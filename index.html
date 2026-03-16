@@ -36,116 +36,41 @@
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body {
-  background: var(--navy);
-  color: var(--white);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  line-height: 1.65;
-  min-height: 100vh;
-}
-.topbar {
-  background: var(--navy-2);
-  border-bottom: 1px solid var(--bdr);
-  padding: 0 2rem;
-  height: 58px;
-  display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 100;
-}
+body { background: var(--navy); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.65; min-height: 100vh; }
+.topbar { background: var(--navy-2); border-bottom: 1px solid var(--bdr); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .brand { display: flex; align-items: center; gap: 11px; }
-.brand-icon {
-  width: 34px; height: 34px; border-radius: 8px;
-  background: var(--amber-bg); border: 1px solid var(--amber-bd);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--amber);
-}
-.brand-info .brand-name {
-  font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--white); line-height: 1;
-}
+.brand-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--amber-bg); border: 1px solid var(--amber-bd); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--amber); }
+.brand-info .brand-name { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--white); line-height: 1; }
 .brand-info .brand-sub { font-size: 11px; color: var(--slate); margin-top: 1px; }
 .topbar-right { display: flex; align-items: center; gap: 10px; }
-.api-btn {
-  display: flex; align-items: center; gap: 7px;
-  background: none; border: 1px solid var(--bdr-md);
-  border-radius: var(--rs); padding: 6px 12px;
-  font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--slate);
-  cursor: pointer; transition: all 0.15s;
-}
+.api-btn { display: flex; align-items: center; gap: 7px; background: none; border: 1px solid var(--bdr-md); border-radius: var(--rs); padding: 6px 12px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--slate); cursor: pointer; transition: all 0.15s; }
 .api-btn:hover { border-color: var(--amber-bd); color: var(--amber); }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--slate-dk); transition: background 0.3s; flex-shrink: 0; }
 .dot.live { background: var(--green); }
-.county-tag {
-  font-size: 11px; color: var(--slate); background: var(--navy-3);
-  border: 1px solid var(--bdr); border-radius: 100px; padding: 4px 12px;
-}
-.overlay {
-  display: none; position: fixed; inset: 0; z-index: 500;
-  background: rgba(8,15,24,0.88);
-  align-items: center; justify-content: center; padding: 1rem;
-}
+.county-tag { font-size: 11px; color: var(--slate); background: var(--navy-3); border: 1px solid var(--bdr); border-radius: 100px; padding: 4px 12px; }
+.overlay { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(8,15,24,0.88); align-items: center; justify-content: center; padding: 1rem; }
 .overlay.open { display: flex; }
-.modal {
-  background: var(--navy-2); border: 1px solid var(--amber-bd);
-  border-radius: var(--r); padding: 2rem; width: 100%; max-width: 440px;
-  animation: fadeUp 0.2s ease;
-}
+.modal { background: var(--navy-2); border: 1px solid var(--amber-bd); border-radius: var(--r); padding: 2rem; width: 100%; max-width: 440px; animation: fadeUp 0.2s ease; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-.modal-icon {
-  width: 44px; height: 44px; border-radius: 10px;
-  background: var(--amber-bg); border: 1px solid var(--amber-bd);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; margin-bottom: 1rem;
-}
+.modal-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--amber-bg); border: 1px solid var(--amber-bd); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 1rem; }
 .modal h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--white); margin-bottom: 6px; }
 .modal p { font-size: 13px; color: var(--slate); line-height: 1.6; margin-bottom: 1.25rem; }
 .modal a { color: var(--amber); text-decoration: none; }
-.modal a:hover { text-decoration: underline; }
 .modal-field label { display: block; font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
-.modal-field input {
-  width: 100%; background: var(--navy-3); border: 1px solid var(--bdr-md);
-  border-radius: var(--rs); padding: 10px 12px;
-  font-family: 'DM Mono', monospace; font-size: 13px; color: var(--white);
-  outline: none; transition: border-color 0.15s; margin-bottom: 14px;
-}
+.modal-field input { width: 100%; background: var(--navy-3); border: 1px solid var(--bdr-md); border-radius: var(--rs); padding: 10px 12px; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--white); outline: none; transition: border-color 0.15s; margin-bottom: 14px; }
 .modal-field input:focus { border-color: var(--amber); }
 .modal-field input::placeholder { color: var(--slate-dk); }
-.btn-primary {
-  width: 100%; padding: 11px; background: var(--amber); border: none;
-  border-radius: var(--rs); font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 500; color: var(--navy);
-  cursor: pointer; transition: background 0.15s;
-}
+.btn-primary { width: 100%; padding: 11px; background: var(--amber); border: none; border-radius: var(--rs); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--navy); cursor: pointer; transition: background 0.15s; }
 .btn-primary:hover { background: var(--amber-lt); }
 .modal-note { text-align: center; font-size: 12px; color: var(--slate); margin-top: 10px; }
 .page { max-width: 920px; margin: 0 auto; padding: 2.25rem 1.5rem 5rem; }
-.search-card {
-  background: var(--navy-2); border: 1px solid var(--bdr);
-  border-radius: var(--r); margin-bottom: 1.75rem; overflow: hidden;
-}
-.search-card-header {
-  padding: 1.25rem 1.5rem 0;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem;
-}
-.search-card-header h1 {
-  font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--white); line-height: 1.1;
-}
+.search-card { background: var(--navy-2); border: 1px solid var(--bdr); border-radius: var(--r); margin-bottom: 1.75rem; overflow: hidden; }
+.search-card-header { padding: 1.25rem 1.5rem 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.search-card-header h1 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--white); line-height: 1.1; }
 .search-card-header p { font-size: 13px; color: var(--slate); margin-top: 3px; }
-.powered-badge {
-  font-size: 10px; color: var(--slate-dk); background: var(--navy-3);
-  border: 1px solid var(--bdr); border-radius: 100px; padding: 3px 10px;
-  white-space: nowrap; margin-bottom: 4px;
-}
-.stabs {
-  display: flex; gap: 0; padding: 0 1.5rem;
-  border-bottom: 1px solid var(--bdr); margin-top: 1.25rem;
-}
-.stab {
-  background: none; border: none; color: var(--slate);
-  font-family: 'DM Sans', sans-serif; font-size: 13px;
-  padding: 10px 16px 12px; cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px;
-  transition: color 0.15s;
-}
+.powered-badge { font-size: 10px; color: var(--slate-dk); background: var(--navy-3); border: 1px solid var(--bdr); border-radius: 100px; padding: 3px 10px; white-space: nowrap; margin-bottom: 4px; }
+.stabs { display: flex; padding: 0 1.5rem; border-bottom: 1px solid var(--bdr); margin-top: 1.25rem; }
+.stab { background: none; border: none; color: var(--slate); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px 16px 12px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s; }
 .stab:hover { color: var(--white); }
 .stab.active { color: var(--amber); border-bottom-color: var(--amber); }
 .spanel { display: none; padding: 1.5rem; }
@@ -154,97 +79,51 @@ body {
 .frow.c2 { grid-template-columns: 1fr 1fr; }
 .frow.c3 { grid-template-columns: 2fr 1fr 1fr; }
 .fsingle { margin-bottom: 12px; }
-label {
-  display: block; font-size: 11px; color: var(--slate);
-  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px;
-}
-input[type=text], input[type=date], select {
-  width: 100%; background: var(--navy-3); border: 1px solid var(--bdr-md);
-  border-radius: var(--rs); padding: 9px 12px;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--white);
-  outline: none; transition: border-color 0.15s; -webkit-appearance: none;
-}
+label { display: block; font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+input[type=text], input[type=date], select { width: 100%; background: var(--navy-3); border: 1px solid var(--bdr-md); border-radius: var(--rs); padding: 9px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--white); outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
 input[type=text]:focus, input[type=date]:focus, select:focus { border-color: var(--amber); }
 input[type=text]::placeholder { color: var(--slate-dk); }
-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237d99b4'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
-  color: var(--white);
-}
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237d99b4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; color: var(--white); }
 select option { background: #1a2a3d; color: var(--white); }
-.btn-search {
-  width: 100%; padding: 11px; background: var(--amber); border: none;
-  border-radius: var(--rs); font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 500; color: var(--navy);
-  cursor: pointer; transition: background 0.15s; margin-top: 4px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
+.btn-search { width: 100%; padding: 11px; background: var(--amber); border: none; border-radius: var(--rs); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--navy); cursor: pointer; transition: background 0.15s; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn-search:hover:not(:disabled) { background: var(--amber-lt); }
 .btn-search:disabled { background: var(--navy-4); color: var(--slate-dk); cursor: not-allowed; }
 .loader { display: none; text-align: center; padding: 3.5rem 1rem; }
 .loader.show { display: block; }
-.spinner {
-  width: 38px; height: 38px; border: 2px solid var(--bdr-md);
-  border-top-color: var(--amber); border-radius: 50%;
-  animation: spin 0.75s linear infinite; margin: 0 auto 1rem;
-}
+.spinner { width: 38px; height: 38px; border: 2px solid var(--bdr-md); border-top-color: var(--amber); border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loader p { font-size: 13px; color: var(--slate); }
 .err { display: none; }
 .err.show { display: block; }
-.err-box {
-  background: var(--red-bg); border: 1px solid var(--red-bd);
-  border-radius: var(--r); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
-}
+.err-box { background: var(--red-bg); border: 1px solid var(--red-bd); border-radius: var(--r); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
 .err-box strong { display: block; color: #f09090; font-size: 13px; margin-bottom: 3px; }
 .err-box span { font-size: 13px; color: #c07070; line-height: 1.5; }
 .results { display: none; }
 .results.show { display: block; }
-.results-meta {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;
-}
+.results-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px; }
 .results-count { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--white); }
 .results-count span { color: var(--amber); }
 .results-sub { font-size: 12px; color: var(--slate); margin-top: 1px; }
-.btn-clear {
-  background: none; border: 1px solid var(--bdr-md); border-radius: var(--rs);
-  padding: 6px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px;
-  color: var(--slate); cursor: pointer; transition: all 0.15s;
-}
+.btn-clear { background: none; border: 1px solid var(--bdr-md); border-radius: var(--rs); padding: 6px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--slate); cursor: pointer; transition: all 0.15s; }
 .btn-clear:hover { border-color: var(--red-bd); color: #f09090; }
-.prop-card {
-  background: var(--navy-2); border: 1px solid var(--bdr);
-  border-radius: var(--r); margin-bottom: 12px; overflow: hidden;
-  transition: border-color 0.15s;
-}
+.prop-card { background: var(--navy-2); border: 1px solid var(--bdr); border-radius: var(--r); margin-bottom: 12px; overflow: hidden; transition: border-color 0.15s; }
 .prop-card:hover { border-color: var(--bdr-md); }
-.prop-card-head {
-  padding: 1rem 1.25rem;
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
-  cursor: pointer; user-select: none;
-}
+.prop-card-head { padding: 1rem 1.25rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; cursor: pointer; user-select: none; }
 .prop-addr { font-size: 15px; font-weight: 500; color: var(--white); margin-bottom: 3px; }
 .prop-loc { font-size: 12px; color: var(--slate); }
 .prop-badges { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
 .badge { font-size: 11px; padding: 3px 9px; border-radius: 100px; white-space: nowrap; }
-.badge-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
-.badge-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
-.badge-teal   { background: var(--teal-bg);   color: var(--teal);   border: 1px solid var(--teal-bd); }
-.badge-red    { background: var(--red-bg);    color: #f09090;        border: 1px solid var(--red-bd); }
-.badge-slate  { background: var(--navy-3);    color: var(--slate);   border: 1px solid var(--bdr-md); }
-.prop-card-body {
-  display: none; border-top: 1px solid var(--bdr);
-  padding: 1.25rem; animation: fadeIn 0.15s ease;
-}
+.badge-green  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
+.badge-amber  { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-bd); }
+.badge-teal   { background: var(--teal-bg);  color: var(--teal);  border: 1px solid var(--teal-bd); }
+.badge-red    { background: var(--red-bg);   color: #f09090;       border: 1px solid var(--red-bd); }
+.badge-slate  { background: var(--navy-3);   color: var(--slate);  border: 1px solid var(--bdr-md); }
+.prop-card-body { display: none; border-top: 1px solid var(--bdr); padding: 1.25rem; animation: fadeIn 0.15s ease; }
 .prop-card-body.open { display: block; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
 .detail-section h4 { font-size: 10px; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-.detail-row {
-  display: flex; align-items: flex-start; gap: 8px;
-  padding: 6px 0; border-bottom: 1px solid var(--bdr); font-size: 13px;
-}
+.detail-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bdr); font-size: 13px; }
 .detail-row:last-child { border-bottom: none; }
 .detail-label { color: var(--slate); min-width: 130px; font-size: 12px; flex-shrink: 0; }
 .detail-val { color: var(--white); font-family: 'DM Mono', monospace; font-size: 12px; }
@@ -254,10 +133,7 @@ select option { background: #1a2a3d; color: var(--white); }
 .sale-history { margin-top: 1rem; }
 .sale-history h4 { font-size: 10px; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
 .sale-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.sale-table th {
-  text-align: left; font-size: 10px; color: var(--slate); text-transform: uppercase;
-  letter-spacing: 0.06em; padding: 0 8px 8px 0; border-bottom: 1px solid var(--bdr); font-weight: 400;
-}
+.sale-table th { text-align: left; font-size: 10px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 8px 8px 0; border-bottom: 1px solid var(--bdr); font-weight: 400; }
 .sale-table td { padding: 8px 8px 8px 0; border-bottom: 1px solid var(--bdr); color: var(--white-60); vertical-align: top; }
 .sale-table tr:last-child td { border-bottom: none; }
 .sale-table td.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
@@ -268,33 +144,15 @@ select option { background: #1a2a3d; color: var(--white); }
 .mort-card .mc-lender { font-size: 13px; font-weight: 500; color: var(--white); }
 .mort-card .mc-rows .detail-row { font-size: 12px; }
 .mort-card .mc-rows .detail-label { min-width: 110px; }
-.expand-icon {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--navy-3); border: 1px solid var(--bdr-md);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; color: var(--slate); flex-shrink: 0;
-  transition: transform 0.2s, background 0.15s;
-}
+.expand-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--navy-3); border: 1px solid var(--bdr-md); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--slate); flex-shrink: 0; transition: transform 0.2s, background 0.15s; }
 .prop-card-head:hover .expand-icon { background: var(--navy-4); }
 .expand-icon.open { transform: rotate(180deg); }
-.no-results {
-  text-align: center; padding: 3rem 1rem;
-  background: var(--navy-2); border: 1px solid var(--bdr); border-radius: var(--r);
-}
+.no-results { text-align: center; padding: 3rem 1rem; background: var(--navy-2); border: 1px solid var(--bdr); border-radius: var(--r); }
 .no-results p { color: var(--slate); font-size: 14px; margin-top: 8px; }
 .no-results .nr-icon { font-size: 32px; margin-bottom: 8px; color: var(--slate-dk); }
-.no-key-banner {
-  background: var(--amber-bg); border: 1px solid var(--amber-bd);
-  border-radius: var(--r); padding: 1rem 1.25rem;
-  display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem;
-}
+.no-key-banner { background: var(--amber-bg); border: 1px solid var(--amber-bd); border-radius: var(--r); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
 .no-key-banner p { font-size: 13px; color: var(--amber); }
-.no-key-banner button {
-  margin-left: auto; background: var(--amber); border: none;
-  border-radius: var(--rs); padding: 7px 16px;
-  font-family: 'DM Sans', sans-serif; font-size: 12px;
-  font-weight: 500; color: var(--navy); cursor: pointer; white-space: nowrap;
-}
+.no-key-banner button { margin-left: auto; background: var(--amber); border: none; border-radius: var(--rs); padding: 7px 16px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--navy); cursor: pointer; white-space: nowrap; }
 .footer { text-align: center; font-size: 11px; color: var(--slate-dk); margin-top: 3rem; line-height: 1.8; }
 .footer a { color: var(--slate); text-decoration: none; }
 </style>
@@ -328,14 +186,13 @@ select option { background: #1a2a3d; color: var(--white); }
       <input type="text" id="api-key-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" spellcheck="false">
     </div>
     <button class="btn-primary" onclick="saveApiKey()">Save &amp; Connect</button>
-    <p class="modal-note">Hamilton County FIPS: <strong style="color:var(--amber)">39061</strong> · Requests routed via CORS proxy for browser compatibility</p>
+    <p class="modal-note">Hamilton County FIPS: <strong style="color:var(--amber)">39061</strong> · All searches filtered to Hamilton County, OH</p>
   </div>
 </div>
 
 <div class="page">
-
   <div class="no-key-banner" id="no-key-banner">
-    <p>⚡ Add your ATTOM API key to start searching real Hamilton County deed and mortgage records.</p>
+    <p>⚡ Add your ATTOM API key to start searching real deed and mortgage records.</p>
     <button onclick="openModal()">Add API Key</button>
   </div>
 
@@ -347,11 +204,10 @@ select option { background: #1a2a3d; color: var(--white); }
       </div>
       <div class="powered-badge">Powered by ATTOM Data</div>
     </div>
-
     <div class="stabs">
-      <button class="stab active" onclick="switchTab('address', this)">Search by Address</button>
-      <button class="stab" onclick="switchTab('owner', this)">Search by Owner</button>
-      <button class="stab" onclick="switchTab('apn', this)">Search by APN</button>
+      <button class="stab active" onclick="switchTab('address',this)">Search by Address</button>
+      <button class="stab" onclick="switchTab('owner',this)">Search by Owner</button>
+      <button class="stab" onclick="switchTab('apn',this)">Search by APN</button>
     </div>
 
     <div class="spanel active" id="panel-address">
@@ -407,10 +263,7 @@ select option { background: #1a2a3d; color: var(--white); }
     </div>
   </div>
 
-  <div class="loader" id="loader">
-    <div class="spinner"></div>
-    <p>Searching Hamilton County records via ATTOM…</p>
-  </div>
+  <div class="loader" id="loader"><div class="spinner"></div><p>Searching Hamilton County records via ATTOM…</p></div>
 
   <div class="err" id="err-box">
     <div class="err-box">
@@ -440,7 +293,7 @@ select option { background: #1a2a3d; color: var(--white); }
 <script>
 var ATTOM_BASE = 'https://api.attomdata.com';
 var HC_FIPS = '39061';
-var PROXY = 'https://corsproxy.io/?';
+var PROXY = 'https://api.allorigins.win/get?url=';
 
 function getKey() { return sessionStorage.getItem('attom_key') || ''; }
 
@@ -449,7 +302,6 @@ function openModal() {
   if (k) document.getElementById('api-key-input').value = k;
   document.getElementById('modal-overlay').classList.add('open');
 }
-
 function saveApiKey() {
   var k = document.getElementById('api-key-input').value.trim();
   if (!k) return;
@@ -458,60 +310,54 @@ function saveApiKey() {
   setConnected(true);
   document.getElementById('no-key-banner').style.display = 'none';
 }
-
 function setConnected(yes) {
   document.getElementById('status-dot').className = 'dot' + (yes ? ' live' : '');
   document.getElementById('status-label').textContent = yes ? 'ATTOM Connected' : 'Set API Key';
 }
+document.getElementById('modal-overlay').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+document.getElementById('api-key-input').addEventListener('keydown', function(e){ if(e.key==='Enter') saveApiKey(); });
 
-document.getElementById('modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
-document.getElementById('api-key-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') saveApiKey();
-});
-
-function switchTab(id, el) {
+function switchTab(id,el) {
   document.querySelectorAll('.stab').forEach(function(t){ t.classList.remove('active'); });
   document.querySelectorAll('.spanel').forEach(function(p){ p.classList.remove('active'); });
   el.classList.add('active');
-  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
 }
-
-function showLoader(yes) { document.getElementById('loader').className = 'loader' + (yes ? ' show' : ''); }
-function showError(title, msg) {
-  document.getElementById('err-title').textContent = title;
-  document.getElementById('err-msg').textContent = msg;
-  document.getElementById('err-box').className = 'err show';
+function showLoader(yes) { document.getElementById('loader').className='loader'+(yes?' show':''); }
+function showError(title,msg) {
+  document.getElementById('err-title').textContent=title;
+  document.getElementById('err-msg').textContent=msg;
+  document.getElementById('err-box').className='err show';
 }
-function hideError() { document.getElementById('err-box').className = 'err'; }
-function showResults(yes) { document.getElementById('results').className = 'results' + (yes ? ' show' : ''); }
-function clearResults() { showResults(false); document.getElementById('result-list').innerHTML = ''; hideError(); }
+function hideError() { document.getElementById('err-box').className='err'; }
+function showResults(yes) { document.getElementById('results').className='results'+(yes?' show':''); }
+function clearResults() { showResults(false); document.getElementById('result-list').innerHTML=''; hideError(); }
 
-function attom(path, params) {
+function attomRaw(path, params) {
   var key = getKey();
   if (!key) { openModal(); return Promise.reject(new Error('No API key')); }
-  var attomUrl = ATTOM_BASE + path + '?' + new URLSearchParams(params).toString();
+  var allParams = Object.assign({}, params, { apikey: key });
+  var attomUrl = ATTOM_BASE + path + '?' + new URLSearchParams(allParams).toString();
   var proxiedUrl = PROXY + encodeURIComponent(attomUrl);
-  return fetch(proxiedUrl, {
-    headers: { 'apikey': key, 'Accept': 'application/json' }
-  }).then(function(r) {
-    if (!r.ok) {
-      return r.text().then(function(txt) {
-        var body = {};
-        try { body = JSON.parse(txt); } catch(e) {}
-        var msg = (body && body.status && body.status.msg) ? body.status.msg
-          : (r.status === 403 ? 'Invalid or expired API key — check your ATTOM key.'
-          : r.status === 404 ? 'No records found for that search.'
-          : r.status === 429 ? 'Rate limit reached — wait a moment and try again.'
-          : 'HTTP ' + r.status);
-        throw new Error(msg);
-      });
-    }
+  return fetch(proxiedUrl).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
-  }).catch(function(e) {
-    if (e.message && (e.message.toLowerCase().indexOf('load failed') !== -1 || e.message.toLowerCase().indexOf('failed to fetch') !== -1)) {
-      throw new Error('Network error — make sure the page is served over http/https, not opened as a file://');
+  }).then(function(wrapper) {
+    var txt = wrapper.contents;
+    if (!txt) throw new Error('Empty response from proxy');
+    var body = {};
+    try { body = JSON.parse(txt); } catch(e) { throw new Error('Bad response — check your API key'); }
+    if (body.status && body.status.msg && body.status.code && body.status.code !== 0) {
+      throw new Error(body.status.msg);
+    }
+    return body;
+  });
+}
+
+function attom(path, params) {
+  return attomRaw(path, params).catch(function(e) {
+    if (e.message && (e.message.toLowerCase().indexOf('load failed')!==-1 || e.message.toLowerCase().indexOf('failed to fetch')!==-1)) {
+      throw new Error('Network error — please check your internet connection and try again.');
     }
     throw e;
   });
@@ -522,171 +368,153 @@ function search(mode) {
   if (!key) { openModal(); return; }
   hideError(); showResults(false); showLoader(true);
   var promise;
-  if (mode === 'address') {
-    var street = document.getElementById('a-street').value.trim();
-    var city = document.getElementById('a-city').value.trim() || 'Cincinnati';
-    var zip = document.getElementById('a-zip').value.trim();
-    if (!street) { showLoader(false); showError('Missing field', 'Please enter a street address.'); return; }
-    var params = { address1: street, address2: city + ' OH', countyFips: HC_FIPS };
-    if (zip) params.postalcode = zip;
-    promise = attom('/propertyapi/v1.0.0/property/detailmortgage', params)
-      .then(function(data) { return buildResults([data.property || data.Property].flat().filter(Boolean), mode, document.getElementById('a-rectype').value); });
-  } else if (mode === 'owner') {
-    var last = document.getElementById('o-last').value.trim();
-    var first = document.getElementById('o-first').value.trim();
-    if (!last) { showLoader(false); showError('Missing field', 'Please enter a last name or company name.'); return; }
-    var params = { ownerName: last + (first ? ', ' + first : ''), countyFips: HC_FIPS };
-    var city2 = document.getElementById('o-city').value.trim();
-    if (city2) params.address2 = city2 + ' OH';
-    promise = attom('/propertyapi/v1.0.0/property/detailowner', params)
-      .then(function(data) { return buildResults([data.property || data.Property].flat().filter(Boolean), mode, document.getElementById('o-rectype').value); });
-  } else if (mode === 'apn') {
-    var apn = document.getElementById('apn-val').value.trim();
-    var addr = document.getElementById('apn-addr').value.trim();
-    if (!apn && !addr) { showLoader(false); showError('Missing field', 'Please enter an APN or a known address.'); return; }
-    var params = { countyFips: HC_FIPS };
-    if (apn) params.apn = apn;
-    if (addr) { params.address1 = addr; params.address2 = 'Hamilton County OH'; }
-    promise = attom('/propertyapi/v1.0.0/property/detailmortgage', params)
-      .then(function(data) { return buildResults([data.property || data.Property].flat().filter(Boolean), mode, document.getElementById('apn-rectype').value); });
+  if (mode==='address') {
+    var street=document.getElementById('a-street').value.trim();
+    var city=document.getElementById('a-city').value.trim()||'Cincinnati';
+    var zip=document.getElementById('a-zip').value.trim();
+    if (!street) { showLoader(false); showError('Missing field','Please enter a street address.'); return; }
+    var params={address1:street, address2:city+' OH', countyFips:HC_FIPS};
+    if (zip) params.postalcode=zip;
+    promise=attom('/propertyapi/v1.0.0/property/detailmortgage',params)
+      .then(function(data){ return buildResults([data.property||data.Property].flat().filter(Boolean),mode,document.getElementById('a-rectype').value); });
+  } else if (mode==='owner') {
+    var last=document.getElementById('o-last').value.trim();
+    var first=document.getElementById('o-first').value.trim();
+    if (!last) { showLoader(false); showError('Missing field','Please enter a last name or company name.'); return; }
+    var params={ownerName:last+(first?', '+first:''), countyFips:HC_FIPS};
+    var city2=document.getElementById('o-city').value.trim();
+    if (city2) params.address2=city2+' OH';
+    promise=attom('/propertyapi/v1.0.0/property/detailowner',params)
+      .then(function(data){ return buildResults([data.property||data.Property].flat().filter(Boolean),mode,document.getElementById('o-rectype').value); });
+  } else if (mode==='apn') {
+    var apn=document.getElementById('apn-val').value.trim();
+    var addr=document.getElementById('apn-addr').value.trim();
+    if (!apn&&!addr) { showLoader(false); showError('Missing field','Please enter an APN or a known address.'); return; }
+    var params={countyFips:HC_FIPS};
+    if (apn) params.apn=apn;
+    if (addr) { params.address1=addr; params.address2='Hamilton County OH'; }
+    promise=attom('/propertyapi/v1.0.0/property/detailmortgage',params)
+      .then(function(data){ return buildResults([data.property||data.Property].flat().filter(Boolean),mode,document.getElementById('apn-rectype').value); });
   }
-  promise.then(function() { showLoader(false); })
-    .catch(function(e) {
-      showLoader(false);
-      if (e.message && e.message.indexOf('No API key') === -1) {
-        showError('ATTOM API Error', e.message);
-      }
-    });
+  promise.then(function(){ showLoader(false); })
+    .catch(function(e){ showLoader(false); if(e.message&&e.message.indexOf('No API key')===-1) showError('ATTOM API Error',e.message); });
 }
 
-function buildResults(props, mode, rectype) {
-  if (!props || props.length === 0) {
-    document.getElementById('result-count').textContent = '0';
-    document.getElementById('result-sub').textContent = 'No records found in Hamilton County for that query.';
-    document.getElementById('result-list').innerHTML = '<div class="no-results"><div class="nr-icon">⌕</div><p>No properties matched your search in Hamilton County, OH.</p></div>';
+function buildResults(props,mode,rectype) {
+  if (!props||props.length===0) {
+    document.getElementById('result-count').textContent='0';
+    document.getElementById('result-sub').textContent='No records found in Hamilton County for that query.';
+    document.getElementById('result-list').innerHTML='<div class="no-results"><div class="nr-icon">⌕</div><p>No properties matched your search in Hamilton County, OH.</p></div>';
     showResults(true); return;
   }
-  document.getElementById('result-count').textContent = props.length;
-  document.getElementById('result-sub').textContent = 'Hamilton County, OH · ' + new Date().toLocaleDateString();
-  var html = '';
-  props.forEach(function(p, i) { html += buildCard(p, i, rectype); });
-  document.getElementById('result-list').innerHTML = html;
+  document.getElementById('result-count').textContent=props.length;
+  document.getElementById('result-sub').textContent='Hamilton County, OH · '+new Date().toLocaleDateString();
+  var html='';
+  props.forEach(function(p,i){ html+=buildCard(p,i,rectype); });
+  document.getElementById('result-list').innerHTML=html;
   showResults(true);
 }
 
-function fmt(v) { return (v && v !== 'N/A' && v !== '0' && v !== 0) ? v : '—'; }
-function fmtMoney(v) { var n = parseInt(v); if (!n || isNaN(n)) return '—'; return '$' + n.toLocaleString(); }
-function fmtDate(v) {
-  if (!v) return '—';
-  var d = new Date(v);
-  if (isNaN(d)) return v;
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-}
+function fmt(v){ return (v&&v!=='N/A'&&v!=='0'&&v!==0)?v:'—'; }
+function fmtMoney(v){ var n=parseInt(v); if(!n||isNaN(n)) return '—'; return '$'+n.toLocaleString(); }
+function fmtDate(v){ if(!v) return '—'; var d=new Date(v); if(isNaN(d)) return v; return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); }
 
-function buildCard(p, idx, rectype) {
-  var addr = p.address || {}, bldg = p.building || {}, lot = p.lot || {};
-  var sale = p.sale || {}, asmt = p.assessment || {}, mort = p.mortgage || {}, summary = p.summary || {};
-  var street = fmt(addr.line1 || addr.oneLine);
-  var cityState = [addr.locality, addr.countrySubd, addr.postal1].filter(Boolean).join(', ') || 'Hamilton County, OH';
-  var propType = fmt(summary.proptype || summary.propClass);
-  var yearBlt = fmt(bldg.yearbuilt || (bldg.summary && bldg.summary.yearBuilt));
-  var sqft = fmt(bldg.size && bldg.size.universalsize);
-  var beds = fmt(bldg.rooms && bldg.rooms.beds);
-  var baths = fmt(bldg.rooms && bldg.rooms.bathstotal);
-  var lotSize = fmt(lot.lotsize2 || lot.lotsize1);
-  var apn = fmt(summary.apn || (p.identifier && p.identifier.apn));
-  var ownerName = '—';
-  if (Array.isArray(p.owner) && p.owner.length > 0) ownerName = fmt(p.owner[0].name || p.owner[0].corporateName);
-  else if (p.owner) ownerName = fmt(p.owner.name || p.owner.corporateName);
-  var lastSaleAmt = fmtMoney(sale.amount && sale.amount.saleamt);
-  var lastSaleDate = fmtDate(sale.salesearchdate || sale.saleTransDate);
-  var docType = fmt(sale.amount && sale.amount.saledisclosure);
-  var asmtVal = fmtMoney(asmt.assessed && asmt.assessed.assdttlvalue);
-  var mktVal = fmtMoney(asmt.market && asmt.market.mktttlvalue);
-  var taxAmt = fmtMoney(asmt.tax && asmt.tax.taxamt);
-  var badges = '';
-  if (propType && propType !== '—') badges += '<span class="badge badge-slate">' + propType + '</span>';
-  if (lastSaleAmt && lastSaleAmt !== '—') badges += '<span class="badge badge-amber">' + lastSaleAmt + '</span>';
-  if (lastSaleDate && lastSaleDate !== '—') badges += '<span class="badge badge-teal">' + lastSaleDate + '</span>';
-  var mortHtml = '';
-  if (rectype !== 'deed' && (mort.first || mort.second || p.mortgage)) {
-    var mortList = [];
-    if (mort.first) mortList.push(mort.first);
-    if (mort.second) mortList.push(mort.second);
-    if (mortList.length === 0 && p.mortgage) mortList.push(p.mortgage);
-    if (mortList.length > 0) {
-      mortHtml += '<div style="margin-top:1.25rem;border-top:1px solid var(--bdr);padding-top:1.25rem">';
-      mortHtml += '<h4 style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Mortgage / Loan Records</h4>';
-      mortHtml += '<div class="mort-cards">';
-      mortList.forEach(function(m, mi) {
-        var lender = fmt(m.lenderName || m.lender);
-        var loanAmt = fmtMoney(m.amount);
-        var loanDate = fmtDate(m.recordingDate || m.dueDate);
-        var loanType = fmt(m.loantype || m.deedOfTrustType);
-        var loanRate = m.interestRate ? m.interestRate + '%' : '—';
-        var term = m.term ? m.term + ' mo' : '—';
-        mortHtml += '<div class="mort-card"><div class="mc-head"><span class="mc-lender">' + (lender !== '—' ? lender : (mi === 0 ? '1st Mortgage' : '2nd Mortgage')) + '</span>';
-        mortHtml += '<span class="badge badge-teal">' + (mi === 0 ? '1st' : '2nd') + '</span></div><div class="mc-rows">';
-        mortHtml += drow('Loan amount', loanAmt, 'hi') + drow('Recorded', loanDate) + drow('Loan type', loanType) + drow('Interest rate', loanRate) + drow('Term', term);
-        mortHtml += '</div></div>';
+function buildCard(p,idx,rectype) {
+  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{};
+  var street=fmt(addr.line1||addr.oneLine);
+  var cityState=[addr.locality,addr.countrySubd,addr.postal1].filter(Boolean).join(', ')||'Hamilton County, OH';
+  var propType=fmt(summary.proptype||summary.propClass);
+  var propUse=fmt(summary.propLandUse||summary.propSubType);
+  var yearBlt=fmt(bldg.yearbuilt||(bldg.summary&&bldg.summary.yearBuilt));
+  var sqft=fmt(bldg.size&&bldg.size.universalsize);
+  var beds=fmt(bldg.rooms&&bldg.rooms.beds);
+  var baths=fmt(bldg.rooms&&bldg.rooms.bathstotal);
+  var lotSize=fmt(lot.lotsize2||lot.lotsize1);
+  var apn=fmt(summary.apn||(p.identifier&&p.identifier.apn));
+  var ownerName='—';
+  if(Array.isArray(p.owner)&&p.owner.length>0) ownerName=fmt(p.owner[0].name||p.owner[0].corporateName);
+  else if(p.owner) ownerName=fmt(p.owner.name||p.owner.corporateName);
+  var lastSaleAmt=fmtMoney(sale.amount&&sale.amount.saleamt);
+  var lastSaleDate=fmtDate(sale.salesearchdate||sale.saleTransDate);
+  var docType=fmt(sale.amount&&sale.amount.saledisclosure);
+  var asmtVal=fmtMoney(asmt.assessed&&asmt.assessed.assdttlvalue);
+  var mktVal=fmtMoney(asmt.market&&asmt.market.mktttlvalue);
+  var taxAmt=fmtMoney(asmt.tax&&asmt.tax.taxamt);
+  var badges='';
+  if(propType&&propType!=='—') badges+='<span class="badge badge-slate">'+propType+'</span>';
+  if(lastSaleAmt&&lastSaleAmt!=='—') badges+='<span class="badge badge-amber">'+lastSaleAmt+'</span>';
+  if(lastSaleDate&&lastSaleDate!=='—') badges+='<span class="badge badge-teal">'+lastSaleDate+'</span>';
+  var mortHtml='';
+  if(rectype!=='deed'&&(mort.first||mort.second||p.mortgage)){
+    var mortList=[];
+    if(mort.first) mortList.push(mort.first);
+    if(mort.second) mortList.push(mort.second);
+    if(mortList.length===0&&p.mortgage) mortList.push(p.mortgage);
+    if(mortList.length>0){
+      mortHtml+='<div style="margin-top:1.25rem;border-top:1px solid var(--bdr);padding-top:1.25rem">';
+      mortHtml+='<h4 style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Mortgage / Loan Records</h4>';
+      mortHtml+='<div class="mort-cards">';
+      mortList.forEach(function(m,mi){
+        var lender=fmt(m.lenderName||m.lender);
+        var loanAmt=fmtMoney(m.amount);
+        var loanDate=fmtDate(m.recordingDate||m.dueDate);
+        var loanType=fmt(m.loantype||m.deedOfTrustType);
+        var loanRate=m.interestRate?m.interestRate+'%':'—';
+        var term=m.term?m.term+' mo':'—';
+        mortHtml+='<div class="mort-card"><div class="mc-head"><span class="mc-lender">'+(lender!=='—'?lender:(mi===0?'1st Mortgage':'2nd Mortgage'))+'</span>';
+        mortHtml+='<span class="badge badge-teal">'+(mi===0?'1st':'2nd')+'</span></div><div class="mc-rows">';
+        mortHtml+=drow('Loan amount',loanAmt,'hi')+drow('Recorded',loanDate)+drow('Loan type',loanType)+drow('Interest rate',loanRate)+drow('Term',term);
+        mortHtml+='</div></div>';
       });
-      mortHtml += '</div></div>';
+      mortHtml+='</div></div>';
     }
   }
-  var histHtml = '';
-  if (rectype !== 'mortgage') {
-    var hist = p.salehistory || p.saleshistory || [];
-    if (hist.length > 0) {
-      histHtml += '<div class="sale-history"><h4>Sale / Deed History</h4><table class="sale-table"><thead><tr><th>Date</th><th>Sale Price</th><th>Buyer</th><th>Seller</th><th>Doc Type</th></tr></thead><tbody>';
-      hist.slice(0, 8).forEach(function(h) {
-        var sa = h.amount || {};
-        histHtml += '<tr><td class="mono">' + fmtDate(h.salesearchdate || h.saleTransDate) + '</td><td class="hi">' + fmtMoney(sa.saleamt) + '</td><td>' + fmt(h.buyer1fullname || h.buyer) + '</td><td>' + fmt(h.seller1fullname || h.seller) + '</td><td>' + fmt(sa.saledisclosure || h.docType) + '</td></tr>';
+  var histHtml='';
+  if(rectype!=='mortgage'){
+    var hist=p.salehistory||p.saleshistory||[];
+    if(hist.length>0){
+      histHtml+='<div class="sale-history"><h4>Sale / Deed History</h4><table class="sale-table"><thead><tr><th>Date</th><th>Sale Price</th><th>Buyer</th><th>Seller</th><th>Doc Type</th></tr></thead><tbody>';
+      hist.slice(0,8).forEach(function(h){
+        var sa=h.amount||{};
+        histHtml+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(sa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td><td>'+fmt(sa.saledisclosure||h.docType)+'</td></tr>';
       });
-      histHtml += '</tbody></table></div>';
+      histHtml+='</tbody></table></div>';
     }
   }
-  var html = '<div class="prop-card" id="card-' + idx + '"><div class="prop-card-head" onclick="toggleCard(' + idx + ')">';
-  html += '<div><div class="prop-addr">' + street + '</div><div class="prop-loc">' + cityState + '</div></div>';
-  html += '<div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">' + badges + '</div><div class="expand-icon" id="exp-' + idx + '">▾</div></div></div>';
-  html += '<div class="prop-card-body" id="body-' + idx + '">';
-  if (rectype !== 'mortgage') {
-    html += '<div class="detail-grid"><div class="detail-section"><h4>Property details</h4>';
-    html += drow('APN', apn) + drow('Property type', propType) + drow('Year built', yearBlt);
-    html += drow('Building size', sqft !== '—' ? sqft + ' sqft' : '—') + drow('Beds / baths', beds !== '—' ? beds + ' bd / ' + baths + ' ba' : '—') + drow('Lot size', lotSize !== '—' ? lotSize + ' sqft' : '—');
-    html += '</div><div class="detail-section"><h4>Ownership &amp; Value</h4>';
-    html += drow('Current owner', ownerName, 'hi') + drow('Last sale date', lastSaleDate, 'teal') + drow('Last sale price', lastSaleAmt, 'hi');
-    html += drow('Assessed value', asmtVal) + drow('Market value', mktVal) + drow('Annual tax', taxAmt) + drow('Document type', docType);
-    html += '</div></div>';
+  var html='<div class="prop-card" id="card-'+idx+'"><div class="prop-card-head" onclick="toggleCard('+idx+')">';
+  html+='<div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div>';
+  html+='<div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">▾</div></div></div>';
+  html+='<div class="prop-card-body" id="body-'+idx+'">';
+  if(rectype!=='mortgage'){
+    html+='<div class="detail-grid"><div class="detail-section"><h4>Property details</h4>';
+    html+=drow('APN',apn)+drow('Property type',propType)+drow('Land use',propUse)+drow('Year built',yearBlt);
+    html+=drow('Building size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds / baths',beds!=='—'?beds+' bd / '+baths+' ba':'—')+drow('Lot size',lotSize!=='—'?lotSize+' sqft':'—');
+    html+='</div><div class="detail-section"><h4>Ownership &amp; Value</h4>';
+    html+=drow('Current owner',ownerName,'hi')+drow('Last sale date',lastSaleDate,'teal')+drow('Last sale price',lastSaleAmt,'hi');
+    html+=drow('Assessed value',asmtVal)+drow('Market value',mktVal)+drow('Annual tax',taxAmt)+drow('Document type',docType);
+    html+='</div></div>';
   }
-  html += histHtml + mortHtml + '</div></div>';
+  html+=histHtml+mortHtml+'</div></div>';
   return html;
 }
 
-function drow(label, val, cls) {
-  return '<div class="detail-row"><span class="detail-label">' + label + '</span><span class="detail-val' + (cls ? ' ' + cls : '') + '">' + (val || '—') + '</span></div>';
+function drow(label,val,cls){
+  return '<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val'+(cls?' '+cls:'')+'">'+( val||'—')+'</span></div>';
 }
-
-function toggleCard(i) {
-  var body = document.getElementById('body-' + i);
-  var icon = document.getElementById('exp-' + i);
-  var open = body.classList.contains('open');
-  body.classList.toggle('open', !open);
-  icon.classList.toggle('open', !open);
+function toggleCard(i){
+  var body=document.getElementById('body-'+i);
+  var icon=document.getElementById('exp-'+i);
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  icon.classList.toggle('open',!open);
 }
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.activeElement.tagName === 'INPUT') {
-    var active = document.querySelector('.spanel.active');
-    if (active) { var btn = active.querySelector('.btn-search'); if (btn) btn.click(); }
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.activeElement.tagName==='INPUT'){
+    var active=document.querySelector('.spanel.active');
+    if(active){ var btn=active.querySelector('.btn-search'); if(btn) btn.click(); }
   }
 });
-
-(function() {
-  if (getKey()) {
-    setConnected(true);
-    document.getElementById('no-key-banner').style.display = 'none';
-  }
-})();
+(function(){ if(getKey()){ setConnected(true); document.getElementById('no-key-banner').style.display='none'; } })();
 </script>
 </body>
 </html>
