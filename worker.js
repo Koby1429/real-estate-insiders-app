@@ -26,9 +26,9 @@ export default {
   }
 };
 ```
-
 3. Tap **"Deploy"** (or "Save and Deploy") in the top right
 
 Once it deploys, look for your Worker URL — it will be at the top of the page and look like:
 ```
 https://hello-world-abc1.yourname.workers.dev
+
