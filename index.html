@@ -186,7 +186,7 @@ select option{background:#1a2a3d;color:var(--white)}
       <button class="btn-search" onclick="search('apn')">Search Records</button>
     </div>
   </div>
-  <div class="loader" id="loader"><div class="spinner"></div><p>Searching Hamilton County records via ATTOM…</p></div>
+  <div class="loader" id="loader"><div class="spinner"></div><p>Searching records via ATTOM…</p></div>
   <div class="err" id="err-box"><div class="err-box"><strong id="err-title">Request failed</strong><span id="err-msg"></span></div></div>
   <div class="results" id="results">
     <div class="results-meta">
@@ -206,7 +206,6 @@ select option{background:#1a2a3d;color:var(--white)}
 </div>
 <script>
 var ATTOM_BASE = 'https://api.gateway.attomdata.com';
-var HC_FIPS = '39061';
 var ATTOM_KEY = '1632df167d773e7d4a5a72721735d1b2';
 var RAILWAY = 'https://real-estate-insiders-app-production.up.railway.app';
 
@@ -243,32 +242,32 @@ function search(mode){
     var city=document.getElementById('a-city').value.trim()||'Cincinnati';
     var zip=document.getElementById('a-zip').value.trim();
     if(!street){showLoader(false);showError('Missing field','Please enter a street address.');return;}
-    var params={address1:street,address2:city+' OH',countyFips:HC_FIPS};
+    var params={address1:street,address2:city+' OH'};
     if(zip)params.postalcode=zip;
     promise=attom('/propertyapi/v1.0.0/property/detailmortgage',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('a-rectype').value);});
   }else if(mode==='owner'){
     var last=document.getElementById('o-last').value.trim();
     var first=document.getElementById('o-first').value.trim();
     if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
-    var params={ownerName:last+(first?', '+first:''),countyFips:HC_FIPS};
+    var params={ownerName:last+(first?', '+first:'')};
     var c2=document.getElementById('o-city').value.trim();if(c2)params.address2=c2+' OH';
     promise=attom('/propertyapi/v1.0.0/property/detailowner',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('o-rectype').value);});
   }else if(mode==='apn'){
     var apn=document.getElementById('apn-val').value.trim();
     var addr=document.getElementById('apn-addr').value.trim();
     if(!apn&&!addr){showLoader(false);showError('Missing field','Please enter an APN or address.');return;}
-    var params={countyFips:HC_FIPS};
+    var params={};
     if(apn)params.apn=apn;
-    if(addr){params.address1=addr;params.address2='Hamilton County OH';}
+    if(addr){params.address1=addr;params.address2='Cincinnati OH';}
     promise=attom('/propertyapi/v1.0.0/property/detailmortgage',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('apn-rectype').value);});
   }
   promise.then(function(){showLoader(false);}).catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
 }
 
 function buildResults(props,mode,rectype){
-  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-sub').textContent='No records found.';document.getElementById('result-list').innerHTML='<div class="no-results"><div class="nr-icon">⌕</div><p>No properties matched in Hamilton County, OH.</p></div>';showResults(true);return;}
+  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-sub').textContent='No records found.';document.getElementById('result-list').innerHTML='<div class="no-results"><div class="nr-icon">⌕</div><p>No properties matched. Try a full street address.</p></div>';showResults(true);return;}
   document.getElementById('result-count').textContent=props.length;
-  document.getElementById('result-sub').textContent='Hamilton County, OH · '+new Date().toLocaleDateString();
+  document.getElementById('result-sub').textContent=new Date().toLocaleDateString();
   var html='';props.forEach(function(p,i){html+=buildCard(p,i,rectype);});
   document.getElementById('result-list').innerHTML=html;showResults(true);
 }
@@ -278,7 +277,7 @@ function fmtDate(v){if(!v)return'—';var d=new Date(v);if(isNaN(d))return v;ret
 function buildCard(p,idx,rectype){
   var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{};
   var street=fmt(addr.line1||addr.oneLine);
-  var cityState=[addr.locality,addr.countrySubd,addr.postal1].filter(Boolean).join(', ')||'Hamilton County, OH';
+  var cityState=[addr.locality,addr.countrySubd,addr.postal1].filter(Boolean).join(', ')||'—';
   var propType=fmt(summary.proptype||summary.propClass);
   var propUse=fmt(summary.propLandUse||summary.propSubType);
   var yearBlt=fmt(bldg.yearbuilt||(bldg.summary&&bldg.summary.yearBuilt));
