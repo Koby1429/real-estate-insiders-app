@@ -34,14 +34,11 @@ body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;
 .spanel.active{display:block}
 .frow{display:grid;gap:12px;margin-bottom:12px}
 .frow.c2{grid-template-columns:1fr 1fr}
-.frow.c3{grid-template-columns:2fr 1fr 1fr}
 .fsingle{margin-bottom:12px}
 label{display:block;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
-input[type=text],input[type=date],select{width:100%;background:var(--navy-3);border:1px solid var(--bdr-md);border-radius:var(--rs);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color 0.15s;-webkit-appearance:none}
-input[type=text]:focus,input[type=date]:focus,select:focus{border-color:var(--amber)}
+input[type=text],select{width:100%;background:var(--navy-3);border:1px solid var(--bdr-md);border-radius:var(--rs);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color 0.15s;-webkit-appearance:none}
+input[type=text]:focus,select:focus{border-color:var(--amber)}
 input[type=text]::placeholder{color:var(--slate-dk)}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237d99b4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;color:var(--white)}
-select option{background:#1a2a3d;color:var(--white)}
 .btn-search{width:100%;padding:11px;background:var(--amber);border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--navy);cursor:pointer;transition:background 0.15s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-search:hover{background:var(--amber-lt)}
 .loader{display:none;text-align:center;padding:3.5rem 1rem}
@@ -61,7 +58,6 @@ select option{background:#1a2a3d;color:var(--white)}
 .results-count span{color:var(--amber)}
 .results-sub{font-size:12px;color:var(--slate);margin-top:1px}
 .btn-clear{background:none;border:1px solid var(--bdr-md);border-radius:var(--rs);padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--slate);cursor:pointer}
-.btn-clear:hover{border-color:var(--red-bd);color:#f09090}
 .prop-card{background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
 .prop-card-head{padding:1rem 1.25rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;cursor:pointer;user-select:none}
 .prop-addr{font-size:15px;font-weight:500;color:var(--white);margin-bottom:3px}
@@ -90,14 +86,6 @@ select option{background:#1a2a3d;color:var(--white)}
 .sale-table tr:last-child td{border-bottom:none}
 .sale-table td.mono{font-family:'DM Mono',monospace;font-size:12px}
 .sale-table td.hi{color:var(--amber);font-family:'DM Mono',monospace}
-.mort-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.mort-card{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:1rem}
-.mort-card .mc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.mort-card .mc-lender{font-size:13px;font-weight:500;color:var(--white)}
-.mort-card .mc-rows .detail-row{font-size:12px}
-.mort-card .mc-rows .detail-label{min-width:110px}
-.expand-icon{width:22px;height:22px;border-radius:50%;background:var(--navy-3);border:1px solid var(--bdr-md);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--slate);flex-shrink:0;transition:transform 0.2s}
-.expand-icon.open{transform:rotate(180deg)}
 .no-results{text-align:center;padding:3rem 1rem;background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r)}
 .no-results p{color:var(--slate);font-size:14px;margin-top:8px}
 .no-results .nr-icon{font-size:32px;margin-bottom:8px;color:var(--slate-dk)}
@@ -131,14 +119,9 @@ select option{background:#1a2a3d;color:var(--white)}
       <button class="stab" onclick="switchTab('apn',this)">Search by APN</button>
     </div>
     <div class="spanel active" id="panel-address">
-      <div class="frow c3">
-        <div><label>Street address</label><input type="text" id="a-street" placeholder="e.g. 138 E Court St"></div>
-        <div><label>City</label><input type="text" id="a-city" placeholder="Cincinnati" value="Cincinnati"></div>
-        <div><label>ZIP (optional)</label><input type="text" id="a-zip" placeholder="45202"></div>
-      </div>
-      <div class="frow c2">
-        <div><label>Record type</label><select id="a-rectype"><option value="all">Deed + Mortgage (all)</option><option value="deed">Deed / ownership only</option><option value="mortgage">Mortgage / loan only</option></select></div>
-        <div><label>Sale date from</label><input type="date" id="a-datefrom"></div>
+      <div class="fsingle">
+        <label>Full address (street, city, state)</label>
+        <input type="text" id="a-address" placeholder="e.g. 138 E Court St, Cincinnati, OH">
       </div>
       <button class="btn-search" onclick="search('address')">Search Records</button>
     </div>
@@ -147,18 +130,11 @@ select option{background:#1a2a3d;color:var(--white)}
         <div><label>Last name or company</label><input type="text" id="o-last" placeholder="e.g. Johnson"></div>
         <div><label>First name (optional)</label><input type="text" id="o-first" placeholder="e.g. Michael"></div>
       </div>
-      <div class="frow c2">
-        <div><label>Record type</label><select id="o-rectype"><option value="all">Deed + Mortgage (all)</option><option value="deed">Deed / ownership only</option><option value="mortgage">Mortgage / loan only</option></select></div>
-        <div><label>City (optional)</label><input type="text" id="o-city" placeholder="e.g. Cincinnati"></div>
-      </div>
+      <div class="fsingle"><label>City (optional)</label><input type="text" id="o-city" placeholder="e.g. Cincinnati"></div>
       <button class="btn-search" onclick="search('owner')">Search Records</button>
     </div>
     <div class="spanel" id="panel-apn">
-      <div class="fsingle"><label>Auditor Parcel Number (APN)</label><input type="text" id="apn-val" placeholder="e.g. 123-0001-0023-00"></div>
-      <div class="frow c2">
-        <div><label>Record type</label><select id="apn-rectype"><option value="all">Deed + Mortgage (all)</option><option value="deed">Deed / ownership only</option><option value="mortgage">Mortgage / loan only</option></select></div>
-        <div><label>Known address (helps match)</label><input type="text" id="apn-addr" placeholder="e.g. 100 Main St Cincinnati"></div>
-      </div>
+      <div class="fsingle"><label>Full address or Parcel Number (APN)</label><input type="text" id="apn-val" placeholder="e.g. 138 E Court St Cincinnati OH  or  123-0001-0023-00"></div>
       <button class="btn-search" onclick="search('apn')">Search Records</button>
     </div>
   </div>
@@ -195,45 +171,39 @@ function search(mode){
   hideError();showResults(false);showLoader(true);
   var promise;
   if(mode==='address'){
-    var street=document.getElementById('a-street').value.trim();
-    var city=document.getElementById('a-city').value.trim()||'Cincinnati';
-    if(!street){showLoader(false);showError('Missing field','Please enter a street address.');return;}
-    var params={address1:street,address2:city+' OH'};
-    promise=attom('/propertyapi/v1.0.0/property/basicprofile',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('a-rectype').value);});
+    var addr=document.getElementById('a-address').value.trim();
+    if(!addr){showLoader(false);showError('Missing field','Please enter a full address.');return;}
+    promise=attom('/propertyapi/v1.0.0/property/basicprofile',{address:addr}).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean));});
   }else if(mode==='owner'){
     var last=document.getElementById('o-last').value.trim();
     var first=document.getElementById('o-first').value.trim();
+    var city=document.getElementById('o-city').value.trim();
     if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
-    var params={name:last+(first?', '+first:'')};
-    var c2=document.getElementById('o-city').value.trim();if(c2)params.address2=c2+' OH';
-    promise=attom('/propertyapi/v1.0.0/property/basicprofile',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('o-rectype').value);});
+    var params={name:last+(first?' '+first:'')};
+    if(city)params.address=city+' OH';
+    promise=attom('/propertyapi/v1.0.0/property/basicprofile',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean));});
   }else if(mode==='apn'){
-    var apn=document.getElementById('apn-val').value.trim();
-    var addr=document.getElementById('apn-addr').value.trim();
-    if(!apn&&!addr){showLoader(false);showError('Missing field','Please enter an APN or address.');return;}
-    var params={};
-    if(apn)params.apn=apn;
-    if(addr){params.address1=addr;params.address2='Cincinnati OH';}
-    promise=attom('/propertyapi/v1.0.0/property/basicprofile',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('apn-rectype').value);});
+    var val=document.getElementById('apn-val').value.trim();
+    if(!val){showLoader(false);showError('Missing field','Please enter an address or APN.');return;}
+    promise=attom('/propertyapi/v1.0.0/property/basicprofile',{address:val}).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean));});
   }
   promise.then(function(){showLoader(false);}).catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
 }
-function buildResults(props,mode,rectype){
-  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-sub').textContent='No records found.';document.getElementById('result-list').innerHTML='<div class="no-results"><div class="nr-icon">&#9906;</div><p>No properties matched. Try a full street address with city.</p></div>';showResults(true);return;}
+function buildResults(props){
+  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-sub').textContent='No records found.';document.getElementById('result-list').innerHTML='<div class="no-results"><div class="nr-icon">&#9906;</div><p>No match. Try: 138 E Court St, Cincinnati, OH</p></div>';showResults(true);return;}
   document.getElementById('result-count').textContent=props.length;
   document.getElementById('result-sub').textContent=new Date().toLocaleDateString();
-  var html='';props.forEach(function(p,i){html+=buildCard(p,i,rectype);});
+  var html='';props.forEach(function(p,i){html+=buildCard(p,i);});
   document.getElementById('result-list').innerHTML=html;showResults(true);
 }
 function fmt(v){return(v&&v!=='N/A'&&v!=='0'&&v!==0)?v:'—';}
 function fmtMoney(v){var n=parseInt(v);if(!n||isNaN(n))return'—';return'$'+n.toLocaleString();}
 function fmtDate(v){if(!v)return'—';var d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
-function buildCard(p,idx,rectype){
-  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{};
+function buildCard(p,idx){
+  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},summary=p.summary||{};
   var street=fmt(addr.line1||addr.oneLine);
   var cityState=[addr.locality,addr.countrySubd,addr.postal1].filter(Boolean).join(', ')||'—';
   var propType=fmt(summary.proptype||summary.propClass);
-  var propUse=fmt(summary.propLandUse||summary.propSubType);
   var yearBlt=fmt(bldg.yearbuilt||(bldg.summary&&bldg.summary.yearBuilt));
   var sqft=fmt(bldg.size&&bldg.size.universalsize);
   var beds=fmt(bldg.rooms&&bldg.rooms.beds);
@@ -245,7 +215,6 @@ function buildCard(p,idx,rectype){
   else if(p.owner)ownerName=fmt(p.owner.name||p.owner.corporateName);
   var lastSaleAmt=fmtMoney(sale.amount&&sale.amount.saleamt);
   var lastSaleDate=fmtDate(sale.salesearchdate||sale.saleTransDate);
-  var docType=fmt(sale.amount&&sale.amount.saledisclosure);
   var asmtVal=fmtMoney(asmt.assessed&&asmt.assessed.assdttlvalue);
   var mktVal=fmtMoney(asmt.market&&asmt.market.mktttlvalue);
   var taxAmt=fmtMoney(asmt.tax&&asmt.tax.taxamt);
@@ -253,14 +222,13 @@ function buildCard(p,idx,rectype){
   if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
   if(lastSaleAmt&&lastSaleAmt!=='—')badges+='<span class="badge badge-amber">'+lastSaleAmt+'</span>';
   if(lastSaleDate&&lastSaleDate!=='—')badges+='<span class="badge badge-teal">'+lastSaleDate+'</span>';
-  var mortHtml='';
-  if(rectype!=='deed'&&(mort.first||mort.second||p.mortgage)){var ml=[];if(mort.first)ml.push(mort.first);if(mort.second)ml.push(mort.second);if(ml.length===0&&p.mortgage)ml.push(p.mortgage);if(ml.length>0){mortHtml+='<div style="margin-top:1.25rem;border-top:1px solid var(--bdr);padding-top:1.25rem"><h4 style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Mortgage / Loan Records</h4><div class="mort-cards">';ml.forEach(function(m,mi){var lender=fmt(m.lenderName||m.lender);var loanAmt=fmtMoney(m.amount);var loanDate=fmtDate(m.recordingDate||m.dueDate);var loanType=fmt(m.loantype||m.deedOfTrustType);var loanRate=m.interestRate?m.interestRate+'%':'—';var term=m.term?m.term+' mo':'—';mortHtml+='<div class="mort-card"><div class="mc-head"><span class="mc-lender">'+(lender!=='—'?lender:(mi===0?'1st Mortgage':'2nd Mortgage'))+'</span><span class="badge badge-teal">'+(mi===0?'1st':'2nd')+'</span></div><div class="mc-rows">'+drow('Loan amount',loanAmt,'hi')+drow('Recorded',loanDate)+drow('Loan type',loanType)+drow('Interest rate',loanRate)+drow('Term',term)+'</div></div>';});mortHtml+='</div></div>';}}
-  var histHtml='';
-  if(rectype!=='mortgage'){var hist=p.salehistory||p.saleshistory||[];if(hist.length>0){histHtml+='<div class="sale-history"><h4>Sale / Deed History</h4><table class="sale-table"><thead><tr><th>Date</th><th>Sale Price</th><th>Buyer</th><th>Seller</th><th>Doc Type</th></tr></thead><tbody>';hist.slice(0,8).forEach(function(h){var sa=h.amount||{};histHtml+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(sa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td><td>'+fmt(sa.saledisclosure||h.docType)+'</td></tr>';});histHtml+='</tbody></table></div>';}}
   var html='<div class="prop-card" id="card-'+idx+'"><div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
   html+='<div class="prop-card-body" id="body-'+idx+'">';
-  if(rectype!=='mortgage'){html+='<div class="detail-grid"><div class="detail-section"><h4>Property details</h4>'+drow('APN',apn)+drow('Property type',propType)+drow('Land use',propUse)+drow('Year built',yearBlt)+drow('Building size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds / baths',beds!=='—'?beds+' bd / '+baths+' ba':'—')+drow('Lot size',lotSize!=='—'?lotSize+' sqft':'—')+'</div><div class="detail-section"><h4>Ownership &amp; Value</h4>'+drow('Current owner',ownerName,'hi')+drow('Last sale date',lastSaleDate,'teal')+drow('Last sale price',lastSaleAmt,'hi')+drow('Assessed value',asmtVal)+drow('Market value',mktVal)+drow('Annual tax',taxAmt)+drow('Document type',docType)+'</div></div>';}
-  html+=histHtml+mortHtml+'</div></div>';
+  html+='<div class="detail-grid"><div class="detail-section"><h4>Property details</h4>'+drow('APN',apn)+drow('Property type',propType)+drow('Year built',yearBlt)+drow('Building size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds / baths',beds!=='—'?beds+' bd / '+baths+' ba':'—')+drow('Lot size',lotSize!=='—'?lotSize+' sqft':'—')+'</div>';
+  html+='<div class="detail-section"><h4>Ownership &amp; Value</h4>'+drow('Current owner',ownerName,'hi')+drow('Last sale date',lastSaleDate,'teal')+drow('Last sale price',lastSaleAmt,'hi')+drow('Assessed value',asmtVal)+drow('Market value',mktVal)+drow('Annual tax',taxAmt)+'</div></div>';
+  var hist=p.salehistory||p.saleshistory||[];
+  if(hist.length>0){html+='<div class="sale-history"><h4>Sale / Deed History</h4><table class="sale-table"><thead><tr><th>Date</th><th>Sale Price</th><th>Buyer</th><th>Seller</th></tr></thead><tbody>';hist.slice(0,8).forEach(function(h){var sa=h.amount||{};html+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(sa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td></tr>';});html+='</tbody></table></div>';}
+  html+='</div></div>';
   return html;
 }
 function drow(label,val,cls){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val'+(cls?' '+cls:'')+'">'+( val||'—')+'</span></div>';}
