@@ -116,19 +116,13 @@ select option{background:#1a2a3d;color:var(--white)}
   </div>
   <div class="topbar-right">
     <span class="county-tag">Hamilton County, OH &nbsp;·&nbsp; FIPS 39061</span>
-    <button class="api-btn">
-      <div class="dot live"></div>
-      <span>Connected</span>
-    </button>
+    <button class="api-btn"><div class="dot live"></div><span>Connected</span></button>
   </div>
 </div>
 <div class="page">
   <div class="search-card">
     <div class="search-card-header">
-      <div>
-        <h1>Property Records Search</h1>
-        <p>Search deeds, ownership history &amp; mortgage records for Hamilton County, OH</p>
-      </div>
+      <div><h1>Property Records Search</h1><p>Search deeds, ownership history &amp; mortgage records for Hamilton County, OH</p></div>
       <div class="powered-badge">Powered by ATTOM Data</div>
     </div>
     <div class="stabs">
@@ -143,13 +137,7 @@ select option{background:#1a2a3d;color:var(--white)}
         <div><label>ZIP (optional)</label><input type="text" id="a-zip" placeholder="45202"></div>
       </div>
       <div class="frow c2">
-        <div><label>Record type</label>
-          <select id="a-rectype">
-            <option value="all">Deed + Mortgage (all)</option>
-            <option value="deed">Deed / ownership only</option>
-            <option value="mortgage">Mortgage / loan only</option>
-          </select>
-        </div>
+        <div><label>Record type</label><select id="a-rectype"><option value="all">Deed + Mortgage (all)</option><option value="deed">Deed / ownership only</option><option value="mortgage">Mortgage / loan only</option></select></div>
         <div><label>Sale date from</label><input type="date" id="a-datefrom"></div>
       </div>
       <button class="btn-search" onclick="search('address')">Search Records</button>
@@ -160,13 +148,7 @@ select option{background:#1a2a3d;color:var(--white)}
         <div><label>First name (optional)</label><input type="text" id="o-first" placeholder="e.g. Michael"></div>
       </div>
       <div class="frow c2">
-        <div><label>Record type</label>
-          <select id="o-rectype">
-            <option value="all">Deed + Mortgage (all)</option>
-            <option value="deed">Deed / ownership only</option>
-            <option value="mortgage">Mortgage / loan only</option>
-          </select>
-        </div>
+        <div><label>Record type</label><select id="o-rectype"><option value="all">Deed + Mortgage (all)</option><option value="deed">Deed / ownership only</option><option value="mortgage">Mortgage / loan only</option></select></div>
         <div><label>City (optional)</label><input type="text" id="o-city" placeholder="e.g. Cincinnati"></div>
       </div>
       <button class="btn-search" onclick="search('owner')">Search Records</button>
@@ -174,13 +156,7 @@ select option{background:#1a2a3d;color:var(--white)}
     <div class="spanel" id="panel-apn">
       <div class="fsingle"><label>Auditor Parcel Number (APN)</label><input type="text" id="apn-val" placeholder="e.g. 123-0001-0023-00"></div>
       <div class="frow c2">
-        <div><label>Record type</label>
-          <select id="apn-rectype">
-            <option value="all">Deed + Mortgage (all)</option>
-            <option value="deed">Deed / ownership only</option>
-            <option value="mortgage">Mortgage / loan only</option>
-          </select>
-        </div>
+        <div><label>Record type</label><select id="apn-rectype"><option value="all">Deed + Mortgage (all)</option><option value="deed">Deed / ownership only</option><option value="mortgage">Mortgage / loan only</option></select></div>
         <div><label>Known address (helps match)</label><input type="text" id="apn-addr" placeholder="e.g. 100 Main St Cincinnati"></div>
       </div>
       <button class="btn-search" onclick="search('apn')">Search Records</button>
@@ -190,50 +166,31 @@ select option{background:#1a2a3d;color:var(--white)}
   <div class="err" id="err-box"><div class="err-box"><strong id="err-title">Request failed</strong><span id="err-msg"></span></div></div>
   <div class="results" id="results">
     <div class="results-meta">
-      <div>
-        <div class="results-count">Found <span id="result-count">0</span> properties</div>
-        <div class="results-sub" id="result-sub"></div>
-      </div>
+      <div><div class="results-count">Found <span id="result-count">0</span> properties</div><div class="results-sub" id="result-sub"></div></div>
       <button class="btn-clear" onclick="clearResults()">Clear results</button>
     </div>
     <div id="result-list"></div>
   </div>
-  <div class="footer">
-    Real Estate Insider's App &nbsp;·&nbsp; Data by <a href="https://www.attomdata.com" target="_blank">ATTOM Data Solutions</a> &nbsp;·&nbsp;
-    <a href="https://recordersoffice.hamilton-co.org" target="_blank">Hamilton County Recorder</a><br>
-    For informational use only — not a substitute for a title search or legal opinion.
-  </div>
+  <div class="footer">Real Estate Insider's App &nbsp;·&nbsp; Data by <a href="https://www.attomdata.com" target="_blank">ATTOM Data Solutions</a> &nbsp;·&nbsp; <a href="https://recordersoffice.hamilton-co.org" target="_blank">Hamilton County Recorder</a><br>For informational use only.</div>
 </div>
 <script>
-var ATTOM_BASE = 'https://api.gateway.attomdata.com';
-var ATTOM_KEY = '1632df167d773e7d4a5a72721735d1b2';
-var RAILWAY = 'https://real-estate-insiders-app-production.up.railway.app';
-
+var ATTOM_BASE='https://api.gateway.attomdata.com';
+var ATTOM_KEY='1632df167d773e7d4a5a72721735d1b2';
+var RAILWAY='https://real-estate-insiders-app-production.up.railway.app';
 function switchTab(id,el){document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.spanel').forEach(function(p){p.classList.remove('active');});el.classList.add('active');document.getElementById('panel-'+id).classList.add('active');}
 function showLoader(yes){document.getElementById('loader').className='loader'+(yes?' show':'');}
 function showError(title,msg){document.getElementById('err-title').textContent=title;document.getElementById('err-msg').textContent=msg;document.getElementById('err-box').className='err show';}
 function hideError(){document.getElementById('err-box').className='err';}
 function showResults(yes){document.getElementById('results').className='results'+(yes?' show':'');}
 function clearResults(){showResults(false);document.getElementById('result-list').innerHTML='';hideError();}
-
 function attom(path,params){
   var attomUrl=ATTOM_BASE+path+'?'+new URLSearchParams(params).toString();
-  var url=RAILWAY+'/p?u='+encodeURIComponent(attomUrl);
+  var url=RAILWAY+'/p?u='+encodeURIComponent(attomUrl)+'&key='+ATTOM_KEY;
   return fetch(url,{headers:{'apikey':ATTOM_KEY,'Accept':'application/json'}})
-  .then(function(r){
-    if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}throw new Error((b&&b.status&&b.status.msg)?b.status.msg:r.status===403?'Invalid API key.':r.status===404?'No records found.':r.status===429?'Rate limit — try again.':'HTTP '+r.status);});}
-    return r.json();
-  })
-  .then(function(body){
-    if(body&&body.status&&body.status.code&&body.status.code!==0)throw new Error(body.status.msg||'ATTOM error');
-    return body;
-  })
-  .catch(function(e){
-    if(e.message&&(e.message.indexOf('load failed')!==-1||e.message.indexOf('failed to fetch')!==-1))throw new Error('Network error — check your connection.');
-    throw e;
-  });
+  .then(function(r){if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}var msg=(b&&b.status&&b.status.msg)?b.status.msg:r.status===403?'Invalid API key.':r.status===404?'No records found.':r.status===429?'Rate limit — try again.':'HTTP '+r.status;throw new Error(msg);});}return r.json();})
+  .then(function(body){if(body&&body.status&&body.status.code&&body.status.code!==0)throw new Error(body.status.msg||'ATTOM error');return body;})
+  .catch(function(e){if(e.message&&(e.message.indexOf('load failed')!==-1||e.message.indexOf('failed to fetch')!==-1))throw new Error('Network error — check your connection.');throw e;});
 }
-
 function search(mode){
   hideError();showResults(false);showLoader(true);
   var promise;
@@ -263,9 +220,8 @@ function search(mode){
   }
   promise.then(function(){showLoader(false);}).catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
 }
-
 function buildResults(props,mode,rectype){
-  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-sub').textContent='No records found.';document.getElementById('result-list').innerHTML='<div class="no-results"><div class="nr-icon">⌕</div><p>No properties matched. Try a full street address.</p></div>';showResults(true);return;}
+  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-sub').textContent='No records found.';document.getElementById('result-list').innerHTML='<div class="no-results"><div class="nr-icon">&#9906;</div><p>No properties matched. Try a full street address with city.</p></div>';showResults(true);return;}
   document.getElementById('result-count').textContent=props.length;
   document.getElementById('result-sub').textContent=new Date().toLocaleDateString();
   var html='';props.forEach(function(p,i){html+=buildCard(p,i,rectype);});
@@ -300,17 +256,10 @@ function buildCard(p,idx,rectype){
   if(lastSaleAmt&&lastSaleAmt!=='—')badges+='<span class="badge badge-amber">'+lastSaleAmt+'</span>';
   if(lastSaleDate&&lastSaleDate!=='—')badges+='<span class="badge badge-teal">'+lastSaleDate+'</span>';
   var mortHtml='';
-  if(rectype!=='deed'&&(mort.first||mort.second||p.mortgage)){
-    var ml=[];if(mort.first)ml.push(mort.first);if(mort.second)ml.push(mort.second);if(ml.length===0&&p.mortgage)ml.push(p.mortgage);
-    if(ml.length>0){
-      mortHtml+='<div style="margin-top:1.25rem;border-top:1px solid var(--bdr);padding-top:1.25rem"><h4 style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Mortgage / Loan Records</h4><div class="mort-cards">';
-      ml.forEach(function(m,mi){var lender=fmt(m.lenderName||m.lender);var loanAmt=fmtMoney(m.amount);var loanDate=fmtDate(m.recordingDate||m.dueDate);var loanType=fmt(m.loantype||m.deedOfTrustType);var loanRate=m.interestRate?m.interestRate+'%':'—';var term=m.term?m.term+' mo':'—';mortHtml+='<div class="mort-card"><div class="mc-head"><span class="mc-lender">'+(lender!=='—'?lender:(mi===0?'1st Mortgage':'2nd Mortgage'))+'</span><span class="badge badge-teal">'+(mi===0?'1st':'2nd')+'</span></div><div class="mc-rows">'+drow('Loan amount',loanAmt,'hi')+drow('Recorded',loanDate)+drow('Loan type',loanType)+drow('Interest rate',loanRate)+drow('Term',term)+'</div></div>';});
-      mortHtml+='</div></div>';
-    }
-  }
+  if(rectype!=='deed'&&(mort.first||mort.second||p.mortgage)){var ml=[];if(mort.first)ml.push(mort.first);if(mort.second)ml.push(mort.second);if(ml.length===0&&p.mortgage)ml.push(p.mortgage);if(ml.length>0){mortHtml+='<div style="margin-top:1.25rem;border-top:1px solid var(--bdr);padding-top:1.25rem"><h4 style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Mortgage / Loan Records</h4><div class="mort-cards">';ml.forEach(function(m,mi){var lender=fmt(m.lenderName||m.lender);var loanAmt=fmtMoney(m.amount);var loanDate=fmtDate(m.recordingDate||m.dueDate);var loanType=fmt(m.loantype||m.deedOfTrustType);var loanRate=m.interestRate?m.interestRate+'%':'—';var term=m.term?m.term+' mo':'—';mortHtml+='<div class="mort-card"><div class="mc-head"><span class="mc-lender">'+(lender!=='—'?lender:(mi===0?'1st Mortgage':'2nd Mortgage'))+'</span><span class="badge badge-teal">'+(mi===0?'1st':'2nd')+'</span></div><div class="mc-rows">'+drow('Loan amount',loanAmt,'hi')+drow('Recorded',loanDate)+drow('Loan type',loanType)+drow('Interest rate',loanRate)+drow('Term',term)+'</div></div>';});mortHtml+='</div></div>';}}
   var histHtml='';
   if(rectype!=='mortgage'){var hist=p.salehistory||p.saleshistory||[];if(hist.length>0){histHtml+='<div class="sale-history"><h4>Sale / Deed History</h4><table class="sale-table"><thead><tr><th>Date</th><th>Sale Price</th><th>Buyer</th><th>Seller</th><th>Doc Type</th></tr></thead><tbody>';hist.slice(0,8).forEach(function(h){var sa=h.amount||{};histHtml+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(sa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td><td>'+fmt(sa.saledisclosure||h.docType)+'</td></tr>';});histHtml+='</tbody></table></div>';}}
-  var html='<div class="prop-card" id="card-'+idx+'"><div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">▾</div></div></div>';
+  var html='<div class="prop-card" id="card-'+idx+'"><div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
   html+='<div class="prop-card-body" id="body-'+idx+'">';
   if(rectype!=='mortgage'){html+='<div class="detail-grid"><div class="detail-section"><h4>Property details</h4>'+drow('APN',apn)+drow('Property type',propType)+drow('Land use',propUse)+drow('Year built',yearBlt)+drow('Building size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds / baths',beds!=='—'?beds+' bd / '+baths+' ba':'—')+drow('Lot size',lotSize!=='—'?lotSize+' sqft':'—')+'</div><div class="detail-section"><h4>Ownership &amp; Value</h4>'+drow('Current owner',ownerName,'hi')+drow('Last sale date',lastSaleDate,'teal')+drow('Last sale price',lastSaleAmt,'hi')+drow('Assessed value',asmtVal)+drow('Market value',mktVal)+drow('Annual tax',taxAmt)+drow('Document type',docType)+'</div></div>';}
   html+=histHtml+mortHtml+'</div></div>';
