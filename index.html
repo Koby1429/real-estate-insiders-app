@@ -74,7 +74,6 @@ select option{background:#1a2a3d;color:var(--white)}
 .prop-card-body.open{display:block}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .section-title{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin:1.25rem 0 10px;padding-top:1.25rem;border-top:1px solid var(--bdr)}
-.section-title:first-child{margin-top:0;padding-top:0;border-top:none}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:.5rem}
 .detail-col h4{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
 .detail-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px}
@@ -177,13 +176,16 @@ function attom(path,params){
 }
 function search(mode){
   hideError();showResults(false);showLoader(true);
-  var addr='';
-  if(mode==='address')addr=document.getElementById('a-address').value.trim();
-  else if(mode==='apn')addr=document.getElementById('apn-val').value.trim();
-  if((mode==='address'||mode==='apn')&&!addr){showLoader(false);showError('Missing field','Please enter an address.');return;}
   var baseParams={};
-  if(mode==='address'||mode==='apn')baseParams={address:addr};
-  else if(mode==='owner'){
+  if(mode==='address'){
+    var addr=document.getElementById('a-address').value.trim();
+    if(!addr){showLoader(false);showError('Missing field','Please enter an address.');return;}
+    baseParams={address:addr};
+  }else if(mode==='apn'){
+    var addr=document.getElementById('apn-val').value.trim();
+    if(!addr){showLoader(false);showError('Missing field','Please enter an address or APN.');return;}
+    baseParams={address:addr};
+  }else if(mode==='owner'){
     var last=document.getElementById('o-last').value.trim();
     if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
     var first=document.getElementById('o-first').value.trim();
@@ -191,10 +193,23 @@ function search(mode){
     baseParams={ownerName:last+(first?' '+first:'')};
     if(city)baseParams.address=city+' OH';
   }
-  var endpoint=(mode==='owner')?'/propertyapi/v1.0.0/property/detailowner':'/propertyapi/v1.0.0/property/detailmortgage';
-  attom(endpoint,baseParams)
-  .then(function(d){var props=[d.property||d.Property].flat().filter(Boolean);showLoader(false);buildResults(props);})
-  .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
+  if(mode==='owner'){
+    attom('/propertyapi/v1.0.0/property/detailowner',baseParams)
+    .then(function(d){showLoader(false);buildResults([d.property||d.Property].flat().filter(Boolean));})
+    .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
+  }else{
+    // Step 1: get ATTOM ID from basicprofile
+    attom('/propertyapi/v1.0.0/property/basicprofile',baseParams)
+    .then(function(d){
+      var props=[d.property||d.Property].flat().filter(Boolean);
+      var attomId=props.length>0&&props[0].identifier&&(props[0].identifier.attomId||props[0].identifier.obPropId);
+      if(!attomId){showLoader(false);buildResults(props);return;}
+      // Step 2: get full detail using ATTOM ID
+      return attom('/propertyapi/v1.0.0/property/detailmortgage',{attomId:attomId})
+      .then(function(d2){showLoader(false);buildResults([d2.property||d2.Property].flat().filter(Boolean));});
+    })
+    .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
+  }
 }
 function buildResults(props){
   if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-list').innerHTML='<div class="no-results"><p>No properties found. Try: 138 E Court St, Cincinnati, OH</p></div>';showResults(true);return;}
@@ -260,7 +275,7 @@ function buildCard(p,idx){
   html+='<div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
   html+='<div class="prop-card-body" id="body-'+idx+'">';
   html+='<div class="detail-grid"><div class="detail-col"><h4>Property Details</h4>'+drow('APN',apn)+drow('ATTOM ID',attomId)+drow('FIPS',fips)+drow('Property type',propType)+drow('Property class',propClass)+drow('Land use',propLandUse)+drow('Year built',yearBlt)+drow('Bldg size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds',beds)+drow('Baths (full)',baths)+drow('Baths (half)',halfbaths)+drow('Stories',stories)+drow('Units',units)+drow('Garage',garageType)+drow('Garage spaces',garageSpaces)+drow('Pool',pool)+'</div>';
-  html+='<div class="detail-col"><h4>Lot &amp; Location</h4>'+drow('Lot size (acres)',lotSize1)+drow('Lot size (sqft)',lotSize2)+drow('Subdivision',subdName)+drow('School district',schoolDistrict)+drow('Latitude',lat)+drow('Longitude',lng)+'<h4 style="margin-top:1rem">Ownership</h4>'+drow('Owner 1',ownerName,'hi')+drow('Owner 2',ownerName2)+drow('Owner occupied',ownerOccupied)+drow('Ownership type',ownershipType)+'</div></div>';
+  html+='<div class="detail-col"><h4>Lot &amp; Location</h4>'+drow('Lot (acres)',lotSize1)+drow('Lot (sqft)',lotSize2)+drow('Subdivision',subdName)+drow('School district',schoolDistrict)+drow('Latitude',lat)+drow('Longitude',lng)+'<h4 style="margin-top:1rem">Ownership</h4>'+drow('Owner 1',ownerName,'hi')+drow('Owner 2',ownerName2)+drow('Owner occupied',ownerOccupied)+drow('Ownership type',ownershipType)+'</div></div>';
   html+='<div class="section-title">Last Sale / Deed</div>';
   html+=drow('Sale date',lastSaleDate,'teal')+drow('Sale price',lastSaleAmt,'hi')+drow('Buyer',buyerName)+drow('Seller',sellerName)+drow('Doc type',saleDocType)+drow('Doc number',saleDocNum);
   html+='<div class="section-title">Assessment &amp; Taxes</div>';
