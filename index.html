@@ -197,18 +197,16 @@ function search(mode){
   if(mode==='address'){
     var street=document.getElementById('a-street').value.trim();
     var city=document.getElementById('a-city').value.trim()||'Cincinnati';
-    var zip=document.getElementById('a-zip').value.trim();
     if(!street){showLoader(false);showError('Missing field','Please enter a street address.');return;}
     var params={address1:street,address2:city+' OH'};
-    if(zip)params.postalcode=zip;
-    promise=attom('/propertyapi/v1.0.0/property/detailmortgage',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('a-rectype').value);});
+    promise=attom('/propertyapi/v1.0.0/property/basicprofile',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('a-rectype').value);});
   }else if(mode==='owner'){
     var last=document.getElementById('o-last').value.trim();
     var first=document.getElementById('o-first').value.trim();
     if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
-    var params={ownerName:last+(first?', '+first:'')};
+    var params={name:last+(first?', '+first:'')};
     var c2=document.getElementById('o-city').value.trim();if(c2)params.address2=c2+' OH';
-    promise=attom('/propertyapi/v1.0.0/property/detailowner',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('o-rectype').value);});
+    promise=attom('/propertyapi/v1.0.0/property/basicprofile',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('o-rectype').value);});
   }else if(mode==='apn'){
     var apn=document.getElementById('apn-val').value.trim();
     var addr=document.getElementById('apn-addr').value.trim();
@@ -216,7 +214,7 @@ function search(mode){
     var params={};
     if(apn)params.apn=apn;
     if(addr){params.address1=addr;params.address2='Cincinnati OH';}
-    promise=attom('/propertyapi/v1.0.0/property/detailmortgage',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('apn-rectype').value);});
+    promise=attom('/propertyapi/v1.0.0/property/basicprofile',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean),mode,document.getElementById('apn-rectype').value);});
   }
   promise.then(function(){showLoader(false);}).catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
 }
