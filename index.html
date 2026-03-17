@@ -20,7 +20,7 @@ body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;
 .dot{width:7px;height:7px;border-radius:50%;background:var(--slate-dk);flex-shrink:0}
 .dot.live{background:var(--green)}
 .county-tag{font-size:11px;color:var(--slate);background:var(--navy-3);border:1px solid var(--bdr);border-radius:100px;padding:4px 12px}
-.page{max-width:920px;margin:0 auto;padding:2.25rem 1.5rem 5rem}
+.page{max-width:960px;margin:0 auto;padding:2.25rem 1.5rem 5rem}
 .search-card{background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:1.75rem;overflow:hidden}
 .search-card-header{padding:1.25rem 1.5rem 0;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
 .search-card-header h1{font-family:'DM Serif Display',serif;font-size:26px;color:var(--white);line-height:1.1}
@@ -48,6 +48,7 @@ select option{background:#1a2a3d;color:var(--white)}
 .spinner{width:38px;height:38px;border:2px solid var(--bdr-md);border-top-color:var(--amber);border-radius:50%;animation:spin 0.75s linear infinite;margin:0 auto 1rem}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loader p{font-size:13px;color:var(--slate)}
+.loader-step{font-size:11px;color:var(--slate-dk);margin-top:4px}
 .err{display:none}
 .err.show{display:block}
 .err-box{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.5rem}
@@ -70,28 +71,39 @@ select option{background:#1a2a3d;color:var(--white)}
 .badge-teal{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd)}
 .badge-slate{background:var(--navy-3);color:var(--slate);border:1px solid var(--bdr-md)}
 .badge-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.badge-red{background:var(--red-bg);color:#f09090;border:1px solid var(--red-bd)}
 .prop-card-body{display:none;border-top:1px solid var(--bdr);padding:1.25rem;animation:fadeIn 0.15s ease}
 .prop-card-body.open{display:block}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .section-title{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin:1.25rem 0 10px;padding-top:1.25rem;border-top:1px solid var(--bdr)}
+.section-title.teal{color:var(--teal)}
+.section-title.green{color:var(--green)}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:.5rem}
 .detail-col h4{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
 .detail-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px}
 .detail-row:last-child{border-bottom:none}
-.detail-label{color:var(--slate);min-width:130px;font-size:12px;flex-shrink:0}
-.detail-val{color:var(--white);font-family:'DM Mono',monospace;font-size:12px}
+.detail-label{color:var(--slate);min-width:140px;font-size:12px;flex-shrink:0}
+.detail-val{color:var(--white);font-family:'DM Mono',monospace;font-size:12px;word-break:break-all}
 .detail-val.hi{color:var(--amber)}
 .detail-val.teal{color:var(--teal)}
 .detail-val.green{color:var(--green)}
+.detail-val a{color:var(--teal);text-decoration:none;font-family:'DM Sans',sans-serif;font-size:12px}
+.detail-val a:hover{text-decoration:underline}
+.avm-box{background:var(--navy-3);border:1px solid var(--amber-bd);border-radius:var(--rs);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.avm-val{font-family:'DM Serif Display',serif;font-size:28px;color:var(--amber)}
+.avm-meta{font-size:12px;color:var(--slate);line-height:1.7}
 .sale-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
 .sale-table th{text-align:left;font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;padding:0 8px 8px 0;border-bottom:1px solid var(--bdr);font-weight:400}
 .sale-table td{padding:7px 8px 7px 0;border-bottom:1px solid var(--bdr);color:var(--white-60);vertical-align:top}
 .sale-table tr:last-child td{border-bottom:none}
 .sale-table td.mono{font-family:'DM Mono',monospace}
 .sale-table td.hi{color:var(--amber);font-family:'DM Mono',monospace}
+.sale-table a{color:var(--teal);text-decoration:none;font-size:11px}
 .mort-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
 .mort-card{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:1rem}
 .mort-card .mc-label{font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500}
+.doc-link{display:inline-flex;align-items:center;gap:5px;background:var(--teal-bg);border:1px solid var(--teal-bd);border-radius:var(--rs);padding:4px 10px;font-size:11px;color:var(--teal);text-decoration:none;margin-top:8px}
+.doc-link:hover{background:rgba(62,180,207,0.2)}
 .expand-icon{width:22px;height:22px;border-radius:50%;background:var(--navy-3);border:1px solid var(--bdr-md);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--slate);flex-shrink:0;transition:transform 0.2s}
 .expand-icon.open{transform:rotate(180deg)}
 .no-results{text-align:center;padding:3rem 1rem;background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r)}
@@ -117,7 +129,7 @@ select option{background:#1a2a3d;color:var(--white)}
 <div class="page">
   <div class="search-card">
     <div class="search-card-header">
-      <div><h1>Property Records Search</h1><p>Full deed, mortgage, ownership &amp; valuation data — Hamilton County, OH</p></div>
+      <div><h1>Property Records Search</h1><p>Full deed, mortgage, ownership, AVM &amp; valuation data</p></div>
       <div class="powered-badge">Powered by ATTOM Data</div>
     </div>
     <div class="stabs">
@@ -145,7 +157,7 @@ select option{background:#1a2a3d;color:var(--white)}
       <button class="btn-search" onclick="search('apn')">Search Records</button>
     </div>
   </div>
-  <div class="loader" id="loader"><div class="spinner"></div><p>Pulling full ATTOM records…</p></div>
+  <div class="loader" id="loader"><div class="spinner"></div><p>Pulling full ATTOM records…</p><div class="loader-step" id="loader-step">Step 1 of 3: Finding property…</div></div>
   <div class="err" id="err-box"><div class="err-box"><strong id="err-title">Error</strong><span id="err-msg"></span></div></div>
   <div class="results" id="results">
     <div class="results-meta">
@@ -154,14 +166,14 @@ select option{background:#1a2a3d;color:var(--white)}
     </div>
     <div id="result-list"></div>
   </div>
-  <div class="footer">Real Estate Insider's App &nbsp;·&nbsp; Data by <a href="https://www.attomdata.com" target="_blank">ATTOM Data Solutions</a> &nbsp;·&nbsp; <a href="https://recordersoffice.hamilton-co.org" target="_blank">Hamilton County Recorder</a><br>For informational use only.</div>
+  <div class="footer">Real Estate Insider's App &nbsp;·&nbsp; Data by <a href="https://www.attomdata.com" target="_blank">ATTOM Data Solutions</a> &nbsp;·&nbsp; <a href="https://recorder.hamilton-co.org" target="_blank">Hamilton County Recorder</a><br>For informational use only — not a substitute for a title search.</div>
 </div>
 <script>
 var ATTOM_BASE='https://api.gateway.attomdata.com';
 var ATTOM_KEY='1632df167d773e7d4a5a72721735d1b2';
 var RAILWAY='https://real-estate-insiders-app-production.up.railway.app';
 function switchTab(id,el){document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.spanel').forEach(function(p){p.classList.remove('active');});el.classList.add('active');document.getElementById('panel-'+id).classList.add('active');}
-function showLoader(yes){document.getElementById('loader').className='loader'+(yes?' show':'');}
+function showLoader(yes,step){document.getElementById('loader').className='loader'+(yes?' show':'');if(step)document.getElementById('loader-step').textContent=step;}
 function showError(title,msg){document.getElementById('err-title').textContent=title;document.getElementById('err-msg').textContent=msg;document.getElementById('err-box').className='err show';}
 function hideError(){document.getElementById('err-box').className='err';}
 function showResults(yes){document.getElementById('results').className='results'+(yes?' show':'');}
@@ -170,46 +182,47 @@ function attom(path,params){
   var attomUrl=ATTOM_BASE+path+'?'+new URLSearchParams(params).toString();
   var url=RAILWAY+'/p?u='+encodeURIComponent(attomUrl)+'&key='+ATTOM_KEY;
   return fetch(url,{headers:{'apikey':ATTOM_KEY,'Accept':'application/json'}})
-  .then(function(r){if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}var msg=(b&&b.status&&b.status.msg)?b.status.msg:'HTTP '+r.status;throw new Error(msg);});}return r.json();})
+  .then(function(r){if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}throw new Error((b&&b.status&&b.status.msg)||'HTTP '+r.status);});}return r.json();})
   .then(function(body){if(body&&body.status&&body.status.code&&body.status.code!==0)throw new Error(body.status.msg||'ATTOM error');return body;})
   .catch(function(e){if(e.message&&(e.message.indexOf('load failed')!==-1||e.message.indexOf('failed to fetch')!==-1))throw new Error('Network error.');throw e;});
 }
 function search(mode){
-  hideError();showResults(false);showLoader(true);
+  hideError();showResults(false);showLoader(true,'Step 1 of 3: Finding property…');
   var baseParams={};
-  if(mode==='address'){
-    var addr=document.getElementById('a-address').value.trim();
-    if(!addr){showLoader(false);showError('Missing field','Please enter an address.');return;}
-    baseParams={address:addr};
-  }else if(mode==='apn'){
-    var addr=document.getElementById('apn-val').value.trim();
-    if(!addr){showLoader(false);showError('Missing field','Please enter an address or APN.');return;}
-    baseParams={address:addr};
-  }else if(mode==='owner'){
-    var last=document.getElementById('o-last').value.trim();
-    if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
-    var first=document.getElementById('o-first').value.trim();
-    var city=document.getElementById('o-city').value.trim();
-    baseParams={ownerName:last+(first?' '+first:'')};
-    if(city)baseParams.address=city+' OH';
-  }
-  if(mode==='owner'){
-    attom('/propertyapi/v1.0.0/property/detailowner',baseParams)
-    .then(function(d){showLoader(false);buildResults([d.property||d.Property].flat().filter(Boolean));})
-    .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
-  }else{
-    // Step 1: get ATTOM ID from basicprofile
-    attom('/propertyapi/v1.0.0/property/basicprofile',baseParams)
-    .then(function(d){
-      var props=[d.property||d.Property].flat().filter(Boolean);
-      var attomId=props.length>0&&props[0].identifier&&(props[0].identifier.attomId||props[0].identifier.obPropId);
-      if(!attomId){showLoader(false);buildResults(props);return;}
-      // Step 2: get full detail using ATTOM ID
-      return attom('/propertyapi/v1.0.0/property/detailmortgage',{attomId:attomId})
-      .then(function(d2){showLoader(false);buildResults([d2.property||d2.Property].flat().filter(Boolean));});
-    })
-    .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
-  }
+  if(mode==='address'){var addr=document.getElementById('a-address').value.trim();if(!addr){showLoader(false);showError('Missing field','Please enter an address.');return;}baseParams={address:addr};}
+  else if(mode==='apn'){var addr=document.getElementById('apn-val').value.trim();if(!addr){showLoader(false);showError('Missing field','Please enter an address or APN.');return;}baseParams={address:addr};}
+  else if(mode==='owner'){var last=document.getElementById('o-last').value.trim();if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}var first=document.getElementById('o-first').value.trim();var city=document.getElementById('o-city').value.trim();baseParams={ownerName:last+(first?' '+first:'')};if(city)baseParams.address=city+' OH';}
+  if(mode==='owner'){attom('/propertyapi/v1.0.0/property/detailowner',baseParams).then(function(d){var props=[d.property||d.Property].flat().filter(Boolean);showLoader(false);buildResults(props);}).catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});return;}
+  var attomId=null,mergedData={};
+  attom('/propertyapi/v1.0.0/property/basicprofile',baseParams)
+  .then(function(d){
+    var props=[d.property||d.Property].flat().filter(Boolean);
+    if(!props.length)throw new Error('No property found for that address.');
+    attomId=props[0].identifier&&(props[0].identifier.attomId||props[0].identifier.obPropId);
+    mergedData.basic=props[0];
+    if(!attomId)throw new Error('Could not get ATTOM ID.');
+    showLoader(true,'Step 2 of 3: Pulling deed & mortgage records…');
+    return attom('/propertyapi/v1.0.0/property/detailmortgage',{attomId:attomId});
+  })
+  .then(function(d){
+    var props=[d.property||d.Property].flat().filter(Boolean);
+    if(props.length)mergedData.detail=props[0];
+    showLoader(true,'Step 3 of 3: Getting owner & AVM data…');
+    return Promise.all([
+      attom('/propertyapi/v1.0.0/property/detailowner',{attomId:attomId}).catch(function(){return null;}),
+      attom('/propertyapi/v1.0.0/attomavm/detail',{attomId:attomId}).catch(function(){return null;})
+    ]);
+  })
+  .then(function(results){
+    if(results[0]){var op=[results[0].property||results[0].Property].flat().filter(Boolean);if(op.length)mergedData.owner=op[0];}
+    if(results[1]){var ap=[results[1].property||results[1].Property].flat().filter(Boolean);if(ap.length)mergedData.avm=ap[0];}
+    showLoader(false);
+    var final=Object.assign({},mergedData.basic||{},mergedData.detail||{});
+    if(mergedData.owner&&mergedData.owner.owner)final.owner=mergedData.owner.owner;
+    if(mergedData.avm)final._avm=mergedData.avm;
+    buildResults([final]);
+  })
+  .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
 }
 function buildResults(props){
   if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-list').innerHTML='<div class="no-results"><p>No properties found. Try: 138 E Court St, Cincinnati, OH</p></div>';showResults(true);return;}
@@ -222,8 +235,10 @@ function fmt(v){return(v&&v!=='N/A'&&v!=='0'&&v!==0)?v:'—';}
 function fmtMoney(v){var n=parseInt(v);if(!n||isNaN(n))return'—';return'$'+n.toLocaleString();}
 function fmtDate(v){if(!v)return'—';var d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
 function drow(label,val,cls){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val'+(cls?' '+cls:'')+'">'+( val||'—')+'</span></div>';}
+function drowLink(label,val,href){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val">'+(href?'<a href="'+href+'" target="_blank">'+val+'</a>':val||'—')+'</span></div>';}
+function recorderLink(docNum){if(!docNum||docNum==='—')return null;return 'https://recorder.hamilton-co.org/recorder/web/?docNumber='+encodeURIComponent(docNum);}
 function buildCard(p,idx){
-  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{};
+  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{},avm=p._avm||{};
   var street=fmt(addr.line1||addr.oneLine);
   var cityState=[addr.locality,addr.countrySubd,addr.postal1].filter(Boolean).join(', ')||'—';
   var propType=fmt(summary.proptype||summary.propsubtype);
@@ -238,57 +253,68 @@ function buildCard(p,idx){
   var units=fmt(bldg.summary&&bldg.summary.unitscount);
   var garageType=fmt(bldg.parking&&bldg.parking.garagetype);
   var garageSpaces=fmt(bldg.parking&&bldg.parking.prkgSpaces);
-  var lotSize1=fmt(lot.lotsize1);
-  var lotSize2=fmt(lot.lotsize2);
-  var pool=fmt(lot.pooltype||lot.pool);
+  var condition=fmt(bldg.summary&&bldg.summary.condition);
+  var quality=fmt(bldg.summary&&bldg.summary.quality);
+  var lotSize1=fmt(lot.lotsize1);var lotSize2=fmt(lot.lotsize2);var pool=fmt(lot.pooltype||lot.pool);
   var apn=fmt(summary.apn||identifier.apn||identifier.apnOrig);
   var attomId=fmt(identifier.attomId||identifier.obPropId);
-  var fips=fmt(identifier.fips);
   var subdName=fmt(area.subdname||area.munname);
   var schoolDistrict=fmt(area.schooldistrictname);
-  var lat=fmt(location&&location.latitude);
-  var lng=fmt(location&&location.longitude);
-  var ownerName='—',ownerName2='—',ownerOccupied='—',ownershipType='—';
-  if(Array.isArray(p.owner)&&p.owner.length>0){ownerName=fmt(p.owner[0].name||p.owner[0].corporateName);if(p.owner[1])ownerName2=fmt(p.owner[1].name||p.owner[1].corporateName);ownerOccupied=fmt(p.owner[0].ownerOccupied);ownershipType=fmt(p.owner[0].type);}
-  else if(p.owner){ownerName=fmt(p.owner.name||p.owner.corporateName);}
-  var lastSaleAmt=fmtMoney(sale.amount&&sale.amount.saleamt);
-  var lastSaleDate=fmtDate(sale.salesearchdate||sale.saleTransDate);
-  var saleDocType=fmt(sale.amount&&sale.amount.saledisclosure);
-  var saleDocNum=fmt(sale.amount&&sale.amount.saledocnum);
-  var sellerName=fmt(sale.amount&&sale.amount.seller1fullname);
-  var buyerName=fmt(sale.amount&&sale.amount.buyer1fullname);
-  var asmtTotal=fmtMoney(asmt.assessed&&asmt.assessed.assdttlvalue);
-  var asmtLand=fmtMoney(asmt.assessed&&asmt.assessed.assdlandvalue);
-  var asmtImprv=fmtMoney(asmt.assessed&&asmt.assessed.assdimprvalue);
-  var mktTotal=fmtMoney(asmt.market&&asmt.market.mktttlvalue);
-  var mktLand=fmtMoney(asmt.market&&asmt.market.mktlandvalue);
-  var mktImprv=fmtMoney(asmt.market&&asmt.market.mktimprvalue);
-  var taxAmt=fmtMoney(asmt.tax&&asmt.tax.taxamt);
-  var taxYear=fmt(asmt.tax&&asmt.tax.taxyear);
-  var taxExemption=fmt(asmt.tax&&asmt.tax.exemptiontype1||asmt.tax&&asmt.tax.exemptiontype2);
+  var lat=fmt(location&&location.latitude);var lng=fmt(location&&location.longitude);
+  var ownerName='—',ownerName2='—',ownerOccupied='—',ownershipType='—',ownerAddr='—';
+  var owners=p.owner||[];if(!Array.isArray(owners))owners=[owners];
+  if(owners.length>0&&owners[0]){ownerName=fmt(owners[0].name||owners[0].corporateName||owners[0].owner1fullname);ownerOccupied=fmt(owners[0].ownerOccupied||owners[0].absenteeInd);ownershipType=fmt(owners[0].type||owners[0].ownershipType);var oa=owners[0].mailingAddress||owners[0].address||{};ownerAddr=fmt(oa.oneLine||oa.line1);}
+  if(owners.length>1&&owners[1])ownerName2=fmt(owners[1].name||owners[1].corporateName||owners[1].owner2fullname);
+  var sa=sale.amount||sale||{};
+  var lastSaleAmt=fmtMoney(sa.saleamt||sale.saleamt);
+  var lastSaleDate=fmtDate(sale.salesearchdate||sale.saleTransDate||sa.saleTransDate);
+  var saleDocType=fmt(sa.saledisclosure||sale.docType);
+  var saleDocNum=fmt(sa.saledocnum||sale.docnum);
+  var sellerName=fmt(sa.seller1fullname||sale.seller1fullname);
+  var buyerName=fmt(sa.buyer1fullname||sale.buyer1fullname);
+  var saleBookPage=fmt(sa.salebookpage);
+  var asmtTotal=fmtMoney(asmt.assessed&&asmt.assessed.assdttlvalue);var asmtLand=fmtMoney(asmt.assessed&&asmt.assessed.assdlandvalue);var asmtImprv=fmtMoney(asmt.assessed&&asmt.assessed.assdimprvalue);
+  var mktTotal=fmtMoney(asmt.market&&asmt.market.mktttlvalue);var mktLand=fmtMoney(asmt.market&&asmt.market.mktlandvalue);var mktImprv=fmtMoney(asmt.market&&asmt.market.mktimprvalue);
+  var taxAmt=fmtMoney(asmt.tax&&asmt.tax.taxamt);var taxYear=fmt(asmt.tax&&asmt.tax.taxyear);var taxExemption=fmt((asmt.tax&&asmt.tax.exemptiontype1)||(asmt.tax&&asmt.tax.exemptiontype2));
+  var avmVal=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.value);
+  var avmLow=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.low);
+  var avmHigh=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.high);
+  var avmConf=fmt(avm.avm&&avm.avm.eventDate);var avmScore=fmt(avm.avm&&avm.avm.confidence);
   var badges='';
   if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
-  if(lastSaleAmt&&lastSaleAmt!=='—')badges+='<span class="badge badge-amber">'+lastSaleAmt+'</span>';
+  if(avmVal&&avmVal!=='—')badges+='<span class="badge badge-green">AVM '+avmVal+'</span>';
+  else if(lastSaleAmt&&lastSaleAmt!=='—')badges+='<span class="badge badge-amber">'+lastSaleAmt+'</span>';
   if(lastSaleDate&&lastSaleDate!=='—')badges+='<span class="badge badge-teal">'+lastSaleDate+'</span>';
-  if(ownerOccupied==='Y')badges+='<span class="badge badge-green">Owner Occupied</span>';
+  if(ownerOccupied==='Y'||ownerOccupied==='true')badges+='<span class="badge badge-green">Owner Occupied</span>';
   var html='<div class="prop-card" id="card-'+idx+'">';
   html+='<div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
   html+='<div class="prop-card-body" id="body-'+idx+'">';
-  html+='<div class="detail-grid"><div class="detail-col"><h4>Property Details</h4>'+drow('APN',apn)+drow('ATTOM ID',attomId)+drow('FIPS',fips)+drow('Property type',propType)+drow('Property class',propClass)+drow('Land use',propLandUse)+drow('Year built',yearBlt)+drow('Bldg size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds',beds)+drow('Baths (full)',baths)+drow('Baths (half)',halfbaths)+drow('Stories',stories)+drow('Units',units)+drow('Garage',garageType)+drow('Garage spaces',garageSpaces)+drow('Pool',pool)+'</div>';
-  html+='<div class="detail-col"><h4>Lot &amp; Location</h4>'+drow('Lot (acres)',lotSize1)+drow('Lot (sqft)',lotSize2)+drow('Subdivision',subdName)+drow('School district',schoolDistrict)+drow('Latitude',lat)+drow('Longitude',lng)+'<h4 style="margin-top:1rem">Ownership</h4>'+drow('Owner 1',ownerName,'hi')+drow('Owner 2',ownerName2)+drow('Owner occupied',ownerOccupied)+drow('Ownership type',ownershipType)+'</div></div>';
+  if(avmVal&&avmVal!=='—'){html+='<div class="avm-box"><div><div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">ATTOM Estimated Value</div><div class="avm-val">'+avmVal+'</div></div><div class="avm-meta">Range: <span style="color:var(--white)">'+avmLow+' — '+avmHigh+'</span><br>Confidence: <span style="color:var(--white)">'+avmScore+'</span><br>As of: <span style="color:var(--white)">'+fmtDate(avmConf)+'</span></div></div>';}
+  html+='<div class="detail-grid"><div class="detail-col"><h4>Property Details</h4>'+drow('APN',apn)+drow('ATTOM ID',attomId)+drow('Property type',propType)+drow('Property class',propClass)+drow('Land use',propLandUse)+drow('Year built',yearBlt)+drow('Bldg size',sqft!=='—'?sqft+' sqft':'—')+drow('Condition',condition)+drow('Quality',quality)+drow('Beds',beds)+drow('Baths (full)',baths)+drow('Baths (half)',halfbaths)+drow('Stories',stories)+drow('Units',units)+drow('Garage type',garageType)+drow('Garage spaces',garageSpaces)+drow('Pool',pool)+'</div>';
+  html+='<div class="detail-col"><h4>Lot &amp; Location</h4>'+drow('Lot (acres)',lotSize1)+drow('Lot (sqft)',lotSize2)+drow('Subdivision',subdName)+drow('School district',schoolDistrict)+drow('Latitude',lat)+drow('Longitude',lng)+'</div></div>';
+  html+='<div class="section-title">Ownership</div>';
+  html+=drow('Owner 1',ownerName,'hi')+drow('Owner 2',ownerName2,'hi')+drow('Mailing address',ownerAddr)+drow('Owner occupied',ownerOccupied)+drow('Ownership type',ownershipType);
+  var docLinkHref=recorderLink(saleDocNum);
   html+='<div class="section-title">Last Sale / Deed</div>';
-  html+=drow('Sale date',lastSaleDate,'teal')+drow('Sale price',lastSaleAmt,'hi')+drow('Buyer',buyerName)+drow('Seller',sellerName)+drow('Doc type',saleDocType)+drow('Doc number',saleDocNum);
+  html+=drow('Sale date',lastSaleDate,'teal')+drow('Sale price',lastSaleAmt,'hi')+drow('Buyer',buyerName)+drow('Seller',sellerName)+drow('Doc type',saleDocType)+drow('Book/Page',saleBookPage);
+  html+=drowLink('Doc number',saleDocNum!=='—'?'&#128196; '+saleDocNum+' (view)':saleDocNum,docLinkHref);
+  if(docLinkHref)html+='<a class="doc-link" href="'+docLinkHref+'" target="_blank">&#128196; View Deed Document at Hamilton County Recorder</a>';
   html+='<div class="section-title">Assessment &amp; Taxes</div>';
   html+='<div class="detail-grid"><div class="detail-col"><h4>Assessed Value</h4>'+drow('Total',asmtTotal,'hi')+drow('Land',asmtLand)+drow('Improvements',asmtImprv)+'</div><div class="detail-col"><h4>Market Value</h4>'+drow('Total',mktTotal,'hi')+drow('Land',mktLand)+drow('Improvements',mktImprv)+'</div></div>';
   html+=drow('Annual tax',taxAmt,'hi')+drow('Tax year',taxYear)+drow('Exemption',taxExemption);
   var hist=p.salehistory||p.saleshistory||[];
-  if(hist.length>0){html+='<div class="section-title">Sale / Deed History</div><table class="sale-table"><thead><tr><th>Date</th><th>Price</th><th>Buyer</th><th>Seller</th><th>Doc Type</th></tr></thead><tbody>';hist.slice(0,10).forEach(function(h){var sa=h.amount||{};html+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(sa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td><td>'+fmt(sa.saledisclosure||h.docType)+'</td></tr>';});html+='</tbody></table>';}
+  if(hist.length>0){html+='<div class="section-title">Sale / Deed History</div><table class="sale-table"><thead><tr><th>Date</th><th>Price</th><th>Buyer</th><th>Seller</th><th>Doc #</th></tr></thead><tbody>';hist.slice(0,10).forEach(function(h){var hsa=h.amount||{};var hdoc=fmt(hsa.saledocnum||h.docnum);var hlink=recorderLink(hdoc);html+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(hsa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td><td>'+(hlink?'<a href="'+hlink+'" target="_blank">'+hdoc+'</a>':hdoc)+'</td></tr>';});html+='</tbody></table>';}
   var mortList=[];
   if(mort.first)mortList.push({label:'1st Mortgage',m:mort.first});
   if(mort.second)mortList.push({label:'2nd Mortgage',m:mort.second});
   if(mortList.length===0&&p.mortgage&&typeof p.mortgage==='object'&&p.mortgage.amount)mortList.push({label:'Mortgage',m:p.mortgage});
-  if(mortList.length>0){html+='<div class="section-title">Mortgage / Loan Records</div><div class="mort-grid">';mortList.forEach(function(item){var m=item.m;html+='<div class="mort-card"><div class="mc-label">'+item.label+'</div>'+drow('Lender',fmt(m.lenderName||m.lender),'teal')+drow('Loan amount',fmtMoney(m.amount),'hi')+drow('Recorded',fmtDate(m.recordingDate||m.dueDate))+drow('Loan type',fmt(m.loantype||m.deedOfTrustType))+drow('Interest rate',m.interestRate?m.interestRate+'%':'—')+drow('Term',m.term?m.term+' mo':'—')+drow('Due date',fmtDate(m.dueDate))+drow('Status',fmt(m.financingType||m.status))+'</div>';});html+='</div>';}
-  html+='</div></div>';
+  if(mortList.length>0){html+='<div class="section-title teal">Mortgage / Loan Records</div><div class="mort-grid">';mortList.forEach(function(item){var m=item.m;var mdoc=fmt(m.docnum||m.documentNumber);var mlink=recorderLink(mdoc);html+='<div class="mort-card"><div class="mc-label">'+item.label+'</div>'+drow('Lender',fmt(m.lenderName||m.lender),'teal')+drow('Loan amount',fmtMoney(m.amount||m.loanamount),'hi')+drow('Recorded',fmtDate(m.recordingDate||m.deedOfTrustDate))+drow('Due date',fmtDate(m.dueDate))+drow('Loan type',fmt(m.loantype||m.deedOfTrustType))+drow('Interest rate',m.interestRate?m.interestRate+'%':'—')+drow('Term',m.term?m.term+' mo':'—')+drow('Finance type',fmt(m.financingType))+drowLink('Doc number',mdoc,mlink)+(mlink?'<a class="doc-link" href="'+mlink+'" target="_blank">&#128196; View Mortgage Doc</a>':'')+'</div>';});html+='</div>';}
+  html+='<div class="section-title">Official Record Links</div>';
+  html+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">';
+  html+='<a class="doc-link" href="https://recorder.hamilton-co.org/recorder/web/" target="_blank">&#127963; Hamilton County Recorder</a>';
+  if(apn&&apn!=='—')html+='<a class="doc-link" href="https://www.hamiltoncountyauditor.org/search?apn='+encodeURIComponent(apn)+'" target="_blank">&#128203; County Auditor Record</a>';
+  if(lat&&lat!=='—'&&lng&&lng!=='—')html+='<a class="doc-link" href="https://maps.google.com/?q='+lat+','+lng+'" target="_blank">&#128205; View on Google Maps</a>';
+  html+='</div></div></div>';
   return html;
 }
 function toggleCard(i){var body=document.getElementById('body-'+i);var icon=document.getElementById('exp-'+i);var open=body.classList.contains('open');body.classList.toggle('open',!open);icon.classList.toggle('open',!open);}
