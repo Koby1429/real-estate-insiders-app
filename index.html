@@ -76,6 +76,7 @@ select option{background:#1a2a3d;color:var(--white)}
 .prop-card-body.open{display:block}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .section-title{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin:1.25rem 0 10px;padding-top:1.25rem;border-top:1px solid var(--bdr)}
+.section-title:first-child{margin-top:0;padding-top:0;border-top:none}
 .section-title.teal{color:var(--teal)}
 .section-title.green{color:var(--green)}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:.5rem}
@@ -110,6 +111,7 @@ select option{background:#1a2a3d;color:var(--white)}
 .no-results p{color:var(--slate);font-size:14px;margin-top:8px}
 .footer{text-align:center;font-size:11px;color:var(--slate-dk);margin-top:3rem;line-height:1.8}
 .footer a{color:var(--slate);text-decoration:none}
+@media(max-width:600px){.detail-grid,.mort-grid{grid-template-columns:1fr}.frow.c2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -172,27 +174,73 @@ select option{background:#1a2a3d;color:var(--white)}
 var ATTOM_BASE='https://api.gateway.attomdata.com';
 var ATTOM_KEY='1632df167d773e7d4a5a72721735d1b2';
 var RAILWAY='https://real-estate-insiders-app-production.up.railway.app';
-function switchTab(id,el){document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.spanel').forEach(function(p){p.classList.remove('active');});el.classList.add('active');document.getElementById('panel-'+id).classList.add('active');}
-function showLoader(yes,step){document.getElementById('loader').className='loader'+(yes?' show':'');if(step)document.getElementById('loader-step').textContent=step;}
-function showError(title,msg){document.getElementById('err-title').textContent=title;document.getElementById('err-msg').textContent=msg;document.getElementById('err-box').className='err show';}
+
+function switchTab(id,el){
+  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.spanel').forEach(function(p){p.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+function showLoader(yes,step){
+  document.getElementById('loader').className='loader'+(yes?' show':'');
+  if(step)document.getElementById('loader-step').textContent=step;
+}
+
+function showError(title,msg){
+  document.getElementById('err-title').textContent=title;
+  document.getElementById('err-msg').textContent=msg;
+  document.getElementById('err-box').className='err show';
+}
+
 function hideError(){document.getElementById('err-box').className='err';}
 function showResults(yes){document.getElementById('results').className='results'+(yes?' show':'');}
 function clearResults(){showResults(false);document.getElementById('result-list').innerHTML='';hideError();}
+
 function attom(path,params){
   var attomUrl=ATTOM_BASE+path+'?'+new URLSearchParams(params).toString();
   var url=RAILWAY+'/p?u='+encodeURIComponent(attomUrl)+'&key='+ATTOM_KEY;
   return fetch(url,{headers:{'apikey':ATTOM_KEY,'Accept':'application/json'}})
-  .then(function(r){if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}throw new Error((b&&b.status&&b.status.msg)||'HTTP '+r.status);});}return r.json();})
-  .then(function(body){if(body&&body.status&&body.status.code&&body.status.code!==0)throw new Error(body.status.msg||'ATTOM error');return body;})
-  .catch(function(e){if(e.message&&(e.message.indexOf('load failed')!==-1||e.message.indexOf('failed to fetch')!==-1))throw new Error('Network error.');throw e;});
+  .then(function(r){
+    if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}throw new Error((b&&b.status&&b.status.msg)||'HTTP '+r.status);});}
+    return r.json();
+  })
+  .then(function(body){
+    if(body&&body.status&&body.status.code&&body.status.code!==0)throw new Error(body.status.msg||'ATTOM error');
+    return body;
+  })
+  .catch(function(e){
+    if(e.message&&(e.message.indexOf('load failed')!==-1||e.message.indexOf('failed to fetch')!==-1))throw new Error('Network error.');
+    throw e;
+  });
 }
+
 function search(mode){
   hideError();showResults(false);showLoader(true,'Step 1 of 3: Finding property…');
   var baseParams={};
-  if(mode==='address'){var addr=document.getElementById('a-address').value.trim();if(!addr){showLoader(false);showError('Missing field','Please enter an address.');return;}baseParams={address:addr};}
-  else if(mode==='apn'){var addr=document.getElementById('apn-val').value.trim();if(!addr){showLoader(false);showError('Missing field','Please enter an address or APN.');return;}baseParams={address:addr};}
-  else if(mode==='owner'){var last=document.getElementById('o-last').value.trim();if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}var first=document.getElementById('o-first').value.trim();var city=document.getElementById('o-city').value.trim();baseParams={ownerName:last+(first?' '+first:'')};if(city)baseParams.address=city+' OH';}
-  if(mode==='owner'){attom('/propertyapi/v1.0.0/property/detailowner',baseParams).then(function(d){var props=[d.property||d.Property].flat().filter(Boolean);showLoader(false);buildResults(props);}).catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});return;}
+  if(mode==='address'){
+    var addr=document.getElementById('a-address').value.trim();
+    if(!addr){showLoader(false);showError('Missing field','Please enter an address.');return;}
+    baseParams={address:addr};
+  }else if(mode==='apn'){
+    var addr=document.getElementById('apn-val').value.trim();
+    if(!addr){showLoader(false);showError('Missing field','Please enter an address or APN.');return;}
+    baseParams={address:addr};
+  }else if(mode==='owner'){
+    var last=document.getElementById('o-last').value.trim();
+    if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
+    var first=document.getElementById('o-first').value.trim();
+    var city=document.getElementById('o-city').value.trim();
+    baseParams={ownerName:last+(first?' '+first:'')};
+    if(city)baseParams.address=city+' OH';
+  }
+  if(mode==='owner'){
+    attom('/propertyapi/v1.0.0/property/detailowner',baseParams).then(function(d){
+      var props=[d.property||d.Property].flat().filter(Boolean);
+      showLoader(false);buildResults(props);
+    }).catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
+    return;
+  }
   var attomId=null,mergedData={};
   attom('/propertyapi/v1.0.0/property/basicprofile',baseParams)
   .then(function(d){
@@ -224,32 +272,41 @@ function search(mode){
   })
   .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
 }
+
 function buildResults(props){
-  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-list').innerHTML='<div class="no-results"><p>No properties found. Try: 138 E Court St, Cincinnati, OH</p></div>';showResults(true);return;}
+  if(!props||props.length===0){
+    document.getElementById('result-count').textContent='0';
+    document.getElementById('result-list').innerHTML='<div class="no-results"><p>No properties found. Try: 138 E Court St, Cincinnati, OH</p></div>';
+    showResults(true);return;
+  }
   document.getElementById('result-count').textContent=props.length;
   document.getElementById('result-sub').textContent=new Date().toLocaleDateString();
   var html='';props.forEach(function(p,i){html+=buildCard(p,i);});
   document.getElementById('result-list').innerHTML=html;showResults(true);
 }
-function fmt(v){return(v&&v!=='N/A'&&v!=='0'&&v!==0)?v:'—';}
+
+function fmt(v){return(v&&v!=='N/A'&&v!=='0'&&v!==0&&v!==''&&v!==null&&v!==undefined)?v:'—';}
 function fmtMoney(v){var n=parseInt(v);if(!n||isNaN(n))return'—';return'$'+n.toLocaleString();}
 function fmtDate(v){if(!v)return'—';var d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
 function drow(label,val,cls){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val'+(cls?' '+cls:'')+'">'+( val||'—')+'</span></div>';}
-function drowLink(label,val,href){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val">'+(href?'<a href="'+href+'" target="_blank">'+val+'</a>':val||'—')+'</span></div>';}
+function drowLink(label,val,href){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val">'+(href&&val!=='—'?'<a href="'+href+'" target="_blank">'+val+'</a>':(val||'—'))+'</span></div>';}
 function recorderLink(docNum){if(!docNum||docNum==='—')return null;return 'https://recorder.hamilton-co.org/recorder/web/?docNumber='+encodeURIComponent(docNum);}
+
 function buildCard(p,idx){
   var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{},avm=p._avm||{};
+  
   var street=fmt(addr.line1||addr.oneLine);
   var cityState=[addr.locality,addr.countrySubd,addr.postal1].filter(Boolean).join(', ')||'—';
-  var propType=fmt(summary.proptype||summary.propsubtype);
+  
+  var propType=fmt(summary.proptype||summary.propsubtype||summary.propType);
   var propClass=fmt(summary.propclass||summary.propClass);
-  var propLandUse=fmt(summary.propLandUse||summary.propSubType);
-  var yearBlt=fmt(bldg.yearbuilt||(bldg.summary&&bldg.summary.yearBuilt));
-  var sqft=fmt(bldg.size&&bldg.size.universalsize);
+  var propLandUse=fmt(summary.propLandUse||summary.proplanduse||summary.propSubType);
+  var yearBlt=fmt(bldg.yearbuilt||bldg.yearBuilt||(bldg.summary&&bldg.summary.yearBuilt));
+  var sqft=fmt((bldg.size&&bldg.size.universalsize)||(bldg.size&&bldg.size.livingsize)||(bldg.size&&bldg.size.bldgsize));
   var beds=fmt(bldg.rooms&&bldg.rooms.beds);
-  var baths=fmt(bldg.rooms&&bldg.rooms.bathstotal);
-  var halfbaths=fmt(bldg.rooms&&bldg.rooms.bathspartial);
-  var stories=fmt(bldg.summary&&bldg.summary.storie);
+  var baths=fmt((bldg.rooms&&bldg.rooms.bathstotal)||(bldg.rooms&&bldg.rooms.bathsfull));
+  var halfbaths=fmt((bldg.rooms&&bldg.rooms.bathspartial)||(bldg.rooms&&bldg.rooms.bathshalf));
+  var stories=fmt((bldg.summary&&bldg.summary.storie)||(bldg.summary&&bldg.summary.stories));
   var units=fmt(bldg.summary&&bldg.summary.unitscount);
   var garageType=fmt(bldg.parking&&bldg.parking.garagetype);
   var garageSpaces=fmt(bldg.parking&&bldg.parking.prkgSpaces);
@@ -261,64 +318,162 @@ function buildCard(p,idx){
   var subdName=fmt(area.subdname||area.munname);
   var schoolDistrict=fmt(area.schooldistrictname);
   var lat=fmt(location&&location.latitude);var lng=fmt(location&&location.longitude);
+
+  // FIXED OWNER PARSING
   var ownerName='—',ownerName2='—',ownerOccupied='—',ownershipType='—',ownerAddr='—';
-  var owners=p.owner||[];if(!Array.isArray(owners))owners=[owners];
-  if(owners.length>0&&owners[0]){ownerName=fmt(owners[0].name||owners[0].corporateName||owners[0].owner1fullname);ownerOccupied=fmt(owners[0].ownerOccupied||owners[0].absenteeInd);ownershipType=fmt(owners[0].type||owners[0].ownershipType);var oa=owners[0].mailingAddress||owners[0].address||{};ownerAddr=fmt(oa.oneLine||oa.line1);}
-  if(owners.length>1&&owners[1])ownerName2=fmt(owners[1].name||owners[1].corporateName||owners[1].owner2fullname);
-  var sa=sale.amount||sale||{};
-  var lastSaleAmt=fmtMoney(sa.saleamt||sale.saleamt);
-  var lastSaleDate=fmtDate(sale.salesearchdate||sale.saleTransDate||sa.saleTransDate);
-  var saleDocType=fmt(sa.saledisclosure||sale.docType);
-  var saleDocNum=fmt(sa.saledocnum||sale.docnum);
-  var sellerName=fmt(sa.seller1fullname||sale.seller1fullname);
-  var buyerName=fmt(sa.buyer1fullname||sale.buyer1fullname);
-  var saleBookPage=fmt(sa.salebookpage);
-  var asmtTotal=fmtMoney(asmt.assessed&&asmt.assessed.assdttlvalue);var asmtLand=fmtMoney(asmt.assessed&&asmt.assessed.assdlandvalue);var asmtImprv=fmtMoney(asmt.assessed&&asmt.assessed.assdimprvalue);
-  var mktTotal=fmtMoney(asmt.market&&asmt.market.mktttlvalue);var mktLand=fmtMoney(asmt.market&&asmt.market.mktlandvalue);var mktImprv=fmtMoney(asmt.market&&asmt.market.mktimprvalue);
-  var taxAmt=fmtMoney(asmt.tax&&asmt.tax.taxamt);var taxYear=fmt(asmt.tax&&asmt.tax.taxyear);var taxExemption=fmt((asmt.tax&&asmt.tax.exemptiontype1)||(asmt.tax&&asmt.tax.exemptiontype2));
+  var ownerData=p.owner||{};
+  
+  if(ownerData.owner1){
+    var o1=ownerData.owner1;
+    ownerName=fmt(o1.fullname||o1.lastname||[o1.firstname,o1.lastname].filter(Boolean).join(' '));
+  }
+  if(ownerData.owner2){
+    var o2=ownerData.owner2;
+    ownerName2=fmt(o2.fullname||o2.lastname||[o2.firstname,o2.lastname].filter(Boolean).join(' '));
+  }
+  if(ownerName==='—'&&Array.isArray(ownerData)){
+    if(ownerData[0])ownerName=fmt(ownerData[0].fullname||ownerData[0].name||ownerData[0].corporatename);
+    if(ownerData[1])ownerName2=fmt(ownerData[1].fullname||ownerData[1].name);
+  }
+  if(ownerName==='—'){
+    ownerName=fmt(ownerData.owner1fullname||ownerData.fullname||ownerData.name||ownerData.corporatename||ownerData.corporateName);
+    ownerName2=fmt(ownerData.owner2fullname);
+  }
+  var absentee=ownerData.absenteeind||ownerData.absenteeInd||ownerData.absenteeOwnerStatus||'';
+  if(absentee==='O'||absentee==='Owner Occupied')ownerOccupied='Yes';
+  else if(absentee==='A'||absentee==='Absentee')ownerOccupied='No (Absentee)';
+  else ownerOccupied=fmt(ownerData.owneroccupied||ownerData.ownerOccupied);
+  ownershipType=fmt(ownerData.ownershiptype||ownerData.type||ownerData.vestingOwnershipType||ownerData.ownerRelationshipType);
+  var oa=ownerData.mailingaddress||ownerData.mailingAddress||ownerData.address||{};
+  ownerAddr=fmt(oa.oneline||oa.oneLine||oa.line1||[oa.street,oa.city,oa.state,oa.zip].filter(Boolean).join(', '));
+
+  // FIXED SALE/DEED PARSING
+  var sa=sale.amount||{};
+  var lastSaleAmt=fmtMoney(sa.saleamt||sale.saleamt||sale.saleprice||sale.salesPrice);
+  var lastSaleDate=fmtDate(sa.saletransdate||sale.saletransdate||sale.salesearchdate||sale.saleTransDate||sale.contractdate||sale.recordingDate);
+  var saleDocType=fmt(sa.saledoctype||sale.saledoctype||sa.saledisclosuretype||sale.documenttype||sale.docType||sale.deedType);
+  var saleDocNum=fmt(sa.saledocnum||sale.saledocnum||sale.docnum||sale.documentnumber||sale.documentNumber||sale.instrumentNumber);
+  var saleBookPage=fmt(sa.salebookpage||sale.salebookpage||[sale.deedbook||sale.bookNumber,sale.deedpage||sale.pageNumber].filter(Boolean).join('/'));
+  var sellerName=fmt(sa.seller1fullname||sale.seller1fullname||sale.sellername||(sale.seller&&(sale.seller.fullname||sale.seller.name)));
+  var buyerName=fmt(sa.buyer1fullname||sale.buyer1fullname||sale.buyername||(sale.buyer&&(sale.buyer.fullname||sale.buyer.name)));
+
+  var asmtTotal=fmtMoney(asmt.assessed&&asmt.assessed.assdttlvalue);
+  var asmtLand=fmtMoney(asmt.assessed&&asmt.assessed.assdlandvalue);
+  var asmtImprv=fmtMoney(asmt.assessed&&asmt.assessed.assdimprvalue);
+  var mktTotal=fmtMoney(asmt.market&&asmt.market.mktttlvalue);
+  var mktLand=fmtMoney(asmt.market&&asmt.market.mktlandvalue);
+  var mktImprv=fmtMoney(asmt.market&&asmt.market.mktimprvalue);
+  var taxAmt=fmtMoney(asmt.tax&&asmt.tax.taxamt);
+  var taxYear=fmt(asmt.tax&&asmt.tax.taxyear);
+  var taxExemption=fmt((asmt.tax&&asmt.tax.exemptiontype1)||(asmt.tax&&asmt.tax.exemptiontype2));
+
   var avmVal=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.value);
   var avmLow=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.low);
   var avmHigh=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.high);
-  var avmConf=fmt(avm.avm&&avm.avm.eventDate);var avmScore=fmt(avm.avm&&avm.avm.confidence);
+  var avmConf=fmt(avm.avm&&avm.avm.eventDate);
+  var avmScore=fmt(avm.avm&&avm.avm.confidence);
+
   var badges='';
   if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
   if(avmVal&&avmVal!=='—')badges+='<span class="badge badge-green">AVM '+avmVal+'</span>';
   else if(lastSaleAmt&&lastSaleAmt!=='—')badges+='<span class="badge badge-amber">'+lastSaleAmt+'</span>';
   if(lastSaleDate&&lastSaleDate!=='—')badges+='<span class="badge badge-teal">'+lastSaleDate+'</span>';
-  if(ownerOccupied==='Y'||ownerOccupied==='true')badges+='<span class="badge badge-green">Owner Occupied</span>';
+  if(ownerOccupied==='Yes')badges+='<span class="badge badge-green">Owner Occupied</span>';
+
   var html='<div class="prop-card" id="card-'+idx+'">';
   html+='<div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
   html+='<div class="prop-card-body" id="body-'+idx+'">';
-  if(avmVal&&avmVal!=='—'){html+='<div class="avm-box"><div><div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">ATTOM Estimated Value</div><div class="avm-val">'+avmVal+'</div></div><div class="avm-meta">Range: <span style="color:var(--white)">'+avmLow+' — '+avmHigh+'</span><br>Confidence: <span style="color:var(--white)">'+avmScore+'</span><br>As of: <span style="color:var(--white)">'+fmtDate(avmConf)+'</span></div></div>';}
-  html+='<div class="detail-grid"><div class="detail-col"><h4>Property Details</h4>'+drow('APN',apn)+drow('ATTOM ID',attomId)+drow('Property type',propType)+drow('Property class',propClass)+drow('Land use',propLandUse)+drow('Year built',yearBlt)+drow('Bldg size',sqft!=='—'?sqft+' sqft':'—')+drow('Condition',condition)+drow('Quality',quality)+drow('Beds',beds)+drow('Baths (full)',baths)+drow('Baths (half)',halfbaths)+drow('Stories',stories)+drow('Units',units)+drow('Garage type',garageType)+drow('Garage spaces',garageSpaces)+drow('Pool',pool)+'</div>';
-  html+='<div class="detail-col"><h4>Lot &amp; Location</h4>'+drow('Lot (acres)',lotSize1)+drow('Lot (sqft)',lotSize2)+drow('Subdivision',subdName)+drow('School district',schoolDistrict)+drow('Latitude',lat)+drow('Longitude',lng)+'</div></div>';
-  html+='<div class="section-title">Ownership</div>';
-  html+=drow('Owner 1',ownerName,'hi')+drow('Owner 2',ownerName2,'hi')+drow('Mailing address',ownerAddr)+drow('Owner occupied',ownerOccupied)+drow('Ownership type',ownershipType);
+
+  if(avmVal&&avmVal!=='—'){
+    html+='<div class="avm-box"><div><div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">ATTOM Estimated Value</div><div class="avm-val">'+avmVal+'</div></div><div class="avm-meta">Range: <span style="color:var(--white)">'+avmLow+' — '+avmHigh+'</span><br>Confidence: <span style="color:var(--white)">'+avmScore+'</span><br>As of: <span style="color:var(--white)">'+fmtDate(avmConf)+'</span></div></div>';
+  }
+
+  html+='<div class="detail-grid"><div class="detail-col"><h4>Property Details</h4>'+drow('APN',apn)+drow('ATTOM ID',attomId)+drow('Property type',propType)+drow('Property class',propClass)+drow('Land use',propLandUse)+drow('Year built',yearBlt)+drow('Bldg size',sqft!=='—'?sqft+' sqft':'—')+drow('Condition',condition)+drow('Quality',quality)+drow('Beds',beds)+drow('Baths (full)',baths)+drow('Baths (half)',halfbaths)+drow('Stories',stories)+drow('Units',units)+drow('Garage',garageType)+drow('Garage spaces',garageSpaces)+drow('Pool',pool)+'</div>';
+  html+='<div class="detail-col"><h4>Lot &amp; Location</h4>'+drow('Lot (acres)',lotSize1)+drow('Lot (sqft)',lotSize2)+drow('Subdivision',subdName)+drow('School district',schoolDistrict)+drow('Latitude',lat)+drow('Longitude',lng)+'<div class="section-title">Ownership</div>'+drow('Owner 1',ownerName,'hi')+drow('Owner 2',ownerName2)+drow('Owner occupied',ownerOccupied)+drow('Ownership type',ownershipType)+drow('Mailing address',ownerAddr)+'</div></div>';
+
   var docLinkHref=recorderLink(saleDocNum);
   html+='<div class="section-title">Last Sale / Deed</div>';
   html+=drow('Sale date',lastSaleDate,'teal')+drow('Sale price',lastSaleAmt,'hi')+drow('Buyer',buyerName)+drow('Seller',sellerName)+drow('Doc type',saleDocType)+drow('Book/Page',saleBookPage);
-  html+=drowLink('Doc number',saleDocNum!=='—'?'&#128196; '+saleDocNum+' (view)':saleDocNum,docLinkHref);
-  if(docLinkHref)html+='<a class="doc-link" href="'+docLinkHref+'" target="_blank">&#128196; View Deed Document at Hamilton County Recorder</a>';
+  html+=drowLink('Doc number',saleDocNum!=='—'?'📄 '+saleDocNum:saleDocNum,docLinkHref);
+  if(docLinkHref)html+='<a class="doc-link" href="'+docLinkHref+'" target="_blank">📄 View Deed Document at Hamilton County Recorder</a>';
+
   html+='<div class="section-title">Assessment &amp; Taxes</div>';
   html+='<div class="detail-grid"><div class="detail-col"><h4>Assessed Value</h4>'+drow('Total',asmtTotal,'hi')+drow('Land',asmtLand)+drow('Improvements',asmtImprv)+'</div><div class="detail-col"><h4>Market Value</h4>'+drow('Total',mktTotal,'hi')+drow('Land',mktLand)+drow('Improvements',mktImprv)+'</div></div>';
   html+=drow('Annual tax',taxAmt,'hi')+drow('Tax year',taxYear)+drow('Exemption',taxExemption);
+
   var hist=p.salehistory||p.saleshistory||[];
-  if(hist.length>0){html+='<div class="section-title">Sale / Deed History</div><table class="sale-table"><thead><tr><th>Date</th><th>Price</th><th>Buyer</th><th>Seller</th><th>Doc #</th></tr></thead><tbody>';hist.slice(0,10).forEach(function(h){var hsa=h.amount||{};var hdoc=fmt(hsa.saledocnum||h.docnum);var hlink=recorderLink(hdoc);html+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(hsa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td><td>'+(hlink?'<a href="'+hlink+'" target="_blank">'+hdoc+'</a>':hdoc)+'</td></tr>';});html+='</tbody></table>';}
+  if(hist.length>0){
+    html+='<div class="section-title">Sale / Deed History</div><table class="sale-table"><thead><tr><th>Date</th><th>Price</th><th>Buyer</th><th>Seller</th><th>Doc #</th></tr></thead><tbody>';
+    hist.slice(0,10).forEach(function(h){
+      var hsa=h.amount||{};
+      var hdoc=fmt(hsa.saledocnum||h.saledocnum||h.docnum||h.documentnumber);
+      var hlink=recorderLink(hdoc);
+      html+='<tr><td class="mono">'+fmtDate(h.saletransdate||h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(hsa.saleamt||h.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyername||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.sellername||h.seller)+'</td><td>'+(hlink?'<a href="'+hlink+'" target="_blank">'+hdoc+'</a>':hdoc)+'</td></tr>';
+    });
+    html+='</tbody></table>';
+  }
+
+  // FIXED MORTGAGE PARSING
   var mortList=[];
-  if(mort.first)mortList.push({label:'1st Mortgage',m:mort.first});
-  if(mort.second)mortList.push({label:'2nd Mortgage',m:mort.second});
-  if(mortList.length===0&&p.mortgage&&typeof p.mortgage==='object'&&p.mortgage.amount)mortList.push({label:'Mortgage',m:p.mortgage});
-  if(mortList.length>0){html+='<div class="section-title teal">Mortgage / Loan Records</div><div class="mort-grid">';mortList.forEach(function(item){var m=item.m;var mdoc=fmt(m.docnum||m.documentNumber);var mlink=recorderLink(mdoc);html+='<div class="mort-card"><div class="mc-label">'+item.label+'</div>'+drow('Lender',fmt(m.lenderName||m.lender),'teal')+drow('Loan amount',fmtMoney(m.amount||m.loanamount),'hi')+drow('Recorded',fmtDate(m.recordingDate||m.deedOfTrustDate))+drow('Due date',fmtDate(m.dueDate))+drow('Loan type',fmt(m.loantype||m.deedOfTrustType))+drow('Interest rate',m.interestRate?m.interestRate+'%':'—')+drow('Term',m.term?m.term+' mo':'—')+drow('Finance type',fmt(m.financingType))+drowLink('Doc number',mdoc,mlink)+(mlink?'<a class="doc-link" href="'+mlink+'" target="_blank">&#128196; View Mortgage Doc</a>':'')+'</div>';});html+='</div>';}
+  if(mort.first&&Object.keys(mort.first).length>1)mortList.push({label:'1st Mortgage',m:mort.first});
+  if(mort.second&&Object.keys(mort.second).length>1)mortList.push({label:'2nd Mortgage',m:mort.second});
+  if(mort.third&&Object.keys(mort.third).length>1)mortList.push({label:'3rd Mortgage',m:mort.third});
+  if(mortList.length===0&&mort&&(mort.amount||mort.loanamount||mort.lender||mort.lendername))mortList.push({label:'Mortgage',m:mort});
+
+  if(mortList.length>0){
+    html+='<div class="section-title teal">Mortgage / Loan Records</div><div class="mort-grid">';
+    mortList.forEach(function(item){
+      var m=item.m||{};
+      var mdoc=fmt(m.documentnumber||m.docnumber||m.docnum||m.deedoftrustnumber||m.instrumentNumber);
+      var mlink=recorderLink(mdoc);
+      var lenderName=fmt(m.lendername||m.lender||(typeof m.lender==='object'?(m.lender.fullname||m.lender.name):''));
+      var loanAmt=fmtMoney(m.amount||m.loanamount||m.loanAmount);
+      var recordDate=fmtDate(m.recordingdate||m.recordingDate||m.deedoftrustdate||m.deedOfTrustDate||m.documentdate);
+      var dueDate=fmtDate(m.duedate||m.dueDate||m.maturitydate||m.maturityDate);
+      var loanType=fmt(m.loantype||m.loantypecode||m.loanTypeCode||m.deedoftrusttype);
+      var intRate=m.interestrate||m.interestRate||m.interestratetype;
+      var termVal=m.term||m.loanterm||m.loanTerm;
+      var finType=fmt(m.financetype||m.financeType||m.financingtype||m.financingType);
+      
+      html+='<div class="mort-card"><div class="mc-label">'+item.label+'</div>'
+        +drow('Lender',lenderName,'teal')
+        +drow('Loan amount',loanAmt,'hi')
+        +drow('Recorded',recordDate)
+        +drow('Due date',dueDate)
+        +drow('Loan type',loanType)
+        +drow('Interest rate',intRate?intRate+'%':'—')
+        +drow('Term',termVal?termVal+' mo':'—')
+        +drow('Finance type',finType)
+        +drowLink('Doc number',mdoc!=='—'?'📄 '+mdoc:mdoc,mlink)
+        +(mlink?'<a class="doc-link" href="'+mlink+'" target="_blank">📄 View Mortgage Doc at Recorder</a>':'')
+        +'</div>';
+    });
+    html+='</div>';
+  }
+
   html+='<div class="section-title">Official Record Links</div>';
   html+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">';
-  html+='<a class="doc-link" href="https://recorder.hamilton-co.org/recorder/web/" target="_blank">&#127963; Hamilton County Recorder</a>';
-  if(apn&&apn!=='—')html+='<a class="doc-link" href="https://www.hamiltoncountyauditor.org/search?apn='+encodeURIComponent(apn)+'" target="_blank">&#128203; County Auditor Record</a>';
-  if(lat&&lat!=='—'&&lng&&lng!=='—')html+='<a class="doc-link" href="https://maps.google.com/?q='+lat+','+lng+'" target="_blank">&#128205; View on Google Maps</a>';
+  html+='<a class="doc-link" href="https://recorder.hamilton-co.org/recorder/web/" target="_blank">🏛 Hamilton County Recorder</a>';
+  if(apn&&apn!=='—')html+='<a class="doc-link" href="https://wedge.hcauditor.org/view/re/'+encodeURIComponent(apn.replace(/-/g,''))+'/2024/summary" target="_blank">📋 County Auditor Record</a>';
+  if(lat&&lat!=='—'&&lng&&lng!=='—')html+='<a class="doc-link" href="https://maps.google.com/?q='+lat+','+lng+'" target="_blank">📍 View on Google Maps</a>';
   html+='</div></div></div>';
   return html;
 }
-function toggleCard(i){var body=document.getElementById('body-'+i);var icon=document.getElementById('exp-'+i);var open=body.classList.contains('open');body.classList.toggle('open',!open);icon.classList.toggle('open',!open);}
-document.addEventListener('keydown',function(e){if(e.key==='Enter'&&document.activeElement.tagName==='INPUT'){var a=document.querySelector('.spanel.active');if(a){var b=a.querySelector('.btn-search');if(b)b.click();}}});
+
+function toggleCard(i){
+  var body=document.getElementById('body-'+i);
+  var icon=document.getElementById('exp-'+i);
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  icon.classList.toggle('open',!open);
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.activeElement.tagName==='INPUT'){
+    var a=document.querySelector('.spanel.active');
+    if(a){var b=a.querySelector('.btn-search');if(b)b.click();}
+  }
+});
 </script>
 </body>
 </html>
