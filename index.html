@@ -39,6 +39,8 @@ label{display:block;font-size:11px;color:var(--slate);text-transform:uppercase;l
 input[type=text],select{width:100%;background:var(--navy-3);border:1px solid var(--bdr-md);border-radius:var(--rs);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color 0.15s;-webkit-appearance:none}
 input[type=text]:focus,select:focus{border-color:var(--amber)}
 input[type=text]::placeholder{color:var(--slate-dk)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237d99b4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+select option{background:#1a2a3d;color:var(--white)}
 .btn-search{width:100%;padding:11px;background:var(--amber);border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--navy);cursor:pointer;transition:background 0.15s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-search:hover{background:var(--amber-lt)}
 .loader{display:none;text-align:center;padding:3.5rem 1rem}
@@ -67,28 +69,34 @@ input[type=text]::placeholder{color:var(--slate-dk)}
 .badge-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
 .badge-teal{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd)}
 .badge-slate{background:var(--navy-3);color:var(--slate);border:1px solid var(--bdr-md)}
+.badge-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
 .prop-card-body{display:none;border-top:1px solid var(--bdr);padding:1.25rem;animation:fadeIn 0.15s ease}
 .prop-card-body.open{display:block}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
-.detail-section h4{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
+.section-title{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin:1.25rem 0 10px;padding-top:1.25rem;border-top:1px solid var(--bdr)}
+.section-title:first-child{margin-top:0;padding-top:0;border-top:none}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:.5rem}
+.detail-col h4{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
 .detail-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px}
 .detail-row:last-child{border-bottom:none}
 .detail-label{color:var(--slate);min-width:130px;font-size:12px;flex-shrink:0}
 .detail-val{color:var(--white);font-family:'DM Mono',monospace;font-size:12px}
 .detail-val.hi{color:var(--amber)}
 .detail-val.teal{color:var(--teal)}
-.sale-history{margin-top:1rem}
-.sale-history h4{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
-.sale-table{width:100%;border-collapse:collapse;font-size:13px}
+.detail-val.green{color:var(--green)}
+.sale-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
 .sale-table th{text-align:left;font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;padding:0 8px 8px 0;border-bottom:1px solid var(--bdr);font-weight:400}
-.sale-table td{padding:8px 8px 8px 0;border-bottom:1px solid var(--bdr);color:var(--white-60);vertical-align:top}
+.sale-table td{padding:7px 8px 7px 0;border-bottom:1px solid var(--bdr);color:var(--white-60);vertical-align:top}
 .sale-table tr:last-child td{border-bottom:none}
-.sale-table td.mono{font-family:'DM Mono',monospace;font-size:12px}
+.sale-table td.mono{font-family:'DM Mono',monospace}
 .sale-table td.hi{color:var(--amber);font-family:'DM Mono',monospace}
+.mort-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.mort-card{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:1rem}
+.mort-card .mc-label{font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500}
+.expand-icon{width:22px;height:22px;border-radius:50%;background:var(--navy-3);border:1px solid var(--bdr-md);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--slate);flex-shrink:0;transition:transform 0.2s}
+.expand-icon.open{transform:rotate(180deg)}
 .no-results{text-align:center;padding:3rem 1rem;background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r)}
 .no-results p{color:var(--slate);font-size:14px;margin-top:8px}
-.no-results .nr-icon{font-size:32px;margin-bottom:8px;color:var(--slate-dk)}
 .footer{text-align:center;font-size:11px;color:var(--slate-dk);margin-top:3rem;line-height:1.8}
 .footer a{color:var(--slate);text-decoration:none}
 </style>
@@ -103,14 +111,14 @@ input[type=text]::placeholder{color:var(--slate-dk)}
     </div>
   </div>
   <div class="topbar-right">
-    <span class="county-tag">Hamilton County, OH &nbsp;·&nbsp; FIPS 39061</span>
+    <span class="county-tag">Hamilton County, OH</span>
     <button class="api-btn"><div class="dot live"></div><span>Connected</span></button>
   </div>
 </div>
 <div class="page">
   <div class="search-card">
     <div class="search-card-header">
-      <div><h1>Property Records Search</h1><p>Search deeds, ownership history &amp; mortgage records for Hamilton County, OH</p></div>
+      <div><h1>Property Records Search</h1><p>Full deed, mortgage, ownership &amp; valuation data — Hamilton County, OH</p></div>
       <div class="powered-badge">Powered by ATTOM Data</div>
     </div>
     <div class="stabs">
@@ -134,16 +142,16 @@ input[type=text]::placeholder{color:var(--slate-dk)}
       <button class="btn-search" onclick="search('owner')">Search Records</button>
     </div>
     <div class="spanel" id="panel-apn">
-      <div class="fsingle"><label>Full address or Parcel Number (APN)</label><input type="text" id="apn-val" placeholder="e.g. 138 E Court St Cincinnati OH  or  123-0001-0023-00"></div>
+      <div class="fsingle"><label>Full address or Parcel Number (APN)</label><input type="text" id="apn-val" placeholder="e.g. 138 E Court St Cincinnati OH"></div>
       <button class="btn-search" onclick="search('apn')">Search Records</button>
     </div>
   </div>
-  <div class="loader" id="loader"><div class="spinner"></div><p>Searching records via ATTOM…</p></div>
-  <div class="err" id="err-box"><div class="err-box"><strong id="err-title">Request failed</strong><span id="err-msg"></span></div></div>
+  <div class="loader" id="loader"><div class="spinner"></div><p>Pulling full ATTOM records…</p></div>
+  <div class="err" id="err-box"><div class="err-box"><strong id="err-title">Error</strong><span id="err-msg"></span></div></div>
   <div class="results" id="results">
     <div class="results-meta">
       <div><div class="results-count">Found <span id="result-count">0</span> properties</div><div class="results-sub" id="result-sub"></div></div>
-      <button class="btn-clear" onclick="clearResults()">Clear results</button>
+      <button class="btn-clear" onclick="clearResults()">Clear</button>
     </div>
     <div id="result-list"></div>
   </div>
@@ -163,34 +171,33 @@ function attom(path,params){
   var attomUrl=ATTOM_BASE+path+'?'+new URLSearchParams(params).toString();
   var url=RAILWAY+'/p?u='+encodeURIComponent(attomUrl)+'&key='+ATTOM_KEY;
   return fetch(url,{headers:{'apikey':ATTOM_KEY,'Accept':'application/json'}})
-  .then(function(r){if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}var msg=(b&&b.status&&b.status.msg)?b.status.msg:r.status===403?'Invalid API key.':r.status===404?'No records found.':r.status===429?'Rate limit — try again.':'HTTP '+r.status;throw new Error(msg);});}return r.json();})
+  .then(function(r){if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}var msg=(b&&b.status&&b.status.msg)?b.status.msg:'HTTP '+r.status;throw new Error(msg);});}return r.json();})
   .then(function(body){if(body&&body.status&&body.status.code&&body.status.code!==0)throw new Error(body.status.msg||'ATTOM error');return body;})
-  .catch(function(e){if(e.message&&(e.message.indexOf('load failed')!==-1||e.message.indexOf('failed to fetch')!==-1))throw new Error('Network error — check your connection.');throw e;});
+  .catch(function(e){if(e.message&&(e.message.indexOf('load failed')!==-1||e.message.indexOf('failed to fetch')!==-1))throw new Error('Network error.');throw e;});
 }
 function search(mode){
   hideError();showResults(false);showLoader(true);
-  var promise;
-  if(mode==='address'){
-    var addr=document.getElementById('a-address').value.trim();
-    if(!addr){showLoader(false);showError('Missing field','Please enter a full address.');return;}
-    promise=attom('/propertyapi/v1.0.0/property/basicprofile',{address:addr}).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean));});
-  }else if(mode==='owner'){
+  var addr='';
+  if(mode==='address')addr=document.getElementById('a-address').value.trim();
+  else if(mode==='apn')addr=document.getElementById('apn-val').value.trim();
+  if((mode==='address'||mode==='apn')&&!addr){showLoader(false);showError('Missing field','Please enter an address.');return;}
+  var baseParams={};
+  if(mode==='address'||mode==='apn')baseParams={address:addr};
+  else if(mode==='owner'){
     var last=document.getElementById('o-last').value.trim();
+    if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
     var first=document.getElementById('o-first').value.trim();
     var city=document.getElementById('o-city').value.trim();
-    if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
-    var params={name:last+(first?' '+first:'')};
-    if(city)params.address=city+' OH';
-    promise=attom('/propertyapi/v1.0.0/property/basicprofile',params).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean));});
-  }else if(mode==='apn'){
-    var val=document.getElementById('apn-val').value.trim();
-    if(!val){showLoader(false);showError('Missing field','Please enter an address or APN.');return;}
-    promise=attom('/propertyapi/v1.0.0/property/basicprofile',{address:val}).then(function(d){return buildResults([d.property||d.Property].flat().filter(Boolean));});
+    baseParams={ownerName:last+(first?' '+first:'')};
+    if(city)baseParams.address=city+' OH';
   }
-  promise.then(function(){showLoader(false);}).catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
+  var endpoint=(mode==='owner')?'/propertyapi/v1.0.0/property/detailowner':'/propertyapi/v1.0.0/property/detailmortgage';
+  attom(endpoint,baseParams)
+  .then(function(d){var props=[d.property||d.Property].flat().filter(Boolean);showLoader(false);buildResults(props);})
+  .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
 }
 function buildResults(props){
-  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-sub').textContent='No records found.';document.getElementById('result-list').innerHTML='<div class="no-results"><div class="nr-icon">&#9906;</div><p>No match. Try: 138 E Court St, Cincinnati, OH</p></div>';showResults(true);return;}
+  if(!props||props.length===0){document.getElementById('result-count').textContent='0';document.getElementById('result-list').innerHTML='<div class="no-results"><p>No properties found. Try: 138 E Court St, Cincinnati, OH</p></div>';showResults(true);return;}
   document.getElementById('result-count').textContent=props.length;
   document.getElementById('result-sub').textContent=new Date().toLocaleDateString();
   var html='';props.forEach(function(p,i){html+=buildCard(p,i);});
@@ -199,39 +206,76 @@ function buildResults(props){
 function fmt(v){return(v&&v!=='N/A'&&v!=='0'&&v!==0)?v:'—';}
 function fmtMoney(v){var n=parseInt(v);if(!n||isNaN(n))return'—';return'$'+n.toLocaleString();}
 function fmtDate(v){if(!v)return'—';var d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
+function drow(label,val,cls){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val'+(cls?' '+cls:'')+'">'+( val||'—')+'</span></div>';}
 function buildCard(p,idx){
-  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},summary=p.summary||{};
+  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{};
   var street=fmt(addr.line1||addr.oneLine);
   var cityState=[addr.locality,addr.countrySubd,addr.postal1].filter(Boolean).join(', ')||'—';
-  var propType=fmt(summary.proptype||summary.propClass);
+  var propType=fmt(summary.proptype||summary.propsubtype);
+  var propClass=fmt(summary.propclass||summary.propClass);
+  var propLandUse=fmt(summary.propLandUse||summary.propSubType);
   var yearBlt=fmt(bldg.yearbuilt||(bldg.summary&&bldg.summary.yearBuilt));
   var sqft=fmt(bldg.size&&bldg.size.universalsize);
   var beds=fmt(bldg.rooms&&bldg.rooms.beds);
   var baths=fmt(bldg.rooms&&bldg.rooms.bathstotal);
-  var lotSize=fmt(lot.lotsize2||lot.lotsize1);
-  var apn=fmt(summary.apn||(p.identifier&&p.identifier.apn));
-  var ownerName='—';
-  if(Array.isArray(p.owner)&&p.owner.length>0)ownerName=fmt(p.owner[0].name||p.owner[0].corporateName);
-  else if(p.owner)ownerName=fmt(p.owner.name||p.owner.corporateName);
+  var halfbaths=fmt(bldg.rooms&&bldg.rooms.bathspartial);
+  var stories=fmt(bldg.summary&&bldg.summary.storie);
+  var units=fmt(bldg.summary&&bldg.summary.unitscount);
+  var garageType=fmt(bldg.parking&&bldg.parking.garagetype);
+  var garageSpaces=fmt(bldg.parking&&bldg.parking.prkgSpaces);
+  var lotSize1=fmt(lot.lotsize1);
+  var lotSize2=fmt(lot.lotsize2);
+  var pool=fmt(lot.pooltype||lot.pool);
+  var apn=fmt(summary.apn||identifier.apn||identifier.apnOrig);
+  var attomId=fmt(identifier.attomId||identifier.obPropId);
+  var fips=fmt(identifier.fips);
+  var subdName=fmt(area.subdname||area.munname);
+  var schoolDistrict=fmt(area.schooldistrictname);
+  var lat=fmt(location&&location.latitude);
+  var lng=fmt(location&&location.longitude);
+  var ownerName='—',ownerName2='—',ownerOccupied='—',ownershipType='—';
+  if(Array.isArray(p.owner)&&p.owner.length>0){ownerName=fmt(p.owner[0].name||p.owner[0].corporateName);if(p.owner[1])ownerName2=fmt(p.owner[1].name||p.owner[1].corporateName);ownerOccupied=fmt(p.owner[0].ownerOccupied);ownershipType=fmt(p.owner[0].type);}
+  else if(p.owner){ownerName=fmt(p.owner.name||p.owner.corporateName);}
   var lastSaleAmt=fmtMoney(sale.amount&&sale.amount.saleamt);
   var lastSaleDate=fmtDate(sale.salesearchdate||sale.saleTransDate);
-  var asmtVal=fmtMoney(asmt.assessed&&asmt.assessed.assdttlvalue);
-  var mktVal=fmtMoney(asmt.market&&asmt.market.mktttlvalue);
+  var saleDocType=fmt(sale.amount&&sale.amount.saledisclosure);
+  var saleDocNum=fmt(sale.amount&&sale.amount.saledocnum);
+  var sellerName=fmt(sale.amount&&sale.amount.seller1fullname);
+  var buyerName=fmt(sale.amount&&sale.amount.buyer1fullname);
+  var asmtTotal=fmtMoney(asmt.assessed&&asmt.assessed.assdttlvalue);
+  var asmtLand=fmtMoney(asmt.assessed&&asmt.assessed.assdlandvalue);
+  var asmtImprv=fmtMoney(asmt.assessed&&asmt.assessed.assdimprvalue);
+  var mktTotal=fmtMoney(asmt.market&&asmt.market.mktttlvalue);
+  var mktLand=fmtMoney(asmt.market&&asmt.market.mktlandvalue);
+  var mktImprv=fmtMoney(asmt.market&&asmt.market.mktimprvalue);
   var taxAmt=fmtMoney(asmt.tax&&asmt.tax.taxamt);
+  var taxYear=fmt(asmt.tax&&asmt.tax.taxyear);
+  var taxExemption=fmt(asmt.tax&&asmt.tax.exemptiontype1||asmt.tax&&asmt.tax.exemptiontype2);
   var badges='';
   if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
   if(lastSaleAmt&&lastSaleAmt!=='—')badges+='<span class="badge badge-amber">'+lastSaleAmt+'</span>';
   if(lastSaleDate&&lastSaleDate!=='—')badges+='<span class="badge badge-teal">'+lastSaleDate+'</span>';
-  var html='<div class="prop-card" id="card-'+idx+'"><div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
+  if(ownerOccupied==='Y')badges+='<span class="badge badge-green">Owner Occupied</span>';
+  var html='<div class="prop-card" id="card-'+idx+'">';
+  html+='<div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
   html+='<div class="prop-card-body" id="body-'+idx+'">';
-  html+='<div class="detail-grid"><div class="detail-section"><h4>Property details</h4>'+drow('APN',apn)+drow('Property type',propType)+drow('Year built',yearBlt)+drow('Building size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds / baths',beds!=='—'?beds+' bd / '+baths+' ba':'—')+drow('Lot size',lotSize!=='—'?lotSize+' sqft':'—')+'</div>';
-  html+='<div class="detail-section"><h4>Ownership &amp; Value</h4>'+drow('Current owner',ownerName,'hi')+drow('Last sale date',lastSaleDate,'teal')+drow('Last sale price',lastSaleAmt,'hi')+drow('Assessed value',asmtVal)+drow('Market value',mktVal)+drow('Annual tax',taxAmt)+'</div></div>';
+  html+='<div class="detail-grid"><div class="detail-col"><h4>Property Details</h4>'+drow('APN',apn)+drow('ATTOM ID',attomId)+drow('FIPS',fips)+drow('Property type',propType)+drow('Property class',propClass)+drow('Land use',propLandUse)+drow('Year built',yearBlt)+drow('Bldg size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds',beds)+drow('Baths (full)',baths)+drow('Baths (half)',halfbaths)+drow('Stories',stories)+drow('Units',units)+drow('Garage',garageType)+drow('Garage spaces',garageSpaces)+drow('Pool',pool)+'</div>';
+  html+='<div class="detail-col"><h4>Lot &amp; Location</h4>'+drow('Lot size (acres)',lotSize1)+drow('Lot size (sqft)',lotSize2)+drow('Subdivision',subdName)+drow('School district',schoolDistrict)+drow('Latitude',lat)+drow('Longitude',lng)+'<h4 style="margin-top:1rem">Ownership</h4>'+drow('Owner 1',ownerName,'hi')+drow('Owner 2',ownerName2)+drow('Owner occupied',ownerOccupied)+drow('Ownership type',ownershipType)+'</div></div>';
+  html+='<div class="section-title">Last Sale / Deed</div>';
+  html+=drow('Sale date',lastSaleDate,'teal')+drow('Sale price',lastSaleAmt,'hi')+drow('Buyer',buyerName)+drow('Seller',sellerName)+drow('Doc type',saleDocType)+drow('Doc number',saleDocNum);
+  html+='<div class="section-title">Assessment &amp; Taxes</div>';
+  html+='<div class="detail-grid"><div class="detail-col"><h4>Assessed Value</h4>'+drow('Total',asmtTotal,'hi')+drow('Land',asmtLand)+drow('Improvements',asmtImprv)+'</div><div class="detail-col"><h4>Market Value</h4>'+drow('Total',mktTotal,'hi')+drow('Land',mktLand)+drow('Improvements',mktImprv)+'</div></div>';
+  html+=drow('Annual tax',taxAmt,'hi')+drow('Tax year',taxYear)+drow('Exemption',taxExemption);
   var hist=p.salehistory||p.saleshistory||[];
-  if(hist.length>0){html+='<div class="sale-history"><h4>Sale / Deed History</h4><table class="sale-table"><thead><tr><th>Date</th><th>Sale Price</th><th>Buyer</th><th>Seller</th></tr></thead><tbody>';hist.slice(0,8).forEach(function(h){var sa=h.amount||{};html+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(sa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td></tr>';});html+='</tbody></table></div>';}
+  if(hist.length>0){html+='<div class="section-title">Sale / Deed History</div><table class="sale-table"><thead><tr><th>Date</th><th>Price</th><th>Buyer</th><th>Seller</th><th>Doc Type</th></tr></thead><tbody>';hist.slice(0,10).forEach(function(h){var sa=h.amount||{};html+='<tr><td class="mono">'+fmtDate(h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(sa.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.seller)+'</td><td>'+fmt(sa.saledisclosure||h.docType)+'</td></tr>';});html+='</tbody></table>';}
+  var mortList=[];
+  if(mort.first)mortList.push({label:'1st Mortgage',m:mort.first});
+  if(mort.second)mortList.push({label:'2nd Mortgage',m:mort.second});
+  if(mortList.length===0&&p.mortgage&&typeof p.mortgage==='object'&&p.mortgage.amount)mortList.push({label:'Mortgage',m:p.mortgage});
+  if(mortList.length>0){html+='<div class="section-title">Mortgage / Loan Records</div><div class="mort-grid">';mortList.forEach(function(item){var m=item.m;html+='<div class="mort-card"><div class="mc-label">'+item.label+'</div>'+drow('Lender',fmt(m.lenderName||m.lender),'teal')+drow('Loan amount',fmtMoney(m.amount),'hi')+drow('Recorded',fmtDate(m.recordingDate||m.dueDate))+drow('Loan type',fmt(m.loantype||m.deedOfTrustType))+drow('Interest rate',m.interestRate?m.interestRate+'%':'—')+drow('Term',m.term?m.term+' mo':'—')+drow('Due date',fmtDate(m.dueDate))+drow('Status',fmt(m.financingType||m.status))+'</div>';});html+='</div>';}
   html+='</div></div>';
   return html;
 }
-function drow(label,val,cls){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val'+(cls?' '+cls:'')+'">'+( val||'—')+'</span></div>';}
 function toggleCard(i){var body=document.getElementById('body-'+i);var icon=document.getElementById('exp-'+i);var open=body.classList.contains('open');body.classList.toggle('open',!open);icon.classList.toggle('open',!open);}
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&document.activeElement.tagName==='INPUT'){var a=document.querySelector('.spanel.active');if(a){var b=a.querySelector('.btn-search');if(b)b.click();}}});
 </script>
