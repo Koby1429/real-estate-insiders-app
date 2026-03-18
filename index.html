@@ -243,7 +243,7 @@ function search(mode){
     if(!last){showLoader(false);showError('Missing field','Please enter a last name.');return;}
     var first=document.getElementById('o-first').value.trim();
     var city=document.getElementById('o-city').value.trim();
-    baseParams={ownerName:last+(first?' '+first:'')};
+    baseParams={owner:last+(first?', '+first:'')};
     if(city)baseParams.address=city+' OH';
   }
   if(mode==='owner'){
