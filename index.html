@@ -168,7 +168,7 @@ select option{background:#1a2a3d;color:var(--white)}
     </div>
     <div id="result-list"></div>
   </div>
-  <div class="footer">Real Estate Insider's App &nbsp;·&nbsp; Data by <a href="https://www.attomdata.com" target="_blank">ATTOM Data Solutions</a> &nbsp;·&nbsp; <a href="https://recorder.hamilton-co.org" target="_blank">Hamilton County Recorder</a><br>For informational use only — not a substitute for a title search.</div>
+  <div class="footer">Real Estate Insider's App &nbsp;·&nbsp; Data by <a href="https://www.attomdata.com" target="_blank">ATTOM Data Solutions</a> &nbsp;·&nbsp; <a href="https://acclaim-web.hamiltoncountyohio.gov/AcclaimWebLive" target="_blank">Hamilton County Recorder</a><br>For informational use only — not a substitute for a title search.</div>
 </div>
 <script>
 var ATTOM_BASE='https://api.gateway.attomdata.com';
@@ -290,7 +290,11 @@ function fmtMoney(v){var n=parseInt(v);if(!n||isNaN(n))return'—';return'$'+n.t
 function fmtDate(v){if(!v)return'—';var d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
 function drow(label,val,cls){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val'+(cls?' '+cls:'')+'">'+( val||'—')+'</span></div>';}
 function drowLink(label,val,href){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val">'+(href&&val!=='—'?'<a href="'+href+'" target="_blank">'+val+'</a>':(val||'—'))+'</span></div>';}
-function recorderLink(docNum){if(!docNum||docNum==='—')return null;return 'https://recorder.hamilton-co.org/recorder/web/?docNumber='+encodeURIComponent(docNum);}
+
+function recorderLink(docNum){
+  if(!docNum||docNum==='—')return null;
+  return 'https://acclaim-web.hamiltoncountyohio.gov/AcclaimWebLive/Search/SearchTypeDocNumber';
+}
 
 function buildCard(p,idx){
   var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{},avm=p._avm||{};
@@ -395,7 +399,7 @@ function buildCard(p,idx){
   html+='<div class="section-title">Last Sale / Deed</div>';
   html+=drow('Sale date',lastSaleDate,'teal')+drow('Sale price',lastSaleAmt,'hi')+drow('Buyer',buyerName)+drow('Seller',sellerName)+drow('Doc type',saleDocType)+drow('Book/Page',saleBookPage);
   html+=drowLink('Doc number',saleDocNum!=='—'?'📄 '+saleDocNum:saleDocNum,docLinkHref);
-  if(docLinkHref)html+='<a class="doc-link" href="'+docLinkHref+'" target="_blank">📄 View Deed Document at Hamilton County Recorder</a>';
+  if(docLinkHref&&saleDocNum!=='—')html+='<a class="doc-link" href="'+docLinkHref+'" target="_blank">📄 Search Deed at Hamilton County Recorder</a>';
 
   html+='<div class="section-title">Assessment &amp; Taxes</div>';
   html+='<div class="detail-grid"><div class="detail-col"><h4>Assessed Value</h4>'+drow('Total',asmtTotal,'hi')+drow('Land',asmtLand)+drow('Improvements',asmtImprv)+'</div><div class="detail-col"><h4>Market Value</h4>'+drow('Total',mktTotal,'hi')+drow('Land',mktLand)+drow('Improvements',mktImprv)+'</div></div>';
@@ -426,7 +430,16 @@ function buildCard(p,idx){
       var m=item.m||{};
       var mdoc=fmt(m.documentnumber||m.docnumber||m.docnum||m.deedoftrustnumber||m.instrumentNumber);
       var mlink=recorderLink(mdoc);
-      var lenderName=fmt(m.lendername||m.lender||(typeof m.lender==='object'?(m.lender.fullname||m.lender.name):''));
+      
+      // FIXED: Handle lender as object or string
+      var lenderRaw=m.lender||{};
+      var lenderName;
+      if(typeof lenderRaw==='string'){
+        lenderName=fmt(lenderRaw);
+      }else{
+        lenderName=fmt(m.lendername||m.lenderName||lenderRaw.fullname||lenderRaw.name||lenderRaw.companyname||lenderRaw.corporateName||lenderRaw.lastname||lenderRaw.lastName);
+      }
+      
       var loanAmt=fmtMoney(m.amount||m.loanamount||m.loanAmount);
       var recordDate=fmtDate(m.recordingdate||m.recordingDate||m.deedoftrustdate||m.deedOfTrustDate||m.documentdate);
       var dueDate=fmtDate(m.duedate||m.dueDate||m.maturitydate||m.maturityDate);
@@ -445,7 +458,7 @@ function buildCard(p,idx){
         +drow('Term',termVal?termVal+' mo':'—')
         +drow('Finance type',finType)
         +drowLink('Doc number',mdoc!=='—'?'📄 '+mdoc:mdoc,mlink)
-        +(mlink?'<a class="doc-link" href="'+mlink+'" target="_blank">📄 View Mortgage Doc at Recorder</a>':'')
+        +(mlink&&mdoc!=='—'?'<a class="doc-link" href="'+mlink+'" target="_blank">📄 Search Mortgage at Recorder</a>':'')
         +'</div>';
     });
     html+='</div>';
@@ -453,7 +466,7 @@ function buildCard(p,idx){
 
   html+='<div class="section-title">Official Record Links</div>';
   html+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">';
-  html+='<a class="doc-link" href="https://recorder.hamilton-co.org/recorder/web/" target="_blank">🏛 Hamilton County Recorder</a>';
+  html+='<a class="doc-link" href="https://acclaim-web.hamiltoncountyohio.gov/AcclaimWebLive" target="_blank">🏛 Hamilton County Recorder</a>';
   if(apn&&apn!=='—')html+='<a class="doc-link" href="https://wedge.hcauditor.org/view/re/'+encodeURIComponent(apn.replace(/-/g,''))+'/2024/summary" target="_blank">📋 County Auditor Record</a>';
   if(lat&&lat!=='—'&&lng&&lng!=='—')html+='<a class="doc-link" href="https://maps.google.com/?q='+lat+','+lng+'" target="_blank">📍 View on Google Maps</a>';
   html+='</div></div></div>';
