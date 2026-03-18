@@ -103,14 +103,20 @@ select option{background:#1a2a3d;color:var(--white)}
 .mort-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
 .mort-card{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:1rem}
 .mort-card .mc-label{font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500}
-.doc-link{display:inline-flex;align-items:center;gap:5px;background:var(--teal-bg);border:1px solid var(--teal-bd);border-radius:var(--rs);padding:4px 10px;font-size:11px;color:var(--teal);text-decoration:none;margin-top:8px}
+.doc-link{display:inline-flex;align-items:center;gap:5px;background:var(--teal-bg);border:1px solid var(--teal-bd);border-radius:var(--rs);padding:4px 10px;font-size:11px;color:var(--teal);text-decoration:none;margin-top:8px;margin-right:6px}
 .doc-link:hover{background:rgba(62,180,207,0.2)}
+.doc-link.amber{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber)}
+.doc-link.amber:hover{background:rgba(232,160,34,0.2)}
 .expand-icon{width:22px;height:22px;border-radius:50%;background:var(--navy-3);border:1px solid var(--bdr-md);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--slate);flex-shrink:0;transition:transform 0.2s}
 .expand-icon.open{transform:rotate(180deg)}
 .no-results{text-align:center;padding:3rem 1rem;background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r)}
 .no-results p{color:var(--slate);font-size:14px;margin-top:8px}
 .footer{text-align:center;font-size:11px;color:var(--slate-dk);margin-top:3rem;line-height:1.8}
 .footer a{color:var(--slate);text-decoration:none}
+.history-note{font-size:11px;color:var(--slate);background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:8px 12px;margin-top:10px;line-height:1.5}
+.history-note a{color:var(--teal)}
+.copy-btn{background:var(--navy-4);border:1px solid var(--bdr-md);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--slate);cursor:pointer;margin-left:6px}
+.copy-btn:hover{background:var(--teal-bg);color:var(--teal)}
 @media(max-width:600px){.detail-grid,.mort-grid{grid-template-columns:1fr}.frow.c2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -159,7 +165,7 @@ select option{background:#1a2a3d;color:var(--white)}
       <button class="btn-search" onclick="search('apn')">Search Records</button>
     </div>
   </div>
-  <div class="loader" id="loader"><div class="spinner"></div><p>Pulling full ATTOM records…</p><div class="loader-step" id="loader-step">Step 1 of 3: Finding property…</div></div>
+  <div class="loader" id="loader"><div class="spinner"></div><p>Pulling full ATTOM records…</p><div class="loader-step" id="loader-step">Step 1 of 4: Finding property…</div></div>
   <div class="err" id="err-box"><div class="err-box"><strong id="err-title">Error</strong><span id="err-msg"></span></div></div>
   <div class="results" id="results">
     <div class="results-meta">
@@ -197,6 +203,12 @@ function hideError(){document.getElementById('err-box').className='err';}
 function showResults(yes){document.getElementById('results').className='results'+(yes?' show':'');}
 function clearResults(){showResults(false);document.getElementById('result-list').innerHTML='';hideError();}
 
+function copyText(text){
+  navigator.clipboard.writeText(text).then(function(){
+    alert('Copied: '+text);
+  });
+}
+
 function attom(path,params){
   var attomUrl=ATTOM_BASE+path+'?'+new URLSearchParams(params).toString();
   var url=RAILWAY+'/p?u='+encodeURIComponent(attomUrl)+'&key='+ATTOM_KEY;
@@ -216,7 +228,7 @@ function attom(path,params){
 }
 
 function search(mode){
-  hideError();showResults(false);showLoader(true,'Step 1 of 3: Finding property…');
+  hideError();showResults(false);showLoader(true,'Step 1 of 4: Finding property…');
   var baseParams={};
   if(mode==='address'){
     var addr=document.getElementById('a-address').value.trim();
@@ -249,13 +261,13 @@ function search(mode){
     attomId=props[0].identifier&&(props[0].identifier.attomId||props[0].identifier.obPropId);
     mergedData.basic=props[0];
     if(!attomId)throw new Error('Could not get ATTOM ID.');
-    showLoader(true,'Step 2 of 3: Pulling deed & mortgage records…');
+    showLoader(true,'Step 2 of 4: Pulling deed & mortgage records…');
     return attom('/propertyapi/v1.0.0/property/detailmortgage',{attomId:attomId});
   })
   .then(function(d){
     var props=[d.property||d.Property].flat().filter(Boolean);
     if(props.length)mergedData.detail=props[0];
-    showLoader(true,'Step 3 of 3: Getting owner & AVM data…');
+    showLoader(true,'Step 3 of 4: Getting owner & AVM data…');
     return Promise.all([
       attom('/propertyapi/v1.0.0/property/detailowner',{attomId:attomId}).catch(function(){return null;}),
       attom('/propertyapi/v1.0.0/attomavm/detail',{attomId:attomId}).catch(function(){return null;})
@@ -264,10 +276,19 @@ function search(mode){
   .then(function(results){
     if(results[0]){var op=[results[0].property||results[0].Property].flat().filter(Boolean);if(op.length)mergedData.owner=op[0];}
     if(results[1]){var ap=[results[1].property||results[1].Property].flat().filter(Boolean);if(ap.length)mergedData.avm=ap[0];}
+    showLoader(true,'Step 4 of 4: Fetching transaction history…');
+    return attom('/propertyapi/v1.0.0/saleshistory/detail',{attomId:attomId}).catch(function(){return null;});
+  })
+  .then(function(histResult){
+    if(histResult){
+      var hp=[histResult.property||histResult.Property].flat().filter(Boolean);
+      if(hp.length)mergedData.history=hp[0];
+    }
     showLoader(false);
     var final=Object.assign({},mergedData.basic||{},mergedData.detail||{});
     if(mergedData.owner&&mergedData.owner.owner)final.owner=mergedData.owner.owner;
     if(mergedData.avm)final._avm=mergedData.avm;
+    if(mergedData.history)final._history=mergedData.history;
     buildResults([final]);
   })
   .catch(function(e){showLoader(false);showError('ATTOM API Error',e.message);});
@@ -296,11 +317,16 @@ function recorderLink(docNum){
   return 'https://acclaim-web.hamiltoncountyohio.gov/AcclaimWebLive/Search/SearchTypeDocNumber';
 }
 
+function recorderAddressSearch(street){
+  return 'https://acclaim-web.hamiltoncountyohio.gov/AcclaimWebLive/Search/SearchTypeName';
+}
+
 function buildCard(p,idx){
-  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{},avm=p._avm||{};
+  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{},avm=p._avm||{},histData=p._history||{};
   
   var street=fmt(addr.line1||addr.oneLine);
   var cityState=[addr.locality,addr.countrySubd,addr.postal1].filter(Boolean).join(', ')||'—';
+  var fullAddress=street+(cityState!=='—'?', '+cityState:'');
   
   var propType=fmt(summary.proptype||summary.propsubtype||summary.propType);
   var propClass=fmt(summary.propclass||summary.propClass);
@@ -399,30 +425,32 @@ function buildCard(p,idx){
   html+='<div class="section-title">Last Sale / Deed</div>';
   html+=drow('Sale date',lastSaleDate,'teal')+drow('Sale price',lastSaleAmt,'hi')+drow('Buyer',buyerName)+drow('Seller',sellerName)+drow('Doc type',saleDocType)+drow('Book/Page',saleBookPage);
   html+=drowLink('Doc number',saleDocNum!=='—'?'📄 '+saleDocNum:saleDocNum,docLinkHref);
-  if(docLinkHref&&saleDocNum!=='—')html+='<a class="doc-link" href="'+docLinkHref+'" target="_blank">📄 Search Deed at Hamilton County Recorder</a>';
+  if(docLinkHref&&saleDocNum!=='—')html+='<a class="doc-link" href="'+docLinkHref+'" target="_blank">📄 Search Deed at Recorder</a><button class="copy-btn" onclick="copyText(\''+saleDocNum+'\')">Copy Doc #</button>';
 
   html+='<div class="section-title">Assessment &amp; Taxes</div>';
   html+='<div class="detail-grid"><div class="detail-col"><h4>Assessed Value</h4>'+drow('Total',asmtTotal,'hi')+drow('Land',asmtLand)+drow('Improvements',asmtImprv)+'</div><div class="detail-col"><h4>Market Value</h4>'+drow('Total',mktTotal,'hi')+drow('Land',mktLand)+drow('Improvements',mktImprv)+'</div></div>';
   html+=drow('Annual tax',taxAmt,'hi')+drow('Tax year',taxYear)+drow('Exemption',taxExemption);
 
-  var hist=p.salehistory||p.saleshistory||[];
+  // TRANSACTION HISTORY FROM ATTOM
+  var hist=histData.salehistory||p.salehistory||p.saleshistory||[];
   if(hist.length>0){
-    html+='<div class="section-title">Sale / Deed History</div><table class="sale-table"><thead><tr><th>Date</th><th>Price</th><th>Buyer</th><th>Seller</th><th>Doc #</th></tr></thead><tbody>';
-    hist.slice(0,10).forEach(function(h){
+    html+='<div class="section-title">Transaction History (ATTOM)</div><table class="sale-table"><thead><tr><th>Date</th><th>Price</th><th>Type</th><th>Buyer</th><th>Seller</th><th>Doc #</th></tr></thead><tbody>';
+    hist.slice(0,15).forEach(function(h){
       var hsa=h.amount||{};
       var hdoc=fmt(hsa.saledocnum||h.saledocnum||h.docnum||h.documentnumber);
       var hlink=recorderLink(hdoc);
-      html+='<tr><td class="mono">'+fmtDate(h.saletransdate||h.salesearchdate||h.saleTransDate)+'</td><td class="hi">'+fmtMoney(hsa.saleamt||h.saleamt)+'</td><td>'+fmt(h.buyer1fullname||h.buyername||h.buyer)+'</td><td>'+fmt(h.seller1fullname||h.sellername||h.seller)+'</td><td>'+(hlink?'<a href="'+hlink+'" target="_blank">'+hdoc+'</a>':hdoc)+'</td></tr>';
+      var htype=fmt(hsa.saledoctype||h.saledoctype||h.transtype||h.documenttype||'Sale');
+      html+='<tr><td class="mono">'+fmtDate(h.saletransdate||h.salesearchdate||h.saleTransDate||hsa.saletransdate)+'</td><td class="hi">'+fmtMoney(hsa.saleamt||h.saleamt||h.amount)+'</td><td>'+htype+'</td><td>'+fmt(h.buyer1fullname||h.buyername||h.buyer||(h.buyer&&h.buyer.fullname))+'</td><td>'+fmt(h.seller1fullname||h.sellername||h.seller||(h.seller&&h.seller.fullname))+'</td><td>'+(hlink&&hdoc!=='—'?'<a href="'+hlink+'" target="_blank">'+hdoc+'</a>':hdoc)+'</td></tr>';
     });
     html+='</tbody></table>';
   }
 
   // FIXED MORTGAGE PARSING
   var mortList=[];
-  if(mort.first&&Object.keys(mort.first).length>1)mortList.push({label:'1st Mortgage',m:mort.first});
+  if(mort.first&&Object.keys(mort.first).length>1)mortList.push({label:'1st Mortgage (Current)',m:mort.first});
   if(mort.second&&Object.keys(mort.second).length>1)mortList.push({label:'2nd Mortgage',m:mort.second});
   if(mort.third&&Object.keys(mort.third).length>1)mortList.push({label:'3rd Mortgage',m:mort.third});
-  if(mortList.length===0&&mort&&(mort.amount||mort.loanamount||mort.lender||mort.lendername))mortList.push({label:'Mortgage',m:mort});
+  if(mortList.length===0&&mort&&(mort.amount||mort.loanamount||mort.lender||mort.lendername))mortList.push({label:'Current Mortgage',m:mort});
 
   if(mortList.length>0){
     html+='<div class="section-title teal">Mortgage / Loan Records</div><div class="mort-grid">';
@@ -431,7 +459,6 @@ function buildCard(p,idx){
       var mdoc=fmt(m.documentnumber||m.docnumber||m.docnum||m.deedoftrustnumber||m.instrumentNumber);
       var mlink=recorderLink(mdoc);
       
-      // FIXED: Handle lender as object or string
       var lenderRaw=m.lender||{};
       var lenderName;
       if(typeof lenderRaw==='string'){
@@ -458,18 +485,26 @@ function buildCard(p,idx){
         +drow('Term',termVal?termVal+' mo':'—')
         +drow('Finance type',finType)
         +drowLink('Doc number',mdoc!=='—'?'📄 '+mdoc:mdoc,mlink)
-        +(mlink&&mdoc!=='—'?'<a class="doc-link" href="'+mlink+'" target="_blank">📄 Search Mortgage at Recorder</a>':'')
+        +(mlink&&mdoc!=='—'?'<a class="doc-link" href="'+mlink+'" target="_blank">📄 Search at Recorder</a><button class="copy-btn" onclick="copyText(\''+mdoc+'\')">Copy</button>':'')
         +'</div>';
     });
     html+='</div>';
+    html+='<div class="history-note">⚠️ <strong>Note:</strong> ATTOM only shows current active mortgages. For complete history including releases, refinances, and old loans, search the Hamilton County Recorder directly.</div>';
   }
 
-  html+='<div class="section-title">Official Record Links</div>';
+  // OFFICIAL RECORD LINKS - NOW WITH ADDRESS SEARCH
+  html+='<div class="section-title green">Official Record Links</div>';
   html+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">';
+  html+='<a class="doc-link amber" href="https://acclaim-web.hamiltoncountyohio.gov/AcclaimWebLive/Search/SearchTypeName" target="_blank" onclick="copyText(\''+street.replace(/'/g,"\\'")+'\')">📜 Search ALL Docs by Address (click to copy address)</a>';
   html+='<a class="doc-link" href="https://acclaim-web.hamiltoncountyohio.gov/AcclaimWebLive" target="_blank">🏛 Hamilton County Recorder</a>';
-  if(apn&&apn!=='—')html+='<a class="doc-link" href="https://wedge.hcauditor.org/view/re/'+encodeURIComponent(apn.replace(/-/g,''))+'/2024/summary" target="_blank">📋 County Auditor Record</a>';
-  if(lat&&lat!=='—'&&lng&&lng!=='—')html+='<a class="doc-link" href="https://maps.google.com/?q='+lat+','+lng+'" target="_blank">📍 View on Google Maps</a>';
-  html+='</div></div></div>';
+  if(apn&&apn!=='—')html+='<a class="doc-link" href="https://wedge.hcauditor.org/view/re/'+encodeURIComponent(apn.replace(/-/g,''))+'/2024/summary" target="_blank">📋 County Auditor</a>';
+  if(lat&&lat!=='—'&&lng&&lng!=='—')html+='<a class="doc-link" href="https://maps.google.com/?q='+lat+','+lng+'" target="_blank">📍 Google Maps</a>';
+  html+='</div>';
+  
+  // Address copy helper
+  html+='<div class="history-note" style="margin-top:12px">💡 <strong>To see ALL mortgages, releases & refinances:</strong><br>1. Click the button above to copy the address<br>2. Go to Hamilton County Recorder → Search by Name<br>3. Paste the street address (e.g. "'+street+'")<br>This shows every recorded document for this property.</div>';
+
+  html+='</div></div>';
   return html;
 }
 
