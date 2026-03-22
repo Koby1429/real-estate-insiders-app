@@ -6,10 +6,10 @@
 <title>Real Estate Insider's App — ARM Finder</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0d1b2a;--navy-2:#132030;--navy-3:#1a2a3d;--navy-4:#223348;--amber:#e8a022;--amber-lt:#f0b540;--amber-bg:rgba(232,160,34,0.1);--amber-bd:rgba(232,160,34,0.28);--slate:#7d99b4;--slate-dk:#4e6a84;--white:#eef3f8;--bdr:rgba(255,255,255,0.07);--bdr-md:rgba(255,255,255,0.13);--green:#3ecf8e;--green-bg:rgba(62,207,142,0.1);--green-bd:rgba(62,207,142,0.28);--red:#e05c5c;--red-bg:rgba(224,92,92,0.1);--red-bd:rgba(224,92,92,0.28);--teal:#3eb4cf;--teal-bg:rgba(62,180,207,0.1);--teal-bd:rgba(62,180,207,0.28);--orange:#ff6b35;--orange-bg:rgba(255,107,53,0.12);--orange-bd:rgba(255,107,53,0.35);--r:10px;--rs:6px}
+:root{--navy:#0d1b2a;--navy-2:#132030;--navy-3:#1a2a3d;--amber:#e8a022;--amber-lt:#f0b540;--amber-bg:rgba(232,160,34,0.1);--amber-bd:rgba(232,160,34,0.28);--slate:#7d99b4;--slate-dk:#4e6a84;--white:#eef3f8;--bdr:rgba(255,255,255,0.07);--bdr-md:rgba(255,255,255,0.13);--green:#3ecf8e;--green-bg:rgba(62,207,142,0.1);--green-bd:rgba(62,207,142,0.28);--red:#e05c5c;--red-bg:rgba(224,92,92,0.1);--red-bd:rgba(224,92,92,0.28);--teal:#3eb4cf;--orange:#ff6b35;--orange-bg:rgba(255,107,53,0.12);--orange-bd:rgba(255,107,53,0.35);--r:10px;--rs:6px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.65;min-height:100vh}
-.topbar{background:var(--navy-2);border-bottom:1px solid var(--bdr);padding:0 2rem;height:58px;display:flex;align-items:center;justify-content:space-between}
+.topbar{background:var(--navy-2);border-bottom:1px solid var(--bdr);padding:0 1.5rem;height:58px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:11px}
 .brand-icon{width:34px;height:34px;border-radius:8px;background:var(--amber-bg);border:1px solid var(--amber-bd);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:14px;color:var(--amber)}
 .brand-name{font-family:'DM Serif Display',serif;font-size:16px}
@@ -18,7 +18,7 @@ body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;
 .dot{width:8px;height:8px;border-radius:50%;background:var(--slate-dk)}
 .dot.live{background:var(--green)}
 .dot.err{background:var(--red)}
-.page{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+.page{max-width:900px;margin:0 auto;padding:1.5rem}
 .card{background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:1.5rem;overflow:hidden}
 .card-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bdr)}
 .card-head h2{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:4px}
@@ -52,7 +52,6 @@ input::placeholder{color:var(--slate-dk)}
 .error.show{display:block}
 .error strong{color:#f09090;display:block;margin-bottom:4px}
 .error span{color:#c07070;font-size:13px}
-.error pre{background:var(--navy-3);padding:8px;border-radius:4px;margin-top:8px;font-size:11px;overflow-x:auto;color:var(--slate)}
 .results{display:none}
 .results.show{display:block}
 .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:10px}
@@ -74,7 +73,6 @@ input::placeholder{color:var(--slate-dk)}
 .badges{display:flex;gap:6px;flex-wrap:wrap}
 .badge{font-size:11px;padding:3px 9px;border-radius:100px}
 .badge-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-bd)}
-.badge-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
 .badge-slate{background:var(--navy-3);color:var(--slate);border:1px solid var(--bdr-md)}
 .prop-body{display:none;padding:1.25rem;border-top:1px solid var(--bdr)}
 .prop-body.open{display:block}
@@ -93,8 +91,6 @@ input::placeholder{color:var(--slate-dk)}
 .detail-val.hi{color:var(--amber)}
 .tip{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 14px;margin-top:12px;font-size:12px;color:var(--slate)}
 .tip strong{color:var(--amber)}
-.debug{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px;margin-top:1rem;font-size:11px;color:var(--slate);max-height:200px;overflow-y:auto}
-.debug pre{margin:0;white-space:pre-wrap;word-break:break-all}
 @media(max-width:600px){.row.c2,.row.c3{grid-template-columns:1fr}.arm-summary{flex-direction:column;text-align:center}}
 </style>
 </head>
@@ -157,7 +153,7 @@ input::placeholder{color:var(--slate-dk)}
   </div>
 
   <div class="loader" id="loader"><div class="spinner"></div><p id="loader-msg">Searching...</p></div>
-  <div class="error" id="error"><strong id="err-title">Error</strong><span id="err-msg"></span><pre id="err-detail"></pre></div>
+  <div class="error" id="error"><strong id="err-title">Error</strong><span id="err-msg"></span></div>
   
   <div class="results" id="results">
     <div id="arm-summary"></div>
@@ -167,37 +163,18 @@ input::placeholder{color:var(--slate-dk)}
     </div>
     <div id="list"></div>
   </div>
-
-  <div class="debug" id="debug" style="display:none"><pre id="debug-log"></pre></div>
 </div>
 
 <script>
-// ============ CONFIG ============
-var API_KEY = '1632df167d773e7d4a5a72721735d1b2';
-var PROXY = 'https://real-estate-insiders-app-production.up.railway.app';
+// ============ YOUR API KEY ============
+var API_KEY = 'df4b4e0b39d20d96e9a621d3de7b49c1';
 var ATTOM = 'https://api.gateway.attomdata.com';
-var DEBUG = true;
-
 var allResults = [];
-var debugLog = [];
 
 // ARM detection
 var ARM_KEYWORDS = ['ARM','ADJUSTABLE','VARIABLE','ADJ','LIBOR','SOFR','INDEX','HYBRID'];
 var ARM_CODES = ['A','ARM','ADJ','V','VAR','2','3'];
 var ARM_PERIODS = {'3/1':3,'3/6':3,'5/1':5,'5/6':5,'7/1':7,'7/6':7,'10/1':10,'10/6':10};
-
-// ============ UTILS ============
-function log(msg, data) {
-  var ts = new Date().toLocaleTimeString();
-  var entry = '[' + ts + '] ' + msg;
-  if (data) entry += '\n' + JSON.stringify(data, null, 2);
-  debugLog.push(entry);
-  console.log(entry);
-  if (DEBUG) {
-    document.getElementById('debug').style.display = 'block';
-    document.getElementById('debug-log').textContent = debugLog.slice(-20).join('\n\n');
-  }
-}
 
 function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -211,279 +188,133 @@ function showLoader(show, msg) {
   if (msg) document.getElementById('loader-msg').textContent = msg;
 }
 
-function showError(title, msg, detail) {
+function showError(title, msg) {
   document.getElementById('err-title').textContent = title;
   document.getElementById('err-msg').textContent = msg;
-  document.getElementById('err-detail').textContent = detail || '';
   document.getElementById('error').className = 'error show';
 }
 
 function hideError() { document.getElementById('error').className = 'error'; }
 function showResults(show) { document.getElementById('results').className = 'results' + (show ? ' show' : ''); }
 
-// ============ API ============
 async function callAPI(endpoint, params) {
   var url = ATTOM + endpoint + '?' + new URLSearchParams(params).toString();
-  var proxyUrl = PROXY + '/p?u=' + encodeURIComponent(url) + '&key=' + API_KEY;
-  
-  log('API Call: ' + endpoint, params);
-  
-  try {
-    var resp = await fetch(proxyUrl, {
-      headers: { 'apikey': API_KEY, 'Accept': 'application/json' }
-    });
-    
-    log('Response status: ' + resp.status);
-    
-    if (!resp.ok) {
-      var errText = await resp.text();
-      log('Error response:', errText);
-      throw new Error('HTTP ' + resp.status + ': ' + errText.substring(0, 200));
-    }
-    
-    var data = await resp.json();
-    log('Response OK, properties: ' + (data.property ? data.property.length : 0));
-    
-    if (data.status && data.status.code !== 0) {
-      throw new Error(data.status.msg || 'API error');
-    }
-    
-    return data;
-  } catch (e) {
-    log('Fetch error: ' + e.message);
-    throw e;
+  var resp = await fetch(url, { headers: { 'apikey': API_KEY, 'Accept': 'application/json' } });
+  if (!resp.ok) {
+    var errText = await resp.text();
+    throw new Error('HTTP ' + resp.status + ': ' + (errText.substring(0, 100) || 'Request failed'));
   }
+  var data = await resp.json();
+  if (data.status && data.status.code !== 0) throw new Error(data.status.msg || 'API error');
+  return data;
 }
 
-// Try direct API call if proxy fails
-async function callAPIDirect(endpoint, params) {
-  var url = ATTOM + endpoint + '?' + new URLSearchParams(params).toString();
-  
-  log('Direct API Call: ' + endpoint, params);
-  
-  try {
-    var resp = await fetch(url, {
-      headers: { 'apikey': API_KEY, 'Accept': 'application/json' }
-    });
-    
-    if (!resp.ok) {
-      var errText = await resp.text();
-      throw new Error('HTTP ' + resp.status);
-    }
-    
-    return await resp.json();
-  } catch (e) {
-    log('Direct call error: ' + e.message);
-    throw e;
-  }
-}
-
-// ============ ARM DETECTION ============
 function detectARM(mort) {
   if (!mort) return null;
-  
-  var text = [
-    mort.loantype, mort.loantypecode, mort.loanType, mort.loanTypeCode,
-    mort.ratetype, mort.rateType, mort.interestratetype, mort.interestRateType,
-    mort.loantypedescription, mort.loanTypeDescription
-  ].filter(Boolean).join(' ').toUpperCase();
-  
+  var text = [mort.loantype, mort.loantypecode, mort.loanType, mort.loanTypeCode, mort.ratetype, mort.rateType, mort.interestratetype, mort.interestRateType, mort.loantypedescription, mort.loanTypeDescription].filter(Boolean).join(' ').toUpperCase();
   var isARM = ARM_KEYWORDS.some(kw => text.includes(kw));
   var code = String(mort.loantypecode || mort.loanTypeCode || '').toUpperCase().trim();
   if (ARM_CODES.includes(code)) isARM = true;
-  
   if (!isARM) return null;
-  
-  // Determine type
   var armType = '5/1 ARM';
-  for (var t in ARM_PERIODS) {
-    if (text.includes(t) || text.includes(t.replace('/',''))) {
-      armType = t + ' ARM';
-      break;
-    }
-  }
-  
-  // Get dates
-  var origDate = mort.recordingdate || mort.recordingDate || mort.deedoftrustdate ||
-                 mort.documentdate || mort.documentDate || mort.originationdate;
-  
+  for (var t in ARM_PERIODS) { if (text.includes(t) || text.includes(t.replace('/',''))) { armType = t + ' ARM'; break; } }
+  var origDate = mort.recordingdate || mort.recordingDate || mort.deedoftrustdate || mort.documentdate || mort.documentDate || mort.originationdate;
   var resetDate = null, daysUntil = null;
   if (origDate) {
     var orig = new Date(origDate);
     if (!isNaN(orig)) {
       var years = 5;
-      for (var t in ARM_PERIODS) {
-        if (text.includes(t)) { years = ARM_PERIODS[t]; break; }
-      }
+      for (var t in ARM_PERIODS) { if (text.includes(t)) { years = ARM_PERIODS[t]; break; } }
       resetDate = new Date(orig);
       resetDate.setFullYear(resetDate.getFullYear() + years);
       daysUntil = Math.ceil((resetDate - new Date()) / (1000*60*60*24));
     }
   }
-  
-  return {
-    isARM: true,
-    armType: armType,
-    loanAmount: mort.amount || mort.loanamount || mort.loanAmount,
-    lender: mort.lendername || mort.lenderName || '',
-    originationDate: origDate,
-    resetDate: resetDate,
-    daysUntilReset: daysUntil
-  };
+  return { isARM: true, armType: armType, loanAmount: mort.amount || mort.loanamount || mort.loanAmount, lender: mort.lendername || mort.lenderName || '', originationDate: origDate, resetDate: resetDate, daysUntilReset: daysUntil };
 }
 
 function checkPropertyARM(p) {
   var mort = p.mortgage || {};
-  var arm = detectARM(mort.first) || detectARM(mort.second) || detectARM(mort);
-  return arm;
+  return detectARM(mort.first) || detectARM(mort.second) || detectARM(mort);
 }
 
-// ============ SEARCH FUNCTIONS ============
 async function searchAddress() {
   var addr = document.getElementById('inp-address').value.trim();
   if (!addr) { showError('Missing', 'Please enter an address'); return; }
-  
   hideError(); showResults(false); showLoader(true, 'Searching...');
-  
   try {
     var data = await callAPI('/propertyapi/v1.0.0/property/basicprofile', { address: addr });
     var props = [data.property || data.Property].flat().filter(Boolean);
-    
     if (!props.length) throw new Error('No property found');
-    
     var attomId = props[0].identifier?.attomId || props[0].identifier?.obPropId;
     if (!attomId) throw new Error('No ATTOM ID');
-    
     showLoader(true, 'Getting mortgage data...');
     var mortData = await callAPI('/propertyapi/v1.0.0/property/detailmortgage', { attomId: attomId });
     var mortProps = [mortData.property || mortData.Property].flat().filter(Boolean);
-    
     var final = Object.assign({}, props[0], mortProps[0] || {});
     final._armInfo = checkPropertyARM(final);
-    
     showLoader(false);
     allResults = [final];
     renderResults(allResults, false);
-  } catch (e) {
-    showLoader(false);
-    showError('Error', e.message, debugLog.slice(-3).join('\n'));
-  }
+  } catch (e) { showLoader(false); showError('Error', e.message); }
 }
 
 async function searchAPN() {
   var apn = document.getElementById('inp-apn').value.trim();
   if (!apn) { showError('Missing', 'Please enter an APN'); return; }
-  
   var fips = document.getElementById('inp-fips').value.trim();
   var params = { apn: apn };
   if (fips) params.fips = fips;
-  
   hideError(); showResults(false); showLoader(true, 'Searching...');
-  
   try {
     var data = await callAPI('/propertyapi/v1.0.0/property/basicprofile', params);
     var props = [data.property || data.Property].flat().filter(Boolean);
-    
     if (!props.length) throw new Error('No property found');
-    
     props[0]._armInfo = checkPropertyARM(props[0]);
-    
     showLoader(false);
     allResults = props;
     renderResults(allResults, false);
-  } catch (e) {
-    showLoader(false);
-    showError('Error', e.message, debugLog.slice(-3).join('\n'));
-  }
+  } catch (e) { showLoader(false); showError('Error', e.message); }
 }
 
 async function searchARM() {
   var zip = document.getElementById('inp-zip').value.trim();
-  if (!zip || !/^\d{5}$/.test(zip)) {
-    showError('Invalid', 'Please enter a 5-digit ZIP code');
-    return;
-  }
-  
+  if (!zip || !/^\d{5}$/.test(zip)) { showError('Invalid', 'Please enter a 5-digit ZIP code'); return; }
   var months = parseInt(document.getElementById('inp-months').value) || 12;
   var maxResults = parseInt(document.getElementById('inp-max').value) || 50;
-  
   hideError(); showResults(false); allResults = [];
   showLoader(true, 'Searching ZIP ' + zip + ' for mortgages...');
-  
   try {
-    var data = await callAPI('/propertyapi/v1.0.0/property/detailmortgage', {
-      postalcode: zip,
-      pagesize: maxResults
-    });
-    
+    var data = await callAPI('/propertyapi/v1.0.0/property/detailmortgage', { postalcode: zip, pagesize: maxResults });
     var props = [data.property || data.Property].flat().filter(Boolean);
-    log('Found ' + props.length + ' properties');
-    
     if (!props.length) throw new Error('No properties with mortgage data in ZIP ' + zip);
-    
     showLoader(true, 'Analyzing ' + props.length + ' properties for ARMs...');
-    
-    var now = new Date();
-    var cutoff = new Date();
+    var now = new Date(), cutoff = new Date();
     cutoff.setMonth(cutoff.getMonth() + months);
-    
     var armProps = [];
     props.forEach(p => {
       var arm = checkPropertyARM(p);
       if (arm) {
         p._armInfo = arm;
-        // Filter by reset window
-        if (arm.resetDate && arm.resetDate >= now && arm.resetDate <= cutoff) {
-          armProps.push(p);
-        } else if (!arm.resetDate) {
-          armProps.push(p); // Include if can't determine date
-        }
+        if (arm.resetDate && arm.resetDate >= now && arm.resetDate <= cutoff) armProps.push(p);
+        else if (!arm.resetDate) armProps.push(p);
       }
     });
-    
-    log('Found ' + armProps.length + ' ARMs');
-    
-    if (!armProps.length) {
-      throw new Error('No ARMs found in ZIP ' + zip + ' resetting within ' + months + ' months. Try increasing the time window.');
-    }
-    
-    // Sort by days until reset
+    if (!armProps.length) throw new Error('No ARMs found in ZIP ' + zip + ' resetting within ' + months + ' months. Try increasing the time window.');
     armProps.sort((a, b) => {
       var da = a._armInfo?.daysUntilReset, db = b._armInfo?.daysUntilReset;
-      if (da === null) return 1;
-      if (db === null) return -1;
-      return da - db;
+      if (da === null) return 1; if (db === null) return -1; return da - db;
     });
-    
     showLoader(false);
     allResults = armProps;
     renderResults(armProps, true);
-    
-  } catch (e) {
-    showLoader(false);
-    showError('Error', e.message, debugLog.slice(-3).join('\n'));
-  }
+  } catch (e) { showLoader(false); showError('Error', e.message); }
 }
 
-// ============ RENDER ============
 function renderResults(props, isARMSearch) {
-  if (!props.length) {
-    document.getElementById('count').textContent = '0';
-    document.getElementById('list').innerHTML = '<p style="color:var(--slate);text-align:center;padding:2rem">No properties found</p>';
-    showResults(true);
-    return;
-  }
-  
-  // ARM stats
+  if (!props.length) { document.getElementById('count').textContent = '0'; document.getElementById('list').innerHTML = '<p style="color:var(--slate);text-align:center;padding:2rem">No properties found</p>'; showResults(true); return; }
   var armCount = 0, urgentCount = 0;
-  props.forEach(p => {
-    if (p._armInfo?.isARM) {
-      armCount++;
-      if (p._armInfo.daysUntilReset !== null && p._armInfo.daysUntilReset <= 90) urgentCount++;
-    }
-  });
-  
-  // Summary
+  props.forEach(p => { if (p._armInfo?.isARM) { armCount++; if (p._armInfo.daysUntilReset !== null && p._armInfo.daysUntilReset <= 90) urgentCount++; } });
   var summaryHtml = '';
   if (isARMSearch && armCount > 0) {
     summaryHtml = '<div class="arm-summary"><div><h3>🔥 ' + armCount + ' ARM' + (armCount > 1 ? 's' : '') + ' Found</h3><p>Sorted by estimated reset date</p></div><div class="arm-stats">';
@@ -492,9 +323,7 @@ function renderResults(props, isARMSearch) {
     document.getElementById('export-btn').style.display = 'inline-block';
   }
   document.getElementById('arm-summary').innerHTML = summaryHtml;
-  
   document.getElementById('count').textContent = props.length;
-  
   var html = '';
   props.forEach((p, i) => html += buildCard(p, i));
   document.getElementById('list').innerHTML = html;
@@ -507,32 +336,20 @@ function fmtDate(v) { if (!v) return '—'; var d = new Date(v); return isNaN(d)
 
 function buildCard(p, idx) {
   var addr = p.address || {}, mort = p.mortgage || {}, summary = p.summary || {}, arm = p._armInfo;
-  
-  var street = fmt(addr.line1 || addr.oneLine);
-  var city = fmt(addr.locality);
-  var state = fmt(addr.countrySubd);
-  var zip = fmt(addr.postal1);
+  var street = fmt(addr.line1 || addr.oneLine), city = fmt(addr.locality), state = fmt(addr.countrySubd), zip = fmt(addr.postal1);
   var cityState = [city, state, zip].filter(x => x !== '—').join(', ') || '—';
   var propType = fmt(summary.proptype || summary.propsubtype);
-  
   var isARM = arm?.isARM;
   var badges = '';
   if (isARM) {
     var label = arm.armType;
-    if (arm.daysUntilReset !== null) {
-      if (arm.daysUntilReset <= 0) label += ' RESET';
-      else if (arm.daysUntilReset <= 90) label += ' · ' + arm.daysUntilReset + 'd';
-      else if (arm.daysUntilReset <= 365) label += ' · ' + Math.ceil(arm.daysUntilReset/30) + 'mo';
-    }
+    if (arm.daysUntilReset !== null) { if (arm.daysUntilReset <= 0) label += ' RESET'; else if (arm.daysUntilReset <= 90) label += ' · ' + arm.daysUntilReset + 'd'; else if (arm.daysUntilReset <= 365) label += ' · ' + Math.ceil(arm.daysUntilReset/30) + 'mo'; }
     badges += '<span class="badge badge-orange">🔥 ' + label + '</span>';
   }
   if (propType !== '—') badges += '<span class="badge badge-slate">' + propType + '</span>';
-  
   var html = '<div class="prop' + (isARM ? ' arm' : '') + '">';
   html += '<div class="prop-head" onclick="toggleProp(' + idx + ')"><div><div class="prop-addr">' + street + '</div><div class="prop-loc">' + cityState + '</div></div><div class="badges">' + badges + '</div></div>';
   html += '<div class="prop-body" id="body-' + idx + '">';
-  
-  // ARM box
   if (isARM) {
     var urg = arm.daysUntilReset !== null && arm.daysUntilReset <= 90 ? 'urgent' : arm.daysUntilReset !== null && arm.daysUntilReset <= 365 ? 'soon' : '';
     html += '<div class="arm-box"><h4>🔥 Adjustable Rate Mortgage</h4><div class="arm-grid">';
@@ -544,106 +361,40 @@ function buildCard(p, idx) {
     if (arm.lender) html += '<div class="arm-item"><div class="lbl">Lender</div><div class="val" style="font-size:10px;color:var(--white)">' + arm.lender + '</div></div>';
     html += '</div></div>';
   }
-  
-  // Basic details
   html += '<div class="detail-row"><span class="detail-label">Property Type</span><span class="detail-val">' + propType + '</span></div>';
-  
   var m = mort.first || mort;
-  if (m.amount || m.loanamount) {
-    html += '<div class="detail-row"><span class="detail-label">Loan Amount</span><span class="detail-val hi">' + fmtMoney(m.amount || m.loanamount) + '</span></div>';
-  }
-  if (m.lendername || m.lenderName) {
-    html += '<div class="detail-row"><span class="detail-label">Lender</span><span class="detail-val">' + fmt(m.lendername || m.lenderName) + '</span></div>';
-  }
-  
+  if (m.amount || m.loanamount) html += '<div class="detail-row"><span class="detail-label">Loan Amount</span><span class="detail-val hi">' + fmtMoney(m.amount || m.loanamount) + '</span></div>';
+  if (m.lendername || m.lenderName) html += '<div class="detail-row"><span class="detail-label">Lender</span><span class="detail-val">' + fmt(m.lendername || m.lenderName) + '</span></div>';
   html += '</div></div>';
   return html;
 }
 
-function toggleProp(i) {
-  var body = document.getElementById('body-' + i);
-  body.classList.toggle('open');
-}
+function toggleProp(i) { document.getElementById('body-' + i).classList.toggle('open'); }
 
-// ============ EXPORT ============
 function exportCSV() {
   if (!allResults.length) return;
-  
   var rows = [['Address','City','State','ZIP','Type','ARM_Type','Loan_Amount','Lender','Reset_Date','Days_Until_Reset'].join(',')];
-  
   allResults.forEach(p => {
     var addr = p.address || {}, summary = p.summary || {}, arm = p._armInfo || {}, mort = p.mortgage || {};
     var m = mort.first || mort;
-    rows.push([
-      esc(addr.line1 || addr.oneLine || ''),
-      esc(addr.locality || ''),
-      esc(addr.countrySubd || ''),
-      esc(addr.postal1 || ''),
-      esc(summary.proptype || ''),
-      esc(arm.armType || ''),
-      arm.loanAmount || m.amount || m.loanamount || '',
-      esc(arm.lender || m.lendername || m.lenderName || ''),
-      arm.resetDate ? arm.resetDate.toISOString().split('T')[0] : '',
-      arm.daysUntilReset !== null ? arm.daysUntilReset : ''
-    ].join(','));
+    rows.push([esc(addr.line1 || addr.oneLine || ''), esc(addr.locality || ''), esc(addr.countrySubd || ''), esc(addr.postal1 || ''), esc(summary.proptype || ''), esc(arm.armType || ''), arm.loanAmount || m.amount || m.loanamount || '', esc(arm.lender || m.lendername || m.lenderName || ''), arm.resetDate ? arm.resetDate.toISOString().split('T')[0] : '', arm.daysUntilReset !== null ? arm.daysUntilReset : ''].join(','));
   });
-  
   var blob = new Blob([rows.join('\n')], {type: 'text/csv'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'arm_properties_' + new Date().toISOString().split('T')[0] + '.csv';
-  a.click();
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'arm_properties_' + new Date().toISOString().split('T')[0] + '.csv'; a.click();
 }
 
-function esc(v) {
-  if (v == null) return '';
-  var s = String(v);
-  return s.includes(',') || s.includes('"') ? '"' + s.replace(/"/g, '""') + '"' : s;
-}
+function esc(v) { if (v == null) return ''; var s = String(v); return s.includes(',') || s.includes('"') ? '"' + s.replace(/"/g, '""') + '"' : s; }
 
-// ============ INIT ============
-async function checkStatus() {
-  var dot = document.getElementById('status-dot');
-  var txt = document.getElementById('status-text');
-  
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && document.activeElement.tagName === 'INPUT') { var panel = document.querySelector('.panel.active'); if (panel) { var btn = panel.querySelector('.btn'); if (btn) btn.click(); } } });
+
+async function testConnection() {
+  var dot = document.getElementById('status-dot'), txt = document.getElementById('status-text');
   try {
-    // Test the proxy
-    var resp = await fetch(PROXY + '/health', { method: 'GET' });
-    if (resp.ok) {
-      dot.className = 'dot live';
-      txt.textContent = 'Connected';
-      log('Proxy health check: OK');
-    } else {
-      throw new Error('Proxy returned ' + resp.status);
-    }
-  } catch (e) {
-    log('Proxy health check failed: ' + e.message);
-    // Try a simple API call
-    try {
-      await callAPI('/propertyapi/v1.0.0/property/basicprofile', { address: '1600 Pennsylvania Ave, Washington DC' });
-      dot.className = 'dot live';
-      txt.textContent = 'Connected';
-    } catch (e2) {
-      dot.className = 'dot err';
-      txt.textContent = 'Connection issue';
-      log('API test failed: ' + e2.message);
-    }
-  }
+    await callAPI('/propertyapi/v1.0.0/property/basicprofile', { address: '1600 Pennsylvania Ave, Washington DC' });
+    dot.className = 'dot live'; txt.textContent = 'Connected';
+  } catch (e) { dot.className = 'dot err'; txt.textContent = e.message.includes('401') ? 'Invalid Key' : 'Error'; }
 }
-
-// Enter key support
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.activeElement.tagName === 'INPUT') {
-    var panel = document.querySelector('.panel.active');
-    if (panel) {
-      var btn = panel.querySelector('.btn');
-      if (btn) btn.click();
-    }
-  }
-});
-
-// Check on load
-checkStatus();
+testConnection();
 </script>
 </body>
 </html>
