@@ -3,843 +3,647 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Real Estate Insider's App — ARM Finder & Property Records</title>
+<title>Real Estate Insider's App — ARM Finder</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0d1b2a;--navy-2:#132030;--navy-3:#1a2a3d;--navy-4:#223348;--amber:#e8a022;--amber-lt:#f0b540;--amber-bg:rgba(232,160,34,0.1);--amber-bd:rgba(232,160,34,0.28);--slate:#7d99b4;--slate-dk:#4e6a84;--white:#eef3f8;--white-60:rgba(238,243,248,0.6);--bdr:rgba(255,255,255,0.07);--bdr-md:rgba(255,255,255,0.13);--green:#3ecf8e;--green-bg:rgba(62,207,142,0.1);--green-bd:rgba(62,207,142,0.28);--red:#e05c5c;--red-bg:rgba(224,92,92,0.1);--red-bd:rgba(224,92,92,0.28);--teal-bg:rgba(62,180,207,0.1);--teal-bd:rgba(62,180,207,0.28);--teal:#3eb4cf;--orange:#ff6b35;--orange-bg:rgba(255,107,53,0.1);--orange-bd:rgba(255,107,53,0.28);--purple:#a855f7;--purple-bg:rgba(168,85,247,0.1);--purple-bd:rgba(168,85,247,0.28);--r:10px;--rs:6px}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+:root{--navy:#0d1b2a;--navy-2:#132030;--navy-3:#1a2a3d;--navy-4:#223348;--amber:#e8a022;--amber-lt:#f0b540;--amber-bg:rgba(232,160,34,0.1);--amber-bd:rgba(232,160,34,0.28);--slate:#7d99b4;--slate-dk:#4e6a84;--white:#eef3f8;--bdr:rgba(255,255,255,0.07);--bdr-md:rgba(255,255,255,0.13);--green:#3ecf8e;--green-bg:rgba(62,207,142,0.1);--green-bd:rgba(62,207,142,0.28);--red:#e05c5c;--red-bg:rgba(224,92,92,0.1);--red-bd:rgba(224,92,92,0.28);--teal:#3eb4cf;--teal-bg:rgba(62,180,207,0.1);--teal-bd:rgba(62,180,207,0.28);--orange:#ff6b35;--orange-bg:rgba(255,107,53,0.12);--orange-bd:rgba(255,107,53,0.35);--r:10px;--rs:6px}
+*{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.65;min-height:100vh}
-.topbar{background:var(--navy-2);border-bottom:1px solid var(--bdr);padding:0 2rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar{background:var(--navy-2);border-bottom:1px solid var(--bdr);padding:0 2rem;height:58px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:11px}
 .brand-icon{width:34px;height:34px;border-radius:8px;background:var(--amber-bg);border:1px solid var(--amber-bd);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:14px;color:var(--amber)}
-.brand-info .brand-name{font-family:'DM Serif Display',serif;font-size:16px;color:var(--white);line-height:1}
-.brand-info .brand-sub{font-size:11px;color:var(--slate);margin-top:1px}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.api-btn{display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--bdr-md);border-radius:var(--rs);padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--slate);cursor:pointer}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--slate-dk);flex-shrink:0}
+.brand-name{font-family:'DM Serif Display',serif;font-size:16px}
+.brand-sub{font-size:11px;color:var(--slate)}
+.status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--slate)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--slate-dk)}
 .dot.live{background:var(--green)}
-.county-tag{font-size:11px;color:var(--slate);background:var(--navy-3);border:1px solid var(--bdr);border-radius:100px;padding:4px 12px}
-.page{max-width:960px;margin:0 auto;padding:2.25rem 1.5rem 5rem}
-.search-card{background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:1.75rem;overflow:hidden}
-.search-card-header{padding:1.25rem 1.5rem 0;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.search-card-header h1{font-family:'DM Serif Display',serif;font-size:26px;color:var(--white);line-height:1.1}
-.search-card-header p{font-size:13px;color:var(--slate);margin-top:3px}
-.powered-badge{font-size:10px;color:var(--slate-dk);background:var(--navy-3);border:1px solid var(--bdr);border-radius:100px;padding:3px 10px;white-space:nowrap;margin-bottom:4px}
-.stabs{display:flex;padding:0 1.5rem;border-bottom:1px solid var(--bdr);margin-top:1.25rem;flex-wrap:wrap}
-.stab{background:none;border:none;color:var(--slate);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 16px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s}
-.stab:hover{color:var(--white)}
-.stab.active{color:var(--amber);border-bottom-color:var(--amber)}
-.stab.orange{color:var(--orange)}
-.stab.orange.active{border-bottom-color:var(--orange)}
-.spanel{display:none;padding:1.5rem}
-.spanel.active{display:block}
-.frow{display:grid;gap:12px;margin-bottom:12px}
-.frow.c2{grid-template-columns:1fr 1fr}
-.frow.c3{grid-template-columns:1fr 1fr 1fr}
-.fsingle{margin-bottom:12px}
-label{display:block;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
-input[type=text],select,textarea{width:100%;background:var(--navy-3);border:1px solid var(--bdr-md);border-radius:var(--rs);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color 0.15s;-webkit-appearance:none}
-textarea{min-height:120px;resize:vertical;font-family:'DM Mono',monospace;font-size:12px;line-height:1.6}
-input[type=text]:focus,select:focus,textarea:focus{border-color:var(--amber)}
-input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237d99b4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
-select option{background:#1a2a3d;color:var(--white)}
-.btn-search{width:100%;padding:11px;background:var(--amber);border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--navy);cursor:pointer;transition:background 0.15s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-search:hover{background:var(--amber-lt)}
-.btn-search:disabled{opacity:0.5;cursor:not-allowed}
-.btn-search.orange{background:var(--orange)}
-.btn-search.orange:hover{background:#ff8555}
-.btn-export{padding:6px 14px;background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--green);cursor:pointer;display:flex;align-items:center;gap:6px}
-.btn-export:hover{background:rgba(62,207,142,0.2)}
-.loader{display:none;text-align:center;padding:3.5rem 1rem}
+.dot.err{background:var(--red)}
+.page{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+.card{background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:1.5rem;overflow:hidden}
+.card-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bdr)}
+.card-head h2{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:4px}
+.card-head p{font-size:13px;color:var(--slate)}
+.tabs{display:flex;border-bottom:1px solid var(--bdr)}
+.tab{background:none;border:none;color:var(--slate);font-family:'DM Sans',sans-serif;font-size:13px;padding:12px 20px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--white)}
+.tab.active{color:var(--amber);border-bottom-color:var(--amber)}
+.tab.orange.active{color:var(--orange);border-bottom-color:var(--orange)}
+.panel{display:none;padding:1.5rem}
+.panel.active{display:block}
+label{display:block;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+input,select{width:100%;background:var(--navy-3);border:1px solid var(--bdr-md);border-radius:var(--rs);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none}
+input:focus,select:focus{border-color:var(--amber)}
+input::placeholder{color:var(--slate-dk)}
+.row{display:grid;gap:12px;margin-bottom:12px}
+.row.c2{grid-template-columns:1fr 1fr}
+.row.c3{grid-template-columns:1fr 1fr 1fr}
+.btn{width:100%;padding:12px;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:8px}
+.btn-amber{background:var(--amber);color:var(--navy)}
+.btn-amber:hover{background:var(--amber-lt)}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{background:#ff8555}
+.btn-export{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green);padding:8px 16px;width:auto;margin:0}
+.loader{display:none;text-align:center;padding:3rem}
 .loader.show{display:block}
-.spinner{width:38px;height:38px;border:2px solid var(--bdr-md);border-top-color:var(--amber);border-radius:50%;animation:spin 0.75s linear infinite;margin:0 auto 1rem}
+.spinner{width:36px;height:36px;border:2px solid var(--bdr-md);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loader p{font-size:13px;color:var(--slate)}
-.loader-step{font-size:11px;color:var(--slate-dk);margin-top:4px}
-.progress-bar{width:100%;max-width:300px;height:6px;background:var(--navy-3);border-radius:3px;margin:1rem auto 0;overflow:hidden}
-.progress-fill{height:100%;background:var(--amber);transition:width 0.3s ease}
-.err{display:none}
-.err.show{display:block}
-.err-box{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.5rem}
-.err-box strong{display:block;color:#f09090;font-size:13px;margin-bottom:3px}
-.err-box span{font-size:13px;color:#c07070;line-height:1.5}
+.loader p{color:var(--slate);font-size:13px}
+.error{display:none;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem}
+.error.show{display:block}
+.error strong{color:#f09090;display:block;margin-bottom:4px}
+.error span{color:#c07070;font-size:13px}
+.error pre{background:var(--navy-3);padding:8px;border-radius:4px;margin-top:8px;font-size:11px;overflow-x:auto;color:var(--slate)}
 .results{display:none}
 .results.show{display:block}
-.results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
-.results-count{font-family:'DM Serif Display',serif;font-size:20px;color:var(--white)}
-.results-count span{color:var(--amber)}
-.results-sub{font-size:12px;color:var(--slate);margin-top:1px}
-.btn-clear{background:none;border:1px solid var(--bdr-md);border-radius:var(--rs);padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--slate);cursor:pointer;margin-left:8px}
-.results-actions{display:flex;align-items:center;gap:8px}
-.arm-summary{background:var(--orange-bg);border:1px solid var(--orange-bd);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-.arm-summary-left{display:flex;align-items:center;gap:12px}
-.arm-summary-icon{width:44px;height:44px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
-.arm-summary h3{font-family:'DM Serif Display',serif;font-size:18px;color:var(--orange);margin-bottom:2px}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:10px}
+.results-count{font-family:'DM Serif Display',serif;font-size:20px}
+.results-count span{color:var(--orange)}
+.arm-summary{background:var(--orange-bg);border:1px solid var(--orange-bd);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.arm-summary h3{font-family:'DM Serif Display',serif;font-size:18px;color:var(--orange)}
 .arm-summary p{font-size:12px;color:var(--slate)}
-.arm-summary-stats{display:flex;gap:1.5rem}
+.arm-stats{display:flex;gap:1.5rem}
 .arm-stat{text-align:center}
 .arm-stat .num{font-family:'DM Serif Display',serif;font-size:24px;color:var(--white)}
-.arm-stat .label{font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:.05em}
-.prop-card{background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
-.prop-card.arm-alert{border-color:var(--orange-bd);border-width:2px}
-.prop-card-head{padding:1rem 1.25rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;cursor:pointer;user-select:none}
-.prop-addr{font-size:15px;font-weight:500;color:var(--white);margin-bottom:3px}
-.prop-loc{font-size:12px;color:var(--slate)}
-.prop-badges{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
-.badge{font-size:11px;padding:3px 9px;border-radius:100px;white-space:nowrap}
+.arm-stat .num.urgent{color:var(--red)}
+.arm-stat .lbl{font-size:10px;color:var(--slate);text-transform:uppercase}
+.prop{background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.prop.arm{border:2px solid var(--orange-bd)}
+.prop-head{padding:1rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.prop-addr{font-size:15px;font-weight:500}
+.prop-loc{font-size:12px;color:var(--slate);margin-top:2px}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:11px;padding:3px 9px;border-radius:100px}
+.badge-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-bd)}
 .badge-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
-.badge-teal{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd)}
 .badge-slate{background:var(--navy-3);color:var(--slate);border:1px solid var(--bdr-md)}
-.badge-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
-.badge-red{background:var(--red-bg);color:#f09090;border:1px solid var(--red-bd)}
-.badge-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-bd);font-weight:500}
-.badge-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)}
-.arm-alert-box{background:var(--orange-bg);border:1px solid var(--orange-bd);border-radius:var(--rs);padding:1rem 1.25rem;margin-bottom:1rem}
-.arm-alert-box h4{color:var(--orange);font-size:13px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.arm-alert-box .arm-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-.arm-detail{background:var(--navy-3);border-radius:var(--rs);padding:10px 12px}
-.arm-detail .label{font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-.arm-detail .value{font-family:'DM Mono',monospace;font-size:14px;color:var(--orange);font-weight:500}
-.arm-detail .value.urgent{color:var(--red)}
-.arm-detail .value.soon{color:var(--amber)}
-.prop-card-body{display:none;border-top:1px solid var(--bdr);padding:1.25rem;animation:fadeIn 0.15s ease}
-.prop-card-body.open{display:block}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.section-title{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin:1.25rem 0 10px;padding-top:1.25rem;border-top:1px solid var(--bdr)}
-.section-title:first-child{margin-top:0;padding-top:0;border-top:none}
-.section-title.teal{color:var(--teal)}
-.section-title.green{color:var(--green)}
-.section-title.orange{color:var(--orange)}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:.5rem}
-.detail-col h4{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
-.detail-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px}
+.prop-body{display:none;padding:1.25rem;border-top:1px solid var(--bdr)}
+.prop-body.open{display:block}
+.arm-box{background:var(--orange-bg);border:1px solid var(--orange-bd);border-radius:var(--rs);padding:1rem;margin-bottom:1rem}
+.arm-box h4{color:var(--orange);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.arm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.arm-item{background:var(--navy-3);border-radius:var(--rs);padding:8px 10px;text-align:center}
+.arm-item .lbl{font-size:9px;color:var(--slate);text-transform:uppercase;margin-bottom:2px}
+.arm-item .val{font-family:'DM Mono',monospace;font-size:13px;color:var(--orange)}
+.arm-item .val.urgent{color:var(--red)}
+.arm-item .val.soon{color:var(--amber)}
+.detail-row{display:flex;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px}
 .detail-row:last-child{border-bottom:none}
-.detail-label{color:var(--slate);min-width:140px;font-size:12px;flex-shrink:0}
-.detail-val{color:var(--white);font-family:'DM Mono',monospace;font-size:12px;word-break:break-all}
+.detail-label{color:var(--slate);width:120px;flex-shrink:0;font-size:12px}
+.detail-val{color:var(--white);font-family:'DM Mono',monospace;font-size:12px}
 .detail-val.hi{color:var(--amber)}
-.detail-val.teal{color:var(--teal)}
-.detail-val.green{color:var(--green)}
-.detail-val.orange{color:var(--orange)}
-.detail-val a{color:var(--teal);text-decoration:none;font-family:'DM Sans',sans-serif;font-size:12px}
-.detail-val a:hover{text-decoration:underline}
-.avm-box{background:var(--navy-3);border:1px solid var(--amber-bd);border-radius:var(--rs);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
-.avm-val{font-family:'DM Serif Display',serif;font-size:28px;color:var(--amber)}
-.avm-meta{font-size:12px;color:var(--slate);line-height:1.7}
-.sale-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
-.sale-table th{text-align:left;font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;padding:0 8px 8px 0;border-bottom:1px solid var(--bdr);font-weight:400}
-.sale-table td{padding:7px 8px 7px 0;border-bottom:1px solid var(--bdr);color:var(--white-60);vertical-align:top}
-.sale-table tr:last-child td{border-bottom:none}
-.sale-table td.mono{font-family:'DM Mono',monospace}
-.sale-table td.hi{color:var(--amber);font-family:'DM Mono',monospace}
-.sale-table a{color:var(--teal);text-decoration:none;font-size:11px}
-.mort-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
-.mort-card{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:1rem}
-.mort-card.arm{border-color:var(--orange-bd);background:var(--orange-bg)}
-.mort-card .mc-label{font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500}
-.mort-card.arm .mc-label{color:var(--orange)}
-.doc-link{display:inline-flex;align-items:center;gap:5px;background:var(--teal-bg);border:1px solid var(--teal-bd);border-radius:var(--rs);padding:4px 10px;font-size:11px;color:var(--teal);text-decoration:none;margin-top:8px;margin-right:6px}
-.doc-link:hover{background:rgba(62,180,207,0.2)}
-.doc-link.amber{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber)}
-.doc-link.amber:hover{background:rgba(232,160,34,0.2)}
-.expand-icon{width:22px;height:22px;border-radius:50%;background:var(--navy-3);border:1px solid var(--bdr-md);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--slate);flex-shrink:0;transition:transform 0.2s}
-.expand-icon.open{transform:rotate(180deg)}
-.no-results{text-align:center;padding:3rem 1rem;background:var(--navy-2);border:1px solid var(--bdr);border-radius:var(--r)}
-.no-results p{color:var(--slate);font-size:14px;margin-top:8px}
-.footer{text-align:center;font-size:11px;color:var(--slate-dk);margin-top:3rem;line-height:1.8}
-.footer a{color:var(--slate);text-decoration:none}
-.history-note{font-size:11px;color:var(--slate);background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:8px 12px;margin-top:10px;line-height:1.5}
-.history-note a{color:var(--teal)}
-.copy-btn{background:var(--navy-4);border:1px solid var(--bdr-md);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--slate);cursor:pointer;margin-left:6px}
-.copy-btn:hover{background:var(--teal-bg);color:var(--teal)}
-.county-badge{display:inline-block;background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green);font-size:10px;padding:2px 8px;border-radius:100px;margin-left:8px}
-.monthly-pmt{background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--rs);padding:8px 12px;margin-top:10px;display:flex;align-items:center;gap:10px}
-.monthly-pmt .pmt-label{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:.06em}
-.monthly-pmt .pmt-val{font-family:'DM Mono',monospace;font-size:14px;color:var(--green);font-weight:500}
-.batch-help{font-size:11px;color:var(--slate);margin-top:8px;line-height:1.6}
-.batch-help code{background:var(--navy-3);padding:2px 6px;border-radius:3px;font-family:'DM Mono',monospace}
-.filter-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
-.filter-btn{background:var(--navy-3);border:1px solid var(--bdr-md);border-radius:100px;padding:6px 14px;font-size:11px;color:var(--slate);cursor:pointer;transition:all 0.15s}
-.filter-btn:hover{border-color:var(--amber);color:var(--white)}
-.filter-btn.active{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber)}
-.filter-btn.orange.active{background:var(--orange-bg);border-color:var(--orange-bd);color:var(--orange)}
-@media(max-width:600px){.detail-grid,.mort-grid{grid-template-columns:1fr}.frow.c2,.frow.c3{grid-template-columns:1fr}.search-card-header{flex-direction:column;align-items:flex-start}.arm-summary{flex-direction:column;text-align:center}.arm-summary-left{flex-direction:column}}
+.tip{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 14px;margin-top:12px;font-size:12px;color:var(--slate)}
+.tip strong{color:var(--amber)}
+.debug{background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px;margin-top:1rem;font-size:11px;color:var(--slate);max-height:200px;overflow-y:auto}
+.debug pre{margin:0;white-space:pre-wrap;word-break:break-all}
+@media(max-width:600px){.row.c2,.row.c3{grid-template-columns:1fr}.arm-summary{flex-direction:column;text-align:center}}
 </style>
 </head>
 <body>
 <div class="topbar">
   <div class="brand">
     <div class="brand-icon">RE</div>
-    <div class="brand-info">
-      <div class="brand-name">Real Estate Insider's App</div>
-      <div class="brand-sub">ARM Finder & Property Records</div>
-    </div>
+    <div><div class="brand-name">Real Estate Insider's App</div><div class="brand-sub">ARM Finder & Property Records</div></div>
   </div>
-  <div class="topbar-right">
-    <span class="county-tag">🇺🇸 All 50 States</span>
-    <button class="api-btn"><div class="dot live"></div><span>Connected</span></button>
-  </div>
+  <div class="status"><div class="dot" id="status-dot"></div><span id="status-text">Checking...</span></div>
 </div>
+
 <div class="page">
-  <div class="search-card">
-    <div class="search-card-header">
-      <div><h1>Property Records Search</h1><p>150M+ properties · ARM detection, deed, mortgage, ownership & valuation</p></div>
-      <div class="powered-badge">Powered by ATTOM Data</div>
+  <div class="card">
+    <div class="card-head">
+      <h2>Property Search</h2>
+      <p>Search properties and find adjustable-rate mortgages with estimated reset dates</p>
     </div>
-    <div class="stabs">
-      <button class="stab active" onclick="switchTab('address',this)">Single Address</button>
-      <button class="stab" onclick="switchTab('apn',this)">Search by APN</button>
-      <button class="stab orange" onclick="switchTab('batch',this)">⚡ Batch Search</button>
-      <button class="stab orange" onclick="switchTab('zip',this)">📍 ZIP Code</button>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('address',this)">Address</button>
+      <button class="tab" onclick="switchTab('apn',this)">APN</button>
+      <button class="tab orange" onclick="switchTab('arm',this)">🔥 ARM Search</button>
     </div>
-    <div class="spanel active" id="panel-address">
-      <div class="fsingle">
-        <label>Full address (street, city, state)</label>
-        <input type="text" id="a-address" placeholder="e.g. 123 Main St, Los Angeles, CA">
+    <div class="panel active" id="panel-address">
+      <div style="margin-bottom:12px">
+        <label>Full Address</label>
+        <input type="text" id="inp-address" placeholder="123 Main St, Phoenix, AZ">
       </div>
-      <button class="btn-search" onclick="search('address')">Search Records</button>
+      <button class="btn btn-amber" onclick="searchAddress()">Search Property</button>
     </div>
-    <div class="spanel" id="panel-apn">
-      <div class="frow c2">
-        <div><label>APN / Parcel Number</label><input type="text" id="apn-val" placeholder="e.g. 1234-567-890"></div>
-        <div><label>County FIPS Code</label><input type="text" id="apn-fips" placeholder="e.g. 06037 (LA County)"></div>
+    <div class="panel" id="panel-apn">
+      <div class="row c2">
+        <div><label>APN / Parcel Number</label><input type="text" id="inp-apn" placeholder="123-45-678"></div>
+        <div><label>County FIPS (optional)</label><input type="text" id="inp-fips" placeholder="04013"></div>
       </div>
-      <button class="btn-search" onclick="search('apn')">Search Records</button>
+      <button class="btn btn-amber" onclick="searchAPN()">Search by APN</button>
     </div>
-    <div class="spanel" id="panel-batch">
-      <div class="fsingle">
-        <label>Addresses (one per line)</label>
-        <textarea id="batch-addresses" placeholder="123 Main St, Los Angeles, CA
-456 Oak Ave, Phoenix, AZ
-789 Elm Blvd, Miami, FL"></textarea>
-      </div>
-      <div class="batch-help">💡 Enter up to <code>25 addresses</code> at once. Each will be searched sequentially.</div>
-      <button class="btn-search orange" onclick="batchSearch()">⚡ Search All Addresses</button>
-    </div>
-    <div class="spanel" id="panel-zip">
-      <div class="frow c3">
-        <div><label>ZIP Code</label><input type="text" id="zip-code" placeholder="e.g. 85001"></div>
-        <div><label>Property Type</label>
-          <select id="zip-proptype">
-            <option value="">All Types</option>
-            <option value="SFR">Single Family</option>
-            <option value="CONDO">Condo</option>
-            <option value="MULTI">Multi-Family</option>
-            <option value="LAND">Land</option>
+    <div class="panel" id="panel-arm">
+      <div class="row c3">
+        <div><label>ZIP Code</label><input type="text" id="inp-zip" placeholder="85001"></div>
+        <div><label>Reset Within</label>
+          <select id="inp-months">
+            <option value="6">6 months</option>
+            <option value="12" selected>12 months</option>
+            <option value="24">24 months</option>
+            <option value="60">5 years</option>
           </select>
         </div>
         <div><label>Max Results</label>
-          <select id="zip-max">
-            <option value="10">10 properties</option>
-            <option value="25" selected>25 properties</option>
-            <option value="50">50 properties</option>
-            <option value="100">100 properties</option>
+          <select id="inp-max">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
           </select>
         </div>
       </div>
-      <div class="batch-help">💡 Search all properties in a ZIP code. Great for finding ARM loans in a specific area.</div>
-      <button class="btn-search orange" onclick="zipSearch()">📍 Search ZIP Code</button>
+      <button class="btn btn-orange" onclick="searchARM()">🔥 Find ARMs in ZIP Code</button>
+      <div class="tip"><strong>💡 Tip:</strong> Searches for properties with adjustable-rate mortgages. Shows estimated reset dates based on origination + fixed period (3/1, 5/1, 7/1, 10/1 ARMs).</div>
     </div>
   </div>
-  <div class="loader" id="loader">
-    <div class="spinner"></div>
-    <p id="loader-msg">Pulling full ATTOM records…</p>
-    <div class="loader-step" id="loader-step">Step 1 of 4: Finding property…</div>
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-  </div>
-  <div class="err" id="err-box"><div class="err-box"><strong id="err-title">Error</strong><span id="err-msg"></span></div></div>
-  <div class="results" id="results">
-    <div id="arm-summary-box"></div>
-    <div class="results-meta">
-      <div>
-        <div class="results-count">Found <span id="result-count">0</span> properties</div>
-        <div class="results-sub" id="result-sub"></div>
-      </div>
-      <div class="results-actions">
-        <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
-        <button class="btn-clear" onclick="clearResults()">Clear</button>
-      </div>
-    </div>
-    <div class="filter-bar" id="filter-bar">
-      <button class="filter-btn active" onclick="filterResults('all',this)">All</button>
-      <button class="filter-btn orange" onclick="filterResults('arm',this)">🔥 ARMs Only</button>
-      <button class="filter-btn" onclick="filterResults('fixed',this)">Fixed Rate</button>
-    </div>
-    <div id="result-list"></div>
-  </div>
-  <div class="footer">Real Estate Insider's App &nbsp;·&nbsp; Data by <a href="https://www.attomdata.com" target="_blank">ATTOM Data Solutions</a><br>Covers 150M+ properties across all 50 states &nbsp;·&nbsp; ARM Detection &amp; Reset Date Estimation</div>
-</div>
-<script>
-var ATTOM_BASE='https://api.gateway.attomdata.com';
-var ATTOM_KEY='1632df167d773e7d4a5a72721735d1b2';
-var RAILWAY='https://real-estate-insiders-app-production.up.railway.app';
 
-// Store all results for filtering/export
-var allResults=[];
-var currentFilter='all';
-
-// ARM Types and fixed periods (in years)
-var ARM_TYPES={
-  '3/1':3,'3/6':3,'5/1':5,'5/6':5,'7/1':7,'7/6':7,'10/1':10,'10/6':10
-};
-
-// ARM detection keywords
-var ARM_KEYWORDS=['ARM','ADJUSTABLE','VARIABLE','ADJ','LIBOR','SOFR','INDEX','HYBRID'];
-
-function switchTab(id,el){
-  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.spanel').forEach(function(p){p.classList.remove('active');});
-  el.classList.add('active');
-  document.getElementById('panel-'+id).classList.add('active');
-}
-
-function showLoader(yes,msg,step,pct){
-  document.getElementById('loader').className='loader'+(yes?' show':'');
-  if(msg)document.getElementById('loader-msg').textContent=msg;
-  if(step)document.getElementById('loader-step').textContent=step;
-  if(typeof pct==='number')document.getElementById('progress-fill').style.width=pct+'%';
-}
-
-function showError(title,msg){
-  document.getElementById('err-title').textContent=title;
-  document.getElementById('err-msg').textContent=msg;
-  document.getElementById('err-box').className='err show';
-}
-
-function hideError(){document.getElementById('err-box').className='err';}
-function showResults(yes){document.getElementById('results').className='results'+(yes?' show':'');}
-function clearResults(){showResults(false);document.getElementById('result-list').innerHTML='';document.getElementById('arm-summary-box').innerHTML='';hideError();allResults=[];}
-
-function attom(path,params){
-  var attomUrl=ATTOM_BASE+path+'?'+new URLSearchParams(params).toString();
-  var url=RAILWAY+'/p?u='+encodeURIComponent(attomUrl)+'&key='+ATTOM_KEY;
-  return fetch(url,{headers:{'apikey':ATTOM_KEY,'Accept':'application/json'}})
-  .then(function(r){
-    if(!r.ok){return r.text().then(function(txt){var b={};try{b=JSON.parse(txt);}catch(e){}throw new Error((b&&b.status&&b.status.msg)||'HTTP '+r.status);});}
-    return r.json();
-  })
-  .then(function(body){
-    if(body&&body.status&&body.status.code&&body.status.code!==0)throw new Error(body.status.msg||'ATTOM error');
-    return body;
-  });
-}
-
-// Detect if mortgage is ARM
-function detectARM(mort){
-  if(!mort)return null;
+  <div class="loader" id="loader"><div class="spinner"></div><p id="loader-msg">Searching...</p></div>
+  <div class="error" id="error"><strong id="err-title">Error</strong><span id="err-msg"></span><pre id="err-detail"></pre></div>
   
-  var fields=[
-    mort.loantype,mort.loantypecode,mort.loanType,mort.loanTypeCode,
-    mort.ratetype,mort.rateType,mort.interestratetype,mort.interestRateType,
-    mort.loantypedescription,mort.loanTypeDescription,
-    mort.adjustablerate,mort.adjustableRate,mort.armtype,mort.armType
+  <div class="results" id="results">
+    <div id="arm-summary"></div>
+    <div class="results-header">
+      <div class="results-count">Found <span id="count">0</span> properties</div>
+      <button class="btn btn-export" id="export-btn" onclick="exportCSV()" style="display:none">📥 Export CSV</button>
+    </div>
+    <div id="list"></div>
+  </div>
+
+  <div class="debug" id="debug" style="display:none"><pre id="debug-log"></pre></div>
+</div>
+
+<script>
+// ============ CONFIG ============
+var API_KEY = '1632df167d773e7d4a5a72721735d1b2';
+var PROXY = 'https://real-estate-insiders-app-production.up.railway.app';
+var ATTOM = 'https://api.gateway.attomdata.com';
+var DEBUG = true;
+
+var allResults = [];
+var debugLog = [];
+
+// ARM detection
+var ARM_KEYWORDS = ['ARM','ADJUSTABLE','VARIABLE','ADJ','LIBOR','SOFR','INDEX','HYBRID'];
+var ARM_CODES = ['A','ARM','ADJ','V','VAR','2','3'];
+var ARM_PERIODS = {'3/1':3,'3/6':3,'5/1':5,'5/6':5,'7/1':7,'7/6':7,'10/1':10,'10/6':10};
+
+// ============ UTILS ============
+function log(msg, data) {
+  var ts = new Date().toLocaleTimeString();
+  var entry = '[' + ts + '] ' + msg;
+  if (data) entry += '\n' + JSON.stringify(data, null, 2);
+  debugLog.push(entry);
+  console.log(entry);
+  if (DEBUG) {
+    document.getElementById('debug').style.display = 'block';
+    document.getElementById('debug-log').textContent = debugLog.slice(-20).join('\n\n');
+  }
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+function showLoader(show, msg) {
+  document.getElementById('loader').className = 'loader' + (show ? ' show' : '');
+  if (msg) document.getElementById('loader-msg').textContent = msg;
+}
+
+function showError(title, msg, detail) {
+  document.getElementById('err-title').textContent = title;
+  document.getElementById('err-msg').textContent = msg;
+  document.getElementById('err-detail').textContent = detail || '';
+  document.getElementById('error').className = 'error show';
+}
+
+function hideError() { document.getElementById('error').className = 'error'; }
+function showResults(show) { document.getElementById('results').className = 'results' + (show ? ' show' : ''); }
+
+// ============ API ============
+async function callAPI(endpoint, params) {
+  var url = ATTOM + endpoint + '?' + new URLSearchParams(params).toString();
+  var proxyUrl = PROXY + '/p?u=' + encodeURIComponent(url) + '&key=' + API_KEY;
+  
+  log('API Call: ' + endpoint, params);
+  
+  try {
+    var resp = await fetch(proxyUrl, {
+      headers: { 'apikey': API_KEY, 'Accept': 'application/json' }
+    });
+    
+    log('Response status: ' + resp.status);
+    
+    if (!resp.ok) {
+      var errText = await resp.text();
+      log('Error response:', errText);
+      throw new Error('HTTP ' + resp.status + ': ' + errText.substring(0, 200));
+    }
+    
+    var data = await resp.json();
+    log('Response OK, properties: ' + (data.property ? data.property.length : 0));
+    
+    if (data.status && data.status.code !== 0) {
+      throw new Error(data.status.msg || 'API error');
+    }
+    
+    return data;
+  } catch (e) {
+    log('Fetch error: ' + e.message);
+    throw e;
+  }
+}
+
+// Try direct API call if proxy fails
+async function callAPIDirect(endpoint, params) {
+  var url = ATTOM + endpoint + '?' + new URLSearchParams(params).toString();
+  
+  log('Direct API Call: ' + endpoint, params);
+  
+  try {
+    var resp = await fetch(url, {
+      headers: { 'apikey': API_KEY, 'Accept': 'application/json' }
+    });
+    
+    if (!resp.ok) {
+      var errText = await resp.text();
+      throw new Error('HTTP ' + resp.status);
+    }
+    
+    return await resp.json();
+  } catch (e) {
+    log('Direct call error: ' + e.message);
+    throw e;
+  }
+}
+
+// ============ ARM DETECTION ============
+function detectARM(mort) {
+  if (!mort) return null;
+  
+  var text = [
+    mort.loantype, mort.loantypecode, mort.loanType, mort.loanTypeCode,
+    mort.ratetype, mort.rateType, mort.interestratetype, mort.interestRateType,
+    mort.loantypedescription, mort.loanTypeDescription
   ].filter(Boolean).join(' ').toUpperCase();
   
-  var isARM=ARM_KEYWORDS.some(function(kw){return fields.indexOf(kw)!==-1;});
+  var isARM = ARM_KEYWORDS.some(kw => text.includes(kw));
+  var code = String(mort.loantypecode || mort.loanTypeCode || '').toUpperCase().trim();
+  if (ARM_CODES.includes(code)) isARM = true;
   
-  // Check loan type codes
-  var code=String(mort.loantypecode||mort.loanTypeCode||'').toUpperCase();
-  if(['A','ARM','ADJ','V','VAR','2','3'].indexOf(code)!==-1)isARM=true;
+  if (!isARM) return null;
   
-  if(!isARM)return null;
-  
-  // Determine ARM type
-  var armType='ARM';
-  for(var t in ARM_TYPES){
-    if(fields.indexOf(t)!==-1){armType=t+' ARM';break;}
-  }
-  
-  // Get origination date
-  var origDate=mort.recordingdate||mort.recordingDate||mort.deedoftrustdate||
-               mort.deedOfTrustDate||mort.documentdate||mort.documentDate||
-               mort.originationdate||mort.originationDate;
-  
-  var resetDate=null,daysUntilReset=null;
-  
-  if(origDate){
-    var orig=new Date(origDate);
-    if(!isNaN(orig)){
-      // Find fixed period
-      var fixedYears=5; // default 5/1
-      for(var t in ARM_TYPES){
-        if(fields.indexOf(t)!==-1){fixedYears=ARM_TYPES[t];break;}
-      }
-      resetDate=new Date(orig);
-      resetDate.setFullYear(resetDate.getFullYear()+fixedYears);
-      
-      var now=new Date();
-      daysUntilReset=Math.ceil((resetDate-now)/(1000*60*60*24));
+  // Determine type
+  var armType = '5/1 ARM';
+  for (var t in ARM_PERIODS) {
+    if (text.includes(t) || text.includes(t.replace('/',''))) {
+      armType = t + ' ARM';
+      break;
     }
   }
   
-  return{
-    isARM:true,
-    armType:armType,
-    originationDate:origDate,
-    resetDate:resetDate,
-    daysUntilReset:daysUntilReset,
-    loanAmount:mort.amount||mort.loanamount||mort.loanAmount,
-    lender:mort.lendername||mort.lenderName||(mort.lender&&(mort.lender.fullname||mort.lender.name))||'',
-    interestRate:mort.interestrate||mort.interestRate||mort.rate||null
+  // Get dates
+  var origDate = mort.recordingdate || mort.recordingDate || mort.deedoftrustdate ||
+                 mort.documentdate || mort.documentDate || mort.originationdate;
+  
+  var resetDate = null, daysUntil = null;
+  if (origDate) {
+    var orig = new Date(origDate);
+    if (!isNaN(orig)) {
+      var years = 5;
+      for (var t in ARM_PERIODS) {
+        if (text.includes(t)) { years = ARM_PERIODS[t]; break; }
+      }
+      resetDate = new Date(orig);
+      resetDate.setFullYear(resetDate.getFullYear() + years);
+      daysUntil = Math.ceil((resetDate - new Date()) / (1000*60*60*24));
+    }
+  }
+  
+  return {
+    isARM: true,
+    armType: armType,
+    loanAmount: mort.amount || mort.loanamount || mort.loanAmount,
+    lender: mort.lendername || mort.lenderName || '',
+    originationDate: origDate,
+    resetDate: resetDate,
+    daysUntilReset: daysUntil
   };
 }
 
-// Search single property
-function searchProperty(params){
-  return new Promise(function(resolve,reject){
-    var attomId=null,mergedData={};
-    
-    attom('/propertyapi/v1.0.0/property/basicprofile',params)
-    .then(function(d){
-      var props=[d.property||d.Property].flat().filter(Boolean);
-      if(!props.length)throw new Error('No property found');
-      attomId=props[0].identifier&&(props[0].identifier.attomId||props[0].identifier.obPropId);
-      mergedData.basic=props[0];
-      if(!attomId)throw new Error('No ATTOM ID');
-      return attom('/propertyapi/v1.0.0/property/detailmortgage',{attomId:attomId});
-    })
-    .then(function(d){
-      var props=[d.property||d.Property].flat().filter(Boolean);
-      if(props.length)mergedData.detail=props[0];
-      return Promise.all([
-        attom('/propertyapi/v1.0.0/property/detailowner',{attomId:attomId}).catch(function(){return null;}),
-        attom('/propertyapi/v1.0.0/attomavm/detail',{attomId:attomId}).catch(function(){return null;})
-      ]);
-    })
-    .then(function(results){
-      if(results[0]){var op=[results[0].property||results[0].Property].flat().filter(Boolean);if(op.length)mergedData.owner=op[0];}
-      if(results[1]){var ap=[results[1].property||results[1].Property].flat().filter(Boolean);if(ap.length)mergedData.avm=ap[0];}
-      return attom('/propertyapi/v1.0.0/saleshistory/detail',{attomId:attomId}).catch(function(){return null;});
-    })
-    .then(function(histResult){
-      if(histResult){
-        var hp=[histResult.property||histResult.Property].flat().filter(Boolean);
-        if(hp.length)mergedData.history=hp[0];
-      }
-      var final=Object.assign({},mergedData.basic||{},mergedData.detail||{});
-      if(mergedData.owner&&mergedData.owner.owner)final.owner=mergedData.owner.owner;
-      if(mergedData.avm)final._avm=mergedData.avm;
-      if(mergedData.history)final._history=mergedData.history;
-      
-      // Detect ARM
-      var mort=final.mortgage||{};
-      var armInfo=null;
-      if(mort.first)armInfo=detectARM(mort.first);
-      if(!armInfo&&mort.second)armInfo=detectARM(mort.second);
-      if(!armInfo)armInfo=detectARM(mort);
-      final._armInfo=armInfo;
-      
-      resolve(final);
-    })
-    .catch(reject);
-  });
+function checkPropertyARM(p) {
+  var mort = p.mortgage || {};
+  var arm = detectARM(mort.first) || detectARM(mort.second) || detectARM(mort);
+  return arm;
 }
 
-// Single address search
-function search(mode){
-  hideError();showResults(false);showLoader(true,'Pulling ATTOM records…','Step 1 of 4: Finding property…',10);
+// ============ SEARCH FUNCTIONS ============
+async function searchAddress() {
+  var addr = document.getElementById('inp-address').value.trim();
+  if (!addr) { showError('Missing', 'Please enter an address'); return; }
   
-  var params={};
-  if(mode==='address'){
-    var addr=document.getElementById('a-address').value.trim();
-    if(!addr){showLoader(false);showError('Missing field','Please enter an address.');return;}
-    params={address:addr};
-  }else if(mode==='apn'){
-    var apn=document.getElementById('apn-val').value.trim();
-    var fips=document.getElementById('apn-fips').value.trim();
-    if(!apn){showLoader(false);showError('Missing field','Please enter an APN.');return;}
-    params={apn:apn};
-    if(fips)params.fips=fips;
+  hideError(); showResults(false); showLoader(true, 'Searching...');
+  
+  try {
+    var data = await callAPI('/propertyapi/v1.0.0/property/basicprofile', { address: addr });
+    var props = [data.property || data.Property].flat().filter(Boolean);
+    
+    if (!props.length) throw new Error('No property found');
+    
+    var attomId = props[0].identifier?.attomId || props[0].identifier?.obPropId;
+    if (!attomId) throw new Error('No ATTOM ID');
+    
+    showLoader(true, 'Getting mortgage data...');
+    var mortData = await callAPI('/propertyapi/v1.0.0/property/detailmortgage', { attomId: attomId });
+    var mortProps = [mortData.property || mortData.Property].flat().filter(Boolean);
+    
+    var final = Object.assign({}, props[0], mortProps[0] || {});
+    final._armInfo = checkPropertyARM(final);
+    
+    showLoader(false);
+    allResults = [final];
+    renderResults(allResults, false);
+  } catch (e) {
+    showLoader(false);
+    showError('Error', e.message, debugLog.slice(-3).join('\n'));
+  }
+}
+
+async function searchAPN() {
+  var apn = document.getElementById('inp-apn').value.trim();
+  if (!apn) { showError('Missing', 'Please enter an APN'); return; }
+  
+  var fips = document.getElementById('inp-fips').value.trim();
+  var params = { apn: apn };
+  if (fips) params.fips = fips;
+  
+  hideError(); showResults(false); showLoader(true, 'Searching...');
+  
+  try {
+    var data = await callAPI('/propertyapi/v1.0.0/property/basicprofile', params);
+    var props = [data.property || data.Property].flat().filter(Boolean);
+    
+    if (!props.length) throw new Error('No property found');
+    
+    props[0]._armInfo = checkPropertyARM(props[0]);
+    
+    showLoader(false);
+    allResults = props;
+    renderResults(allResults, false);
+  } catch (e) {
+    showLoader(false);
+    showError('Error', e.message, debugLog.slice(-3).join('\n'));
+  }
+}
+
+async function searchARM() {
+  var zip = document.getElementById('inp-zip').value.trim();
+  if (!zip || !/^\d{5}$/.test(zip)) {
+    showError('Invalid', 'Please enter a 5-digit ZIP code');
+    return;
   }
   
-  searchProperty(params)
-  .then(function(prop){
-    showLoader(false);
-    allResults=[prop];
-    buildResults(allResults);
-  })
-  .catch(function(e){
-    showLoader(false);
-    showError('ATTOM API Error',e.message);
-  });
-}
-
-// Batch address search
-function batchSearch(){
-  var text=document.getElementById('batch-addresses').value.trim();
-  if(!text){showError('Missing field','Please enter at least one address.');return;}
+  var months = parseInt(document.getElementById('inp-months').value) || 12;
+  var maxResults = parseInt(document.getElementById('inp-max').value) || 50;
   
-  var addresses=text.split('\n').map(function(a){return a.trim();}).filter(Boolean);
-  if(addresses.length===0){showError('Missing field','No valid addresses found.');return;}
-  if(addresses.length>25){showError('Too many','Maximum 25 addresses per batch.');return;}
+  hideError(); showResults(false); allResults = [];
+  showLoader(true, 'Searching ZIP ' + zip + ' for mortgages...');
   
-  hideError();showResults(false);
-  allResults=[];
-  var total=addresses.length,completed=0,errors=[];
-  
-  function processNext(idx){
-    if(idx>=addresses.length){
-      showLoader(false);
-      if(allResults.length>0)buildResults(allResults);
-      else showError('No Results','Could not find any properties. Errors: '+errors.join('; '));
-      return;
+  try {
+    var data = await callAPI('/propertyapi/v1.0.0/property/detailmortgage', {
+      postalcode: zip,
+      pagesize: maxResults
+    });
+    
+    var props = [data.property || data.Property].flat().filter(Boolean);
+    log('Found ' + props.length + ' properties');
+    
+    if (!props.length) throw new Error('No properties with mortgage data in ZIP ' + zip);
+    
+    showLoader(true, 'Analyzing ' + props.length + ' properties for ARMs...');
+    
+    var now = new Date();
+    var cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() + months);
+    
+    var armProps = [];
+    props.forEach(p => {
+      var arm = checkPropertyARM(p);
+      if (arm) {
+        p._armInfo = arm;
+        // Filter by reset window
+        if (arm.resetDate && arm.resetDate >= now && arm.resetDate <= cutoff) {
+          armProps.push(p);
+        } else if (!arm.resetDate) {
+          armProps.push(p); // Include if can't determine date
+        }
+      }
+    });
+    
+    log('Found ' + armProps.length + ' ARMs');
+    
+    if (!armProps.length) {
+      throw new Error('No ARMs found in ZIP ' + zip + ' resetting within ' + months + ' months. Try increasing the time window.');
     }
     
-    var addr=addresses[idx];
-    var pct=Math.round((idx/total)*100);
-    showLoader(true,'Batch search in progress…','Processing '+addr+' ('+(idx+1)+'/'+total+')',pct);
-    
-    searchProperty({address:addr})
-    .then(function(prop){
-      allResults.push(prop);
-    })
-    .catch(function(e){
-      errors.push(addr+': '+e.message);
-    })
-    .finally(function(){
-      completed++;
-      setTimeout(function(){processNext(idx+1);},300);
-    });
-  }
-  
-  processNext(0);
-}
-
-// ZIP code search
-function zipSearch(){
-  var zip=document.getElementById('zip-code').value.trim();
-  if(!zip||zip.length!==5){showError('Invalid ZIP','Please enter a valid 5-digit ZIP code.');return;}
-  
-  var propType=document.getElementById('zip-proptype').value;
-  var maxResults=parseInt(document.getElementById('zip-max').value)||25;
-  
-  hideError();showResults(false);
-  showLoader(true,'Searching ZIP code '+zip+'…','Finding properties with mortgage data…',10);
-  
-  var params={postalcode:zip,pagesize:Math.min(maxResults,100)};
-  if(propType)params.propertytype=propType;
-  
-  attom('/propertyapi/v1.0.0/property/detailmortgage',params)
-  .then(function(d){
-    var props=[d.property||d.Property].flat().filter(Boolean);
-    if(!props.length)throw new Error('No properties found in ZIP '+zip);
-    
-    // Process ARM detection for each
-    props.forEach(function(p){
-      var mort=p.mortgage||{};
-      var armInfo=null;
-      if(mort.first)armInfo=detectARM(mort.first);
-      if(!armInfo&&mort.second)armInfo=detectARM(mort.second);
-      if(!armInfo)armInfo=detectARM(mort);
-      p._armInfo=armInfo;
+    // Sort by days until reset
+    armProps.sort((a, b) => {
+      var da = a._armInfo?.daysUntilReset, db = b._armInfo?.daysUntilReset;
+      if (da === null) return 1;
+      if (db === null) return -1;
+      return da - db;
     });
     
     showLoader(false);
-    allResults=props;
-    buildResults(allResults);
-  })
-  .catch(function(e){
+    allResults = armProps;
+    renderResults(armProps, true);
+    
+  } catch (e) {
     showLoader(false);
-    showError('ATTOM API Error',e.message);
-  });
+    showError('Error', e.message, debugLog.slice(-3).join('\n'));
+  }
 }
 
-// Filter results
-function filterResults(filter,btn){
-  currentFilter=filter;
-  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  
-  var filtered=allResults;
-  if(filter==='arm'){
-    filtered=allResults.filter(function(p){return p._armInfo&&p._armInfo.isARM;});
-  }else if(filter==='fixed'){
-    filtered=allResults.filter(function(p){return!p._armInfo||!p._armInfo.isARM;});
+// ============ RENDER ============
+function renderResults(props, isARMSearch) {
+  if (!props.length) {
+    document.getElementById('count').textContent = '0';
+    document.getElementById('list').innerHTML = '<p style="color:var(--slate);text-align:center;padding:2rem">No properties found</p>';
+    showResults(true);
+    return;
   }
   
-  renderList(filtered);
-}
-
-function buildResults(props){
-  if(!props||props.length===0){
-    document.getElementById('result-count').textContent='0';
-    document.getElementById('result-list').innerHTML='<div class="no-results"><p>No properties found.</p></div>';
-    showResults(true);return;
-  }
-  
-  // Count ARMs
-  var armCount=0,urgentCount=0,soonCount=0;
-  props.forEach(function(p){
-    if(p._armInfo&&p._armInfo.isARM){
+  // ARM stats
+  var armCount = 0, urgentCount = 0;
+  props.forEach(p => {
+    if (p._armInfo?.isARM) {
       armCount++;
-      if(p._armInfo.daysUntilReset!==null){
-        if(p._armInfo.daysUntilReset<=90)urgentCount++;
-        else if(p._armInfo.daysUntilReset<=365)soonCount++;
-      }
+      if (p._armInfo.daysUntilReset !== null && p._armInfo.daysUntilReset <= 90) urgentCount++;
     }
   });
   
-  // ARM Summary
-  var summaryHtml='';
-  if(armCount>0){
-    summaryHtml='<div class="arm-summary"><div class="arm-summary-left"><div class="arm-summary-icon">🔥</div><div><h3>'+armCount+' ARM'+(armCount>1?'s':'')+' Detected</h3><p>Adjustable-rate mortgages with estimated reset dates</p></div></div><div class="arm-summary-stats">';
-    if(urgentCount>0)summaryHtml+='<div class="arm-stat"><div class="num" style="color:var(--red)">'+urgentCount+'</div><div class="label">Reset &lt;90 days</div></div>';
-    if(soonCount>0)summaryHtml+='<div class="arm-stat"><div class="num" style="color:var(--amber)">'+soonCount+'</div><div class="label">Reset &lt;1 year</div></div>';
-    summaryHtml+='<div class="arm-stat"><div class="num">'+armCount+'</div><div class="label">Total ARMs</div></div></div></div>';
+  // Summary
+  var summaryHtml = '';
+  if (isARMSearch && armCount > 0) {
+    summaryHtml = '<div class="arm-summary"><div><h3>🔥 ' + armCount + ' ARM' + (armCount > 1 ? 's' : '') + ' Found</h3><p>Sorted by estimated reset date</p></div><div class="arm-stats">';
+    if (urgentCount > 0) summaryHtml += '<div class="arm-stat"><div class="num urgent">' + urgentCount + '</div><div class="lbl">Reset ≤90d</div></div>';
+    summaryHtml += '<div class="arm-stat"><div class="num">' + armCount + '</div><div class="lbl">Total</div></div></div></div>';
+    document.getElementById('export-btn').style.display = 'inline-block';
   }
-  document.getElementById('arm-summary-box').innerHTML=summaryHtml;
+  document.getElementById('arm-summary').innerHTML = summaryHtml;
   
-  document.getElementById('result-count').textContent=props.length;
-  document.getElementById('result-sub').textContent=new Date().toLocaleDateString()+(armCount>0?' · '+armCount+' ARM'+(armCount>1?'s':'')+' found':'');
+  document.getElementById('count').textContent = props.length;
   
-  renderList(props);
+  var html = '';
+  props.forEach((p, i) => html += buildCard(p, i));
+  document.getElementById('list').innerHTML = html;
   showResults(true);
 }
 
-function renderList(props){
-  var html='';
-  props.forEach(function(p,i){html+=buildCard(p,i);});
-  document.getElementById('result-list').innerHTML=html||'<div class="no-results"><p>No matching properties.</p></div>';
-}
+function fmt(v) { return (v && v !== 'N/A' && v !== '0' && v !== 0) ? v : '—'; }
+function fmtMoney(v) { var n = parseInt(v); return (!n || isNaN(n)) ? '—' : '$' + n.toLocaleString(); }
+function fmtDate(v) { if (!v) return '—'; var d = new Date(v); return isNaN(d) ? v : d.toLocaleDateString(); }
 
-function fmt(v){return(v&&v!=='N/A'&&v!=='0'&&v!==0&&v!==''&&v!==null&&v!==undefined)?v:'—';}
-function fmtMoney(v){var n=parseInt(v);if(!n||isNaN(n))return'—';return'$'+n.toLocaleString();}
-function fmtDate(v){if(!v)return'—';var d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
-function drow(label,val,cls){return'<div class="detail-row"><span class="detail-label">'+label+'</span><span class="detail-val'+(cls?' '+cls:'')+'">'+( val||'—')+'</span></div>';}
-
-function calcMonthlyPayment(principal,annualRate,termMonths){
-  if(!principal||!annualRate||!termMonths)return null;
-  var p=parseFloat(principal),r=parseFloat(annualRate)/100/12,n=parseInt(termMonths);
-  if(isNaN(p)||isNaN(r)||isNaN(n)||r<=0||n<=0)return null;
-  var pmt=p*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);
-  return isNaN(pmt)?null:Math.round(pmt);
-}
-
-function recorderSearchLink(county,state){
-  return'https://www.google.com/search?q='+encodeURIComponent(county+' '+state+' county recorder deed search');
-}
-
-function buildCard(p,idx){
-  var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{},avm=p._avm||{},histData=p._history||{},armInfo=p._armInfo;
+function buildCard(p, idx) {
+  var addr = p.address || {}, mort = p.mortgage || {}, summary = p.summary || {}, arm = p._armInfo;
   
-  var street=fmt(addr.line1||addr.oneLine);
-  var city=fmt(addr.locality);
-  var state=fmt(addr.countrySubd);
-  var zip=fmt(addr.postal1);
-  var cityState=[city,state,zip].filter(function(x){return x!=='—';}).join(', ')||'—';
-  var county=fmt(area.countrysecsubd||area.munname);
-  var fips=fmt(identifier.fips);
-  var propType=fmt(summary.proptype||summary.propsubtype);
-  var yearBlt=fmt(bldg.yearbuilt||bldg.yearBuilt);
-  var sqft=fmt((bldg.size&&bldg.size.universalsize)||(bldg.size&&bldg.size.livingsize));
-  var beds=fmt(bldg.rooms&&bldg.rooms.beds);
-  var baths=fmt((bldg.rooms&&bldg.rooms.bathstotal)||(bldg.rooms&&bldg.rooms.bathsfull));
-  var apn=fmt(summary.apn||identifier.apn);
-  var attomId=fmt(identifier.attomId||identifier.obPropId);
+  var street = fmt(addr.line1 || addr.oneLine);
+  var city = fmt(addr.locality);
+  var state = fmt(addr.countrySubd);
+  var zip = fmt(addr.postal1);
+  var cityState = [city, state, zip].filter(x => x !== '—').join(', ') || '—';
+  var propType = fmt(summary.proptype || summary.propsubtype);
   
-  // Owner
-  var ownerName='—',ownerOccupied='—';
-  var ownerData=p.owner||{};
-  if(ownerData.owner1)ownerName=fmt(ownerData.owner1.fullname||ownerData.owner1.lastname);
-  if(ownerName==='—')ownerName=fmt(ownerData.owner1fullname||ownerData.fullname||ownerData.corporatename);
-  var absentee=ownerData.absenteeind||'';
-  if(absentee==='O')ownerOccupied='Yes';else if(absentee==='A')ownerOccupied='No (Absentee)';
-  
-  // Sale
-  var sa=sale.amount||{};
-  var lastSaleAmt=fmtMoney(sa.saleamt||sale.saleamt||sale.saleprice);
-  var lastSaleDate=fmtDate(sa.saletransdate||sale.saletransdate||sale.salesearchdate);
-  
-  // AVM
-  var avmVal=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.value);
-  
-  // BADGES
-  var badges='',isARMCard=false;
-  if(armInfo&&armInfo.isARM){
-    isARMCard=true;
-    var armLabel=armInfo.armType;
-    if(armInfo.daysUntilReset!==null){
-      if(armInfo.daysUntilReset<=0)armLabel+=' · RESET PASSED';
-      else if(armInfo.daysUntilReset<=90)armLabel+=' · '+armInfo.daysUntilReset+'d';
-      else if(armInfo.daysUntilReset<=365)armLabel+=' · '+Math.round(armInfo.daysUntilReset/30)+'mo';
+  var isARM = arm?.isARM;
+  var badges = '';
+  if (isARM) {
+    var label = arm.armType;
+    if (arm.daysUntilReset !== null) {
+      if (arm.daysUntilReset <= 0) label += ' RESET';
+      else if (arm.daysUntilReset <= 90) label += ' · ' + arm.daysUntilReset + 'd';
+      else if (arm.daysUntilReset <= 365) label += ' · ' + Math.ceil(arm.daysUntilReset/30) + 'mo';
     }
-    badges+='<span class="badge badge-orange">🔥 '+armLabel+'</span>';
+    badges += '<span class="badge badge-orange">🔥 ' + label + '</span>';
   }
-  if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
-  if(avmVal&&avmVal!=='—')badges+='<span class="badge badge-green">'+avmVal+'</span>';
-  else if(lastSaleAmt&&lastSaleAmt!=='—')badges+='<span class="badge badge-amber">'+lastSaleAmt+'</span>';
+  if (propType !== '—') badges += '<span class="badge badge-slate">' + propType + '</span>';
   
-  var html='<div class="prop-card'+(isARMCard?' arm-alert':'')+'" id="card-'+idx+'">';
-  html+='<div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+(county!=='—'?' <span class="county-badge">'+county+'</span>':'')+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
-  html+='<div class="prop-card-body" id="body-'+idx+'">';
+  var html = '<div class="prop' + (isARM ? ' arm' : '') + '">';
+  html += '<div class="prop-head" onclick="toggleProp(' + idx + ')"><div><div class="prop-addr">' + street + '</div><div class="prop-loc">' + cityState + '</div></div><div class="badges">' + badges + '</div></div>';
+  html += '<div class="prop-body" id="body-' + idx + '">';
   
-  // ARM ALERT BOX
-  if(armInfo&&armInfo.isARM){
-    var urgencyClass='';
-    if(armInfo.daysUntilReset!==null){
-      if(armInfo.daysUntilReset<=90)urgencyClass='urgent';
-      else if(armInfo.daysUntilReset<=365)urgencyClass='soon';
-    }
-    html+='<div class="arm-alert-box"><h4>🔥 Adjustable Rate Mortgage Detected</h4><div class="arm-details">';
-    html+='<div class="arm-detail"><div class="label">ARM Type</div><div class="value">'+armInfo.armType+'</div></div>';
-    if(armInfo.loanAmount)html+='<div class="arm-detail"><div class="label">Loan Amount</div><div class="value">'+fmtMoney(armInfo.loanAmount)+'</div></div>';
-    if(armInfo.originationDate)html+='<div class="arm-detail"><div class="label">Originated</div><div class="value">'+fmtDate(armInfo.originationDate)+'</div></div>';
-    if(armInfo.resetDate)html+='<div class="arm-detail"><div class="label">Est. Reset Date</div><div class="value '+urgencyClass+'">'+fmtDate(armInfo.resetDate)+'</div></div>';
-    if(armInfo.daysUntilReset!==null)html+='<div class="arm-detail"><div class="label">Days Until Reset</div><div class="value '+urgencyClass+'">'+(armInfo.daysUntilReset<=0?'PASSED':armInfo.daysUntilReset+' days')+'</div></div>';
-    if(armInfo.lender)html+='<div class="arm-detail"><div class="label">Lender</div><div class="value" style="font-size:11px;color:var(--white)">'+armInfo.lender+'</div></div>';
-    html+='</div></div>';
+  // ARM box
+  if (isARM) {
+    var urg = arm.daysUntilReset !== null && arm.daysUntilReset <= 90 ? 'urgent' : arm.daysUntilReset !== null && arm.daysUntilReset <= 365 ? 'soon' : '';
+    html += '<div class="arm-box"><h4>🔥 Adjustable Rate Mortgage</h4><div class="arm-grid">';
+    html += '<div class="arm-item"><div class="lbl">Type</div><div class="val">' + arm.armType + '</div></div>';
+    if (arm.loanAmount) html += '<div class="arm-item"><div class="lbl">Amount</div><div class="val">' + fmtMoney(arm.loanAmount) + '</div></div>';
+    if (arm.originationDate) html += '<div class="arm-item"><div class="lbl">Originated</div><div class="val">' + fmtDate(arm.originationDate) + '</div></div>';
+    if (arm.resetDate) html += '<div class="arm-item"><div class="lbl">Est. Reset</div><div class="val ' + urg + '">' + fmtDate(arm.resetDate) + '</div></div>';
+    if (arm.daysUntilReset !== null) html += '<div class="arm-item"><div class="lbl">Days Left</div><div class="val ' + urg + '">' + (arm.daysUntilReset <= 0 ? 'PASSED' : arm.daysUntilReset) + '</div></div>';
+    if (arm.lender) html += '<div class="arm-item"><div class="lbl">Lender</div><div class="val" style="font-size:10px;color:var(--white)">' + arm.lender + '</div></div>';
+    html += '</div></div>';
   }
   
-  // AVM BOX
-  if(avmVal&&avmVal!=='—'){
-    var avmLow=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.low);
-    var avmHigh=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.high);
-    html+='<div class="avm-box"><div><div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">ATTOM Estimated Value</div><div class="avm-val">'+avmVal+'</div></div><div class="avm-meta">Range: <span style="color:var(--white)">'+avmLow+' — '+avmHigh+'</span></div></div>';
+  // Basic details
+  html += '<div class="detail-row"><span class="detail-label">Property Type</span><span class="detail-val">' + propType + '</span></div>';
+  
+  var m = mort.first || mort;
+  if (m.amount || m.loanamount) {
+    html += '<div class="detail-row"><span class="detail-label">Loan Amount</span><span class="detail-val hi">' + fmtMoney(m.amount || m.loanamount) + '</span></div>';
+  }
+  if (m.lendername || m.lenderName) {
+    html += '<div class="detail-row"><span class="detail-label">Lender</span><span class="detail-val">' + fmt(m.lendername || m.lenderName) + '</span></div>';
   }
   
-  // PROPERTY DETAILS
-  html+='<div class="detail-grid"><div class="detail-col"><h4>Property Details</h4>'+drow('APN',apn)+drow('ATTOM ID',attomId)+drow('County',county)+drow('Property type',propType)+drow('Year built',yearBlt)+drow('Bldg size',sqft!=='—'?sqft+' sqft':'—')+drow('Beds',beds)+drow('Baths',baths)+'</div>';
-  html+='<div class="detail-col"><h4>Ownership</h4>'+drow('Owner',ownerName,'hi')+drow('Owner occupied',ownerOccupied)+'<div class="section-title">Last Sale</div>'+drow('Sale date',lastSaleDate,'teal')+drow('Sale price',lastSaleAmt,'hi')+'</div></div>';
-  
-  // MORTGAGE INFO
-  var mortList=[];
-  if(mort.first&&Object.keys(mort.first).length>1)mortList.push({label:'1st Mortgage',m:mort.first,isARM:armInfo&&armInfo.isARM});
-  if(mort.second&&Object.keys(mort.second).length>1)mortList.push({label:'2nd Mortgage',m:mort.second});
-  if(mortList.length===0&&mort&&(mort.amount||mort.loanamount||mort.lender))mortList.push({label:'Current Mortgage',m:mort,isARM:armInfo&&armInfo.isARM});
-  
-  if(mortList.length>0){
-    html+='<div class="section-title '+(isARMCard?'orange':'teal')+'">Mortgage Records</div><div class="mort-grid">';
-    mortList.forEach(function(item){
-      var m=item.m||{};
-      var lenderName=fmt(m.lendername||m.lenderName||(m.lender&&(m.lender.fullname||m.lender.name)));
-      var loanAmt=fmtMoney(m.amount||m.loanamount||m.loanAmount);
-      var recordDate=fmtDate(m.recordingdate||m.recordingDate||m.deedoftrustdate);
-      var loanType=fmt(m.loantype||m.loantypecode||m.loanTypeCode);
-      var intRate=m.interestrate||m.interestRate;
-      var intRateFmt=(intRate&&parseFloat(intRate)>0)?parseFloat(intRate).toFixed(3)+'%':'—';
-      
-      html+='<div class="mort-card'+(item.isARM?' arm':'')+'"><div class="mc-label">'+item.label+(item.isARM?' (ARM)':'')+'</div>'
-        +drow('Lender',lenderName,'teal')
-        +drow('Loan amount',loanAmt,'hi')
-        +drow('Interest rate',intRateFmt,item.isARM?'orange':'green')
-        +drow('Recorded',recordDate)
-        +drow('Loan type',loanType)
-        +'</div>';
-    });
-    html+='</div>';
-  }
-  
-  // LINKS
-  html+='<div class="section-title green">Quick Links</div>';
-  html+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">';
-  if(county!=='—'&&state!=='—')html+='<a class="doc-link amber" href="'+recorderSearchLink(county,state)+'" target="_blank">🔍 County Recorder</a>';
-  if(street!=='—')html+='<a class="doc-link" href="https://www.zillow.com/homes/'+encodeURIComponent(street+' '+cityState)+'_rb/" target="_blank">🏠 Zillow</a>';
-  if(street!=='—')html+='<a class="doc-link" href="https://www.redfin.com/search?location='+encodeURIComponent(street+' '+cityState)+'" target="_blank">🔴 Redfin</a>';
-  html+='</div>';
-  
-  html+='</div></div>';
+  html += '</div></div>';
   return html;
 }
 
-function toggleCard(i){
-  var body=document.getElementById('body-'+i);
-  var icon=document.getElementById('exp-'+i);
-  var open=body.classList.contains('open');
-  body.classList.toggle('open',!open);
-  icon.classList.toggle('open',!open);
+function toggleProp(i) {
+  var body = document.getElementById('body-' + i);
+  body.classList.toggle('open');
 }
 
-// EXPORT TO CSV
-function exportCSV(){
-  if(allResults.length===0){alert('No results to export.');return;}
+// ============ EXPORT ============
+function exportCSV() {
+  if (!allResults.length) return;
   
-  var headers=[
-    'Address','City','State','ZIP','County','APN','ATTOM_ID',
-    'Property_Type','Year_Built','SqFt','Beds','Baths',
-    'Owner_Name','Owner_Occupied',
-    'Last_Sale_Date','Last_Sale_Price',
-    'AVM_Value','AVM_Low','AVM_High',
-    'Is_ARM','ARM_Type','Loan_Amount','Interest_Rate','Lender',
-    'Origination_Date','Est_Reset_Date','Days_Until_Reset'
-  ];
+  var rows = [['Address','City','State','ZIP','Type','ARM_Type','Loan_Amount','Lender','Reset_Date','Days_Until_Reset'].join(',')];
   
-  var rows=[headers.join(',')];
-  
-  allResults.forEach(function(p){
-    var addr=p.address||{},bldg=p.building||{},sale=p.sale||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},avm=p._avm||{},mort=p.mortgage||{},armInfo=p._armInfo;
-    var sa=sale.amount||{};
-    var ownerData=p.owner||{};
-    var ownerName='';
-    if(ownerData.owner1)ownerName=ownerData.owner1.fullname||ownerData.owner1.lastname||'';
-    if(!ownerName)ownerName=ownerData.owner1fullname||ownerData.fullname||ownerData.corporatename||'';
-    var absentee=ownerData.absenteeind||'';
-    var ownerOcc=absentee==='O'?'Yes':absentee==='A'?'No':'';
-    
-    var m=mort.first||mort||{};
-    var loanAmt=m.amount||m.loanamount||m.loanAmount||'';
-    var intRate=m.interestrate||m.interestRate||'';
-    var lender=m.lendername||m.lenderName||(m.lender&&(m.lender.fullname||m.lender.name))||'';
-    
-    var avmData=avm.avm&&avm.avm.amount||{};
-    
-    var row=[
-      esc(addr.line1||addr.oneLine||''),
-      esc(addr.locality||''),
-      esc(addr.countrySubd||''),
-      esc(addr.postal1||''),
-      esc(area.countrysecsubd||area.munname||''),
-      esc(summary.apn||identifier.apn||''),
-      esc(identifier.attomId||identifier.obPropId||''),
-      esc(summary.proptype||summary.propsubtype||''),
-      esc(bldg.yearbuilt||bldg.yearBuilt||''),
-      esc((bldg.size&&bldg.size.universalsize)||(bldg.size&&bldg.size.livingsize)||''),
-      esc((bldg.rooms&&bldg.rooms.beds)||''),
-      esc((bldg.rooms&&bldg.rooms.bathstotal)||(bldg.rooms&&bldg.rooms.bathsfull)||''),
-      esc(ownerName),
-      esc(ownerOcc),
-      esc(sa.saletransdate||sale.saletransdate||sale.salesearchdate||''),
-      esc(sa.saleamt||sale.saleamt||sale.saleprice||''),
-      esc(avmData.value||''),
-      esc(avmData.low||''),
-      esc(avmData.high||''),
-      armInfo&&armInfo.isARM?'Yes':'No',
-      esc(armInfo&&armInfo.armType||''),
-      esc(armInfo&&armInfo.loanAmount||loanAmt),
-      esc(armInfo&&armInfo.interestRate||intRate),
-      esc(armInfo&&armInfo.lender||lender),
-      esc(armInfo&&armInfo.originationDate||''),
-      armInfo&&armInfo.resetDate?armInfo.resetDate.toISOString().split('T')[0]:'',
-      armInfo&&armInfo.daysUntilReset!==null?armInfo.daysUntilReset:''
-    ];
-    rows.push(row.join(','));
+  allResults.forEach(p => {
+    var addr = p.address || {}, summary = p.summary || {}, arm = p._armInfo || {}, mort = p.mortgage || {};
+    var m = mort.first || mort;
+    rows.push([
+      esc(addr.line1 || addr.oneLine || ''),
+      esc(addr.locality || ''),
+      esc(addr.countrySubd || ''),
+      esc(addr.postal1 || ''),
+      esc(summary.proptype || ''),
+      esc(arm.armType || ''),
+      arm.loanAmount || m.amount || m.loanamount || '',
+      esc(arm.lender || m.lendername || m.lenderName || ''),
+      arm.resetDate ? arm.resetDate.toISOString().split('T')[0] : '',
+      arm.daysUntilReset !== null ? arm.daysUntilReset : ''
+    ].join(','));
   });
   
-  var csv=rows.join('\n');
-  var blob=new Blob([csv],{type:'text/csv'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='property_records_'+new Date().toISOString().split('T')[0]+'.csv';
+  var blob = new Blob([rows.join('\n')], {type: 'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'arm_properties_' + new Date().toISOString().split('T')[0] + '.csv';
   a.click();
-  URL.revokeObjectURL(url);
 }
 
-function esc(v){
-  if(v===null||v===undefined)return'';
-  var s=String(v);
-  if(s.indexOf(',')!==-1||s.indexOf('"')!==-1||s.indexOf('\n')!==-1){
-    return'"'+s.replace(/"/g,'""')+'"';
+function esc(v) {
+  if (v == null) return '';
+  var s = String(v);
+  return s.includes(',') || s.includes('"') ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+// ============ INIT ============
+async function checkStatus() {
+  var dot = document.getElementById('status-dot');
+  var txt = document.getElementById('status-text');
+  
+  try {
+    // Test the proxy
+    var resp = await fetch(PROXY + '/health', { method: 'GET' });
+    if (resp.ok) {
+      dot.className = 'dot live';
+      txt.textContent = 'Connected';
+      log('Proxy health check: OK');
+    } else {
+      throw new Error('Proxy returned ' + resp.status);
+    }
+  } catch (e) {
+    log('Proxy health check failed: ' + e.message);
+    // Try a simple API call
+    try {
+      await callAPI('/propertyapi/v1.0.0/property/basicprofile', { address: '1600 Pennsylvania Ave, Washington DC' });
+      dot.className = 'dot live';
+      txt.textContent = 'Connected';
+    } catch (e2) {
+      dot.className = 'dot err';
+      txt.textContent = 'Connection issue';
+      log('API test failed: ' + e2.message);
+    }
   }
-  return s;
 }
 
-document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&document.activeElement.tagName==='INPUT'){
-    var a=document.querySelector('.spanel.active');
-    if(a){var b=a.querySelector('.btn-search');if(b)b.click();}
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement.tagName === 'INPUT') {
+    var panel = document.querySelector('.panel.active');
+    if (panel) {
+      var btn = panel.querySelector('.btn');
+      if (btn) btn.click();
+    }
   }
 });
+
+// Check on load
+checkStatus();
 </script>
 </body>
 </html>
