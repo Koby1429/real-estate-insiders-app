@@ -52,6 +52,7 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
 .spinner{width:38px;height:38px;border:2px solid var(--bdr-md);border-top-color:var(--amber);border-radius:50%;animation:spin 0.75s linear infinite;margin:0 auto 1rem}
 .spinner.ai{border-top-color:var(--purple)}
 .spinner.orange{border-top-color:var(--orange)}
+.spinner.teal{border-top-color:var(--teal)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loader p{font-size:13px;color:var(--slate)}
 .loader-step{font-size:11px;color:var(--slate-dk);margin-top:4px}
@@ -130,16 +131,20 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
 /* AI BOXES */
 .ai-box{background:var(--purple-bg);border:1px solid var(--purple-bd);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem}
 .ai-box.orange{background:var(--orange-bg);border-color:var(--orange-bd)}
+.ai-box.teal{background:var(--teal-bg);border-color:var(--teal-bd)}
 .ai-box-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .ai-icon{width:28px;height:28px;border-radius:6px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:14px}
 .ai-icon.orange{background:var(--orange)}
+.ai-icon.teal{background:var(--teal)}
 .ai-box-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--purple)}
 .ai-box-title.orange{color:var(--orange)}
+.ai-box-title.teal{color:var(--teal)}
 .ai-content{font-size:13px;color:var(--white);line-height:1.7}
 .ai-content p{margin-bottom:10px}
 .ai-content p:last-child{margin-bottom:0}
 .ai-content strong{color:var(--purple)}
 .ai-content.orange strong{color:var(--orange)}
+.ai-content.teal strong{color:var(--teal)}
 .ai-content ul{margin:8px 0 12px 20px}
 .ai-content li{margin-bottom:4px}
 .ai-loading{display:flex;align-items:center;gap:10px;color:var(--slate)}
@@ -188,6 +193,7 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
 .ai-tab:hover{border-color:var(--purple-bd);color:var(--purple)}
 .ai-tab.active{background:var(--purple-bg);border-color:var(--purple-bd);color:var(--purple)}
 .ai-tab.orange.active{background:var(--orange-bg);border-color:var(--orange-bd);color:var(--orange)}
+.ai-tab.teal.active{background:var(--teal-bg);border-color:var(--teal-bd);color:var(--teal)}
 .ai-panel{display:none}
 .ai-panel.active{display:block}
 
@@ -209,7 +215,17 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
 .arm-detail-val.orange{color:var(--orange)}
 .arm-detail-val.green{color:var(--green)}
 
-@media(max-width:600px){.detail-grid,.mort-grid,.comps-grid{grid-template-columns:1fr}.frow.c2,.frow.c3{grid-template-columns:1fr}.search-card-header{flex-direction:column;align-items:flex-start}.ai-chat-msg.user{margin-left:10%}}
+/* Balance Calculator Box */
+.balance-box{background:var(--teal-bg);border:1px solid var(--teal-bd);border-radius:var(--r);padding:1.25rem;margin-top:12px}
+.balance-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.balance-big{font-family:'DM Serif Display',serif;font-size:32px;color:var(--teal)}
+.balance-label{font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:.08em}
+.balance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:12px}
+.balance-stat{text-align:center;padding:10px;background:var(--navy-3);border-radius:var(--rs)}
+.balance-stat-val{font-family:'DM Mono',monospace;font-size:14px;color:var(--white)}
+.balance-stat-label{font-size:10px;color:var(--slate);margin-top:4px}
+
+@media(max-width:600px){.detail-grid,.mort-grid,.comps-grid{grid-template-columns:1fr}.frow.c2,.frow.c3{grid-template-columns:1fr}.search-card-header{flex-direction:column;align-items:flex-start}.ai-chat-msg.user{margin-left:10%}.balance-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -295,6 +311,7 @@ var RAILWAY='https://real-estate-insiders-app-production.up.railway.app';
 
 var currentPropertyData = null;
 var currentCompsData = null;
+var currentMortgageData = null;
 var chatHistories = {};
 var armResults = [];
 
@@ -318,7 +335,7 @@ function showError(title,msg){
 
 function hideError(){document.getElementById('err-box').className='err';}
 function showResults(yes){document.getElementById('results').className='results'+(yes?' show':'');}
-function clearResults(){showResults(false);document.getElementById('result-list').innerHTML='';hideError();currentPropertyData=null;currentCompsData=null;chatHistories={};armResults=[];document.getElementById('btn-export').style.display='none';}
+function clearResults(){showResults(false);document.getElementById('result-list').innerHTML='';hideError();currentPropertyData=null;currentCompsData=null;currentMortgageData=null;chatHistories={};armResults=[];document.getElementById('btn-export').style.display='none';}
 
 function attom(path,params){
   var attomUrl=ATTOM_BASE+path+'?'+new URLSearchParams(params).toString();
@@ -386,6 +403,23 @@ async function generateCompsAnalysis(idx) {
   }
 }
 
+async function generateBalanceAnalysis(idx) {
+  const div = document.getElementById('ai-balance-'+idx);
+  if (!div || !currentMortgageData) return;
+  div.innerHTML = '<div class="ai-loading"><div class="spinner teal"></div><span>AI calculating remaining balance...</span></div>';
+  
+  const systemPrompt = "You are a mortgage analyst. Calculate the estimated remaining balance on this mortgage. Use standard amortization formulas. If rate is missing, use average rates for that year (2020: 3.1%, 2021: 2.96%, 2022: 5.34%, 2023: 6.81%, 2024: 6.72%, 2025: 6.5%). Assume 30-year term unless stated. Show: 1) Estimated remaining balance 2) Monthly payment estimate 3) Total paid so far 4) Principal vs interest breakdown 5) Equity built. Be specific with dollar amounts. Format with HTML. Include a summary box at top with the key number.";
+
+  const ctx = "Calculate remaining mortgage balance:\nOriginal Loan Amount: "+currentMortgageData.amount+"\nLoan Date: "+currentMortgageData.date+"\nInterest Rate: "+currentMortgageData.rate+"\nLender: "+currentMortgageData.lender+"\nLoan Type: "+(currentMortgageData.loanType||'Conventional')+"\nProperty Value (AVM): "+currentPropertyData.avmValue+"\nToday's Date: "+new Date().toLocaleDateString();
+
+  try {
+    const analysis = await askClaude([{role:"user",content:ctx}], systemPrompt);
+    div.innerHTML = '<div class="ai-content teal">'+analysis+'</div>';
+  } catch(e) {
+    div.innerHTML = '<div class="ai-error">⚠️ Balance calculation unavailable</div>';
+  }
+}
+
 async function sendChatMessage(idx) {
   const input = document.getElementById('chat-input-'+idx);
   const messagesDiv = document.getElementById('chat-messages-'+idx);
@@ -407,7 +441,7 @@ async function sendChatMessage(idx) {
     compsInfo = '\n\nCOMPARABLE SALES:\n' + currentCompsData.map(function(c,i){return "Comp "+(i+1)+": "+c.address+" - $"+(c.price?c.price.toLocaleString():'N/A')+", "+(c.sqft||'?')+"sqft, "+(c.beds||'?')+"bd/"+(c.baths||'?')+"ba";}).join('\n');
   }
   
-  const systemPrompt = "You are a real estate assistant. Property data:\n"+JSON.stringify(currentPropertyData)+compsInfo+"\nAnswer concisely (<150 words). Use HTML formatting if helpful.";
+  const systemPrompt = "You are a real estate assistant. Property data:\n"+JSON.stringify(currentPropertyData)+"\nMortgage data:\n"+JSON.stringify(currentMortgageData)+compsInfo+"\nAnswer concisely (<150 words). Use HTML formatting if helpful.";
 
   try {
     const response = await askClaude(chatHistories[idx], systemPrompt);
@@ -436,6 +470,11 @@ function switchAiTab(idx, tab) {
   panels.forEach(function(p){p.classList.remove('active');});
   document.querySelector('#ai-tabs-'+idx+' [data-tab="'+tab+'"]').classList.add('active');
   document.getElementById('ai-panel-'+tab+'-'+idx).classList.add('active');
+  
+  // Trigger balance analysis when tab is clicked
+  if (tab === 'balance') {
+    generateBalanceAnalysis(idx);
+  }
 }
 
 function escapeHtml(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
@@ -709,22 +748,43 @@ function buildCard(p,idx){
   var avmLow=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.low);
   var avmHigh=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.high);
 
-  var mortgageAmount='—',mortgageRate='—',lenderName='—';
-  if(mort.first&&Object.keys(mort.first).length>1){
-    var m=mort.first;
-    mortgageAmount=fmtMoney(m.amount||m.loanamount);
-    var ir=m.interestrate||m.interestRate;
-    mortgageRate=ir?(parseFloat(ir).toFixed(3)+'%'):'—';
-    var lr=m.lender||{};
-    lenderName=typeof lr==='string'?fmt(lr):fmt(m.lendername||lr.fullname||lr.name);
+  // Extract mortgage data - more flexible detection
+  var mortgageAmount='—',mortgageRate='—',lenderName='—',mortgageDate='—',loanType='—';
+  var hasMortgage = false;
+  var m = mort.first || mort.First || {};
+  
+  // Check multiple possible field names
+  var amt = m.amount || m.loanamount || m.Amount || m.LoanAmount;
+  if (amt) {
+    mortgageAmount = fmtMoney(amt);
+    hasMortgage = true;
   }
+  
+  var ir = m.interestrate || m.interestRate || m.InterestRate || m.rate;
+  if (ir) mortgageRate = parseFloat(ir).toFixed(3)+'%';
+  
+  var lr = m.lender || {};
+  lenderName = typeof lr === 'string' ? fmt(lr) : fmt(m.lendername || m.LenderName || lr.fullname || lr.name || lr.FullName);
+  
+  mortgageDate = fmtDate(m.recordingdate || m.recordingDate || m.RecordingDate || m.originationdate);
+  loanType = fmt(m.loantype || m.loantypecode || m.LoanType);
+
+  // Store mortgage data for AI balance calculator
+  currentMortgageData = {
+    amount: mortgageAmount,
+    rate: mortgageRate,
+    lender: lenderName,
+    date: mortgageDate,
+    loanType: loanType,
+    hasMortgage: hasMortgage
+  };
 
   // Check for ARM
   var armInfo = isARM(mort);
   var armHtml = '';
   if (armInfo) {
-    var m = armInfo.mortgage;
-    var origDate = m.recordingdate || m.recordingDate || m.originationdate;
+    var am = armInfo.mortgage;
+    var origDate = am.recordingdate || am.recordingDate || am.originationdate;
     var resetDate = calculateResetDate(origDate, armInfo.type);
     var daysLeft = resetDate ? Math.ceil((resetDate - new Date()) / (1000 * 60 * 60 * 24)) : null;
     
@@ -767,6 +827,7 @@ function buildCard(p,idx){
 
   var badges='<span class="badge badge-purple">🤖 AI</span><span class="badge badge-orange">📊 Comps</span>';
   if(armInfo)badges+='<span class="badge badge-orange">🔥 ARM</span>';
+  if(hasMortgage)badges+='<span class="badge badge-teal">💰 Mortgage</span>';
   if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
   if(avmVal&&avmVal!=='—')badges+='<span class="badge badge-green">'+avmVal+'</span>';
 
@@ -780,6 +841,7 @@ function buildCard(p,idx){
   html+='<div class="ai-tabs" id="ai-tabs-'+idx+'">';
   html+='<div class="ai-tab active" data-tab="insights" onclick="switchAiTab('+idx+',\'insights\')">🤖 AI Insights</div>';
   html+='<div class="ai-tab orange" data-tab="comps" onclick="switchAiTab('+idx+',\'comps\')">📊 Comps Analysis</div>';
+  html+='<div class="ai-tab teal" data-tab="balance" onclick="switchAiTab('+idx+',\'balance\')">💰 Balance Calculator</div>';
   html+='<div class="ai-tab" data-tab="chat" onclick="switchAiTab('+idx+',\'chat\')">💬 Ask AI</div>';
   html+='</div>';
 
@@ -820,10 +882,27 @@ function buildCard(p,idx){
   }
   html+='</div>';
 
+  // Balance Calculator Panel
+  html+='<div class="ai-panel" id="ai-panel-balance-'+idx+'">';
+  html+='<div class="ai-box teal"><div class="ai-box-header"><div class="ai-icon teal">💰</div><div class="ai-box-title teal">AI Mortgage Balance Calculator</div></div>';
+  html+='<div id="ai-balance-'+idx+'">';
+  if (hasMortgage) {
+    html+='<p style="color:var(--slate);font-size:13px;margin-bottom:12px">Click this tab to calculate estimated remaining balance based on loan amount, date, and average rates.</p>';
+    html+='<div class="arm-details">';
+    html+='<div class="arm-detail"><span class="arm-detail-label">Original Loan</span><span class="arm-detail-val">'+mortgageAmount+'</span></div>';
+    html+='<div class="arm-detail"><span class="arm-detail-label">Loan Date</span><span class="arm-detail-val">'+mortgageDate+'</span></div>';
+    html+='<div class="arm-detail"><span class="arm-detail-label">Rate</span><span class="arm-detail-val green">'+mortgageRate+'</span></div>';
+    html+='<div class="arm-detail"><span class="arm-detail-label">Lender</span><span class="arm-detail-val">'+lenderName+'</span></div>';
+    html+='</div>';
+  } else {
+    html+='<p style="color:var(--slate)">No mortgage data found for this property.</p>';
+  }
+  html+='</div></div></div>';
+
   html+='<div class="ai-panel" id="ai-panel-chat-'+idx+'">';
   html+='<div class="ai-chat"><div class="ai-chat-header"><span>💬 Ask AI About This Property</span></div>';
   html+='<div class="ai-chat-messages" id="chat-messages-'+idx+'"><div class="ai-chat-msg assistant">I\'ve analyzed this property and comps. Ask me anything!</div></div>';
-  html+='<div class="quick-questions"><span onclick="askQuickQuestion('+idx+',\'Is this a good investment?\')" class="quick-q">Good investment?</span><span onclick="askQuickQuestion('+idx+',\'What are the red flags?\')" class="quick-q">Red flags?</span><span onclick="askQuickQuestion('+idx+',\'Estimate rental income\')" class="quick-q">Rental income?</span><span onclick="askQuickQuestion('+idx+',\'How does it compare to comps?\')" class="quick-q">Compare to comps?</span><span onclick="askQuickQuestion('+idx+',\'Calculate equity\')" class="quick-q">Equity?</span></div>';
+  html+='<div class="quick-questions"><span onclick="askQuickQuestion('+idx+',\'Is this a good investment?\')" class="quick-q">Good investment?</span><span onclick="askQuickQuestion('+idx+',\'What are the red flags?\')" class="quick-q">Red flags?</span><span onclick="askQuickQuestion('+idx+',\'Estimate rental income\')" class="quick-q">Rental income?</span><span onclick="askQuickQuestion('+idx+',\'How does it compare to comps?\')" class="quick-q">Compare to comps?</span><span onclick="askQuickQuestion('+idx+',\'Calculate remaining mortgage balance\')" class="quick-q">Mortgage balance?</span></div>';
   html+='<div class="ai-chat-input"><input type="text" id="chat-input-'+idx+'" placeholder="Ask about this property..." onkeydown="if(event.key===\'Enter\')sendChatMessage('+idx+')"><button id="chat-send-'+idx+'" onclick="sendChatMessage('+idx+')">Send</button></div></div>';
   html+='</div>';
 
@@ -849,19 +928,35 @@ function buildCard(p,idx){
     html+='</tbody></table>';
   }
 
-  var mortList=[];
-  if(mort.first&&Object.keys(mort.first).length>1)mortList.push({label:'1st Mortgage',m:mort.first});
-  if(mort.second&&Object.keys(mort.second).length>1)mortList.push({label:'2nd Mortgage',m:mort.second});
-  if(mortList.length>0){
-    html+='<div class="section-title teal">Mortgages</div><div class="mort-grid">';
-    mortList.forEach(function(item){
-      var m=item.m;
-      var lr=m.lender||{};
-      var ln=typeof lr==='string'?fmt(lr):fmt(m.lendername||lr.fullname||lr.name);
-      var ir=m.interestrate||m.interestRate;
-      html+='<div class="mort-card"><div class="mc-label">'+item.label+'</div>'+drow('Lender',ln,'teal')+drow('Amount',fmtMoney(m.amount||m.loanamount),'hi')+drow('Rate',ir?(parseFloat(ir).toFixed(3)+'%'):'—','green')+drow('Recorded',fmtDate(m.recordingdate||m.recordingDate))+'</div>';
-    });
+  // ALWAYS show mortgage section if any data exists
+  html+='<div class="section-title teal">Mortgage</div>';
+  if (hasMortgage || mortgageAmount !== '—' || lenderName !== '—') {
+    html+='<div class="mort-grid">';
+    html+='<div class="mort-card"><div class="mc-label">1st Mortgage</div>';
+    html+=drow('Lender',lenderName,'teal');
+    html+=drow('Amount',mortgageAmount,'hi');
+    html+=drow('Rate',mortgageRate,'green');
+    html+=drow('Type',loanType);
+    html+=drow('Recorded',mortgageDate);
     html+='</div>';
+    
+    // Check for 2nd mortgage
+    var m2 = mort.second || mort.Second || {};
+    var amt2 = m2.amount || m2.loanamount;
+    if (amt2) {
+      var lr2 = m2.lender || {};
+      var ln2 = typeof lr2 === 'string' ? fmt(lr2) : fmt(m2.lendername || lr2.fullname || lr2.name);
+      var ir2 = m2.interestrate || m2.interestRate;
+      html+='<div class="mort-card"><div class="mc-label">2nd Mortgage</div>';
+      html+=drow('Lender',ln2,'teal');
+      html+=drow('Amount',fmtMoney(amt2),'hi');
+      html+=drow('Rate',ir2?(parseFloat(ir2).toFixed(3)+'%'):'—','green');
+      html+=drow('Recorded',fmtDate(m2.recordingdate||m2.recordingDate));
+      html+='</div>';
+    }
+    html+='</div>';
+  } else {
+    html+='<p style="color:var(--slate);font-size:13px">No mortgage data on file for this property.</p>';
   }
 
   html+='<div class="section-title green">Links</div>';
