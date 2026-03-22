@@ -408,9 +408,28 @@ async function generateBalanceAnalysis(idx) {
   if (!div || !currentMortgageData) return;
   div.innerHTML = '<div class="ai-loading"><div class="spinner teal"></div><span>AI calculating remaining balance...</span></div>';
   
-  const systemPrompt = "You are a mortgage analyst. Calculate the estimated remaining balance on this mortgage. Use standard amortization formulas. If rate is missing, use average rates for that year (2020: 3.1%, 2021: 2.96%, 2022: 5.34%, 2023: 6.81%, 2024: 6.72%, 2025: 6.5%). Assume 30-year term unless stated. Show: 1) Estimated remaining balance 2) Monthly payment estimate 3) Total paid so far 4) Principal vs interest breakdown 5) Equity built. Be specific with dollar amounts. Format with HTML. Include a summary box at top with the key number.";
+  // Calculate loan start date from maturity if missing
+  let loanStartDate = currentMortgageData.date;
+  let dateNote = '';
+  if ((!loanStartDate || loanStartDate === '—') && currentMortgageData.maturity && currentMortgageData.maturity !== '—') {
+    // Calculate from maturity - term
+    const matDate = new Date(currentMortgageData.maturity);
+    let termMonths = 360; // default 30 years
+    if (currentMortgageData.term && currentMortgageData.term !== '—') {
+      const match = currentMortgageData.term.match(/(\d+)/);
+      if (match) termMonths = parseInt(match[1]);
+    }
+    if (!isNaN(matDate.getTime())) {
+      const startDate = new Date(matDate);
+      startDate.setMonth(startDate.getMonth() - termMonths);
+      loanStartDate = startDate.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+      dateNote = ' (calculated from maturity date minus term)';
+    }
+  }
+  
+  const systemPrompt = "You are a mortgage analyst. Calculate the estimated remaining balance. Use standard amortization formulas. IMPORTANT: If the loan date says 'calculated from maturity', it is accurate - use it. If rate is missing, use average rates for that origination year (2020: 3.1%, 2021: 2.96%, 2022: 5.34%, 2023: 6.81%, 2024: 6.72%, 2025: 6.5%, 2026: 6.3%). Show: 1) Estimated remaining balance 2) Monthly payment estimate 3) Total paid so far 4) Principal vs interest breakdown 5) Equity built. Be specific with dollar amounts. Format with HTML. Include a summary box at top with the key number.";
 
-  const ctx = "Calculate remaining mortgage balance:\nOriginal Loan Amount: "+currentMortgageData.amount+"\nLoan Date: "+currentMortgageData.date+"\nInterest Rate: "+currentMortgageData.rate+"\nLender: "+currentMortgageData.lender+"\nLoan Type: "+(currentMortgageData.loanType||'Conventional')+"\nProperty Value (AVM): "+currentPropertyData.avmValue+"\nToday's Date: "+new Date().toLocaleDateString();
+  const ctx = "Calculate remaining mortgage balance:\nOriginal Loan Amount: "+currentMortgageData.amount+"\nLoan Date: "+loanStartDate+dateNote+"\nMaturity Date: "+(currentMortgageData.maturity||'—')+"\nTerm: "+(currentMortgageData.term||'30 years')+"\nInterest Rate: "+currentMortgageData.rate+"\nLender: "+currentMortgageData.lender+"\nLoan Type: "+(currentMortgageData.loanType||'Conventional')+"\nProperty Value (AVM): "+currentPropertyData.avmValue+"\nToday's Date: "+new Date().toLocaleDateString();
 
   try {
     const analysis = await askClaude([{role:"user",content:ctx}], systemPrompt);
@@ -652,8 +671,12 @@ function search(mode){
     return attom('/propertyapi/v1.0.0/property/detailmortgage',{attomId:attomId});
   })
   .then(function(d){
+    console.log('Raw detailmortgage API response:', JSON.stringify(d, null, 2));
     var props=[d.property||d.Property].flat().filter(Boolean);
-    if(props.length)mergedData.detail=props[0];
+    if(props.length){
+      console.log('Extracted property from detailmortgage:', JSON.stringify(props[0], null, 2));
+      mergedData.detail=props[0];
+    }
     showLoader(true,'Step 3 of 6: Getting owner & AVM…');
     return Promise.all([
       attom('/propertyapi/v1.0.0/property/detailowner',{attomId:attomId}).catch(function(){return null;}),
@@ -682,6 +705,7 @@ function search(mode){
     }
     showLoader(true,'Step 6 of 6: Running AI analysis…');
     var final=Object.assign({},mergedData.basic||{},mergedData.detail||{});
+    console.log('Final merged data - mortgage:', JSON.stringify(final.mortgage, null, 2));
     if(mergedData.owner&&mergedData.owner.owner)final.owner=mergedData.owner.owner;
     if(mergedData.avm)final._avm=mergedData.avm;
     if(mergedData.history)final._history=mergedData.history;
@@ -750,24 +774,83 @@ function buildCard(p,idx){
 
   // Extract mortgage data - more flexible detection
   var mortgageAmount='—',mortgageRate='—',lenderName='—',mortgageDate='—',loanType='—';
+  var mortgageTerm='—',mortgageMaturity='—',calculatedFromMaturity=false;
   var hasMortgage = false;
-  var m = mort.first || mort.First || {};
+  var isEstimated = false;
   
-  // Check multiple possible field names
-  var amt = m.amount || m.loanamount || m.Amount || m.LoanAmount;
+  // Debug: log raw mortgage object
+  console.log('Raw mortgage object:', JSON.stringify(mort, null, 2));
+  
+  // Try multiple paths to find mortgage data
+  var m = mort.first || mort.First || mort.mortgage1 || mort.currentMortgage || mort || {};
+  
+  // If mort itself has amount fields directly, use them
+  if (!m.amount && mort.amount) m = mort;
+  if (!m.amount && mort.loanAmount1) m = { amount: mort.loanAmount1, lender: mort.lenderName1, term: mort.loanTerm1, maturitydate: mort.maturityDate1 };
+  
+  // Check multiple possible field names for amount
+  var amt = m.amount || m.loanamount || m.Amount || m.LoanAmount || m.loanAmount || m.mortgageAmount || m.MortgageAmount;
   if (amt) {
     mortgageAmount = fmtMoney(amt);
     hasMortgage = true;
   }
   
-  var ir = m.interestrate || m.interestRate || m.InterestRate || m.rate;
+  // Interest rate
+  var ir = m.interestrate || m.interestRate || m.InterestRate || m.rate || m.Rate;
   if (ir) mortgageRate = parseFloat(ir).toFixed(3)+'%';
   
+  // Lender name - multiple possible structures
   var lr = m.lender || {};
-  lenderName = typeof lr === 'string' ? fmt(lr) : fmt(m.lendername || m.LenderName || lr.fullname || lr.name || lr.FullName);
+  if (typeof lr === 'string') {
+    lenderName = fmt(lr);
+  } else {
+    lenderName = fmt(m.lendername || m.lenderName || m.LenderName || lr.fullname || lr.fullName || lr.name || lr.FullName || lr.companyname || lr.companyName);
+  }
   
-  mortgageDate = fmtDate(m.recordingdate || m.recordingDate || m.RecordingDate || m.originationdate);
-  loanType = fmt(m.loantype || m.loantypecode || m.LoanType);
+  // Extract term (in months)
+  var termMonths = m.term || m.loanterm || m.loanTerm || m.termmonths || m.termMonths || m.Term || m.LoanTerm || m.TermMonths;
+  if (termMonths) {
+    var yrs = Math.round(parseInt(termMonths) / 12);
+    mortgageTerm = termMonths + ' months (' + yrs + ' yrs)';
+  }
+  
+  // Extract maturity date
+  var maturityRaw = m.maturitydate || m.maturityDate || m.duedate || m.dueDate || m.MaturityDate || m.DueDate || m.maturity;
+  if (maturityRaw) {
+    mortgageMaturity = fmtDate(maturityRaw);
+  }
+  
+  // Try to get recording/origination date first
+  var recordedRaw = m.recordingdate || m.recordingDate || m.RecordingDate || m.originationdate || m.originationDate || m.OriginationDate || m.loandate || m.loanDate;
+  mortgageDate = fmtDate(recordedRaw);
+  
+  // If no recording date, calculate from maturity - term
+  if (mortgageDate === '—' && maturityRaw && termMonths) {
+    var maturityDate = new Date(maturityRaw);
+    if (!isNaN(maturityDate.getTime())) {
+      var originationDate = new Date(maturityDate);
+      originationDate.setMonth(originationDate.getMonth() - parseInt(termMonths));
+      mortgageDate = fmtDate(originationDate.toISOString());
+      calculatedFromMaturity = true;
+    }
+  }
+  
+  loanType = fmt(m.loantype || m.loanType || m.loantypecode || m.loanTypeCode || m.LoanType);
+  
+  console.log('Extracted mortgage data:', {hasMortgage, mortgageAmount, mortgageRate, lenderName, mortgageDate, mortgageTerm, mortgageMaturity, loanType});
+
+  // If no explicit mortgage data, estimate from sale price (assume 80% LTV)
+  var saleAmt = parseInt(sa.saleamt || sale.saleamt) || 0;
+  var saleDate = sa.saletransdate || sale.saletransdate || sale.salesearchdate;
+  if (!hasMortgage && saleAmt > 0) {
+    var estimatedLoan = Math.round(saleAmt * 0.8); // 80% LTV assumption
+    mortgageAmount = fmtMoney(estimatedLoan) + ' (est)';
+    mortgageDate = fmtDate(saleDate);
+    mortgageRate = '—'; // Will use historical avg
+    lenderName = 'Unknown (estimated from sale)';
+    hasMortgage = true;
+    isEstimated = true;
+  }
 
   // Store mortgage data for AI balance calculator
   currentMortgageData = {
@@ -776,7 +859,13 @@ function buildCard(p,idx){
     lender: lenderName,
     date: mortgageDate,
     loanType: loanType,
-    hasMortgage: hasMortgage
+    term: mortgageTerm,
+    maturity: mortgageMaturity,
+    calculatedFromMaturity: calculatedFromMaturity,
+    hasMortgage: hasMortgage,
+    isEstimated: isEstimated,
+    salePrice: fmtMoney(saleAmt),
+    saleDateRaw: saleDate
   };
 
   // Check for ARM
@@ -890,8 +979,14 @@ function buildCard(p,idx){
     html+='<p style="color:var(--slate);font-size:13px;margin-bottom:12px">Click this tab to calculate estimated remaining balance based on loan amount, date, and average rates.</p>';
     html+='<div class="arm-details">';
     html+='<div class="arm-detail"><span class="arm-detail-label">Original Loan</span><span class="arm-detail-val">'+mortgageAmount+'</span></div>';
-    html+='<div class="arm-detail"><span class="arm-detail-label">Loan Date</span><span class="arm-detail-val">'+mortgageDate+'</span></div>';
+    if (calculatedFromMaturity) {
+      html+='<div class="arm-detail"><span class="arm-detail-label">Loan Date</span><span class="arm-detail-val">'+mortgageDate+' <span style="color:var(--green);font-size:10px">(from maturity)</span></span></div>';
+    } else {
+      html+='<div class="arm-detail"><span class="arm-detail-label">Loan Date</span><span class="arm-detail-val">'+mortgageDate+'</span></div>';
+    }
     html+='<div class="arm-detail"><span class="arm-detail-label">Rate</span><span class="arm-detail-val green">'+mortgageRate+'</span></div>';
+    html+='<div class="arm-detail"><span class="arm-detail-label">Term</span><span class="arm-detail-val">'+mortgageTerm+'</span></div>';
+    html+='<div class="arm-detail"><span class="arm-detail-label">Maturity</span><span class="arm-detail-val green">'+mortgageMaturity+'</span></div>';
     html+='<div class="arm-detail"><span class="arm-detail-label">Lender</span><span class="arm-detail-val">'+lenderName+'</span></div>';
     html+='</div>';
   } else {
@@ -937,7 +1032,13 @@ function buildCard(p,idx){
     html+=drow('Amount',mortgageAmount,'hi');
     html+=drow('Rate',mortgageRate,'green');
     html+=drow('Type',loanType);
-    html+=drow('Recorded',mortgageDate);
+    html+=drow('Term',mortgageTerm);
+    if (calculatedFromMaturity) {
+      html+=drow('Recorded',mortgageDate + ' (calc)');
+    } else {
+      html+=drow('Recorded',mortgageDate);
+    }
+    html+=drow('Maturity',mortgageMaturity,'green');
     html+='</div>';
     
     // Check for 2nd mortgage
