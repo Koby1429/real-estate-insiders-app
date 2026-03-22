@@ -225,6 +225,29 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
 .balance-stat-val{font-family:'DM Mono',monospace;font-size:14px;color:var(--white)}
 .balance-stat-label{font-size:10px;color:var(--slate);margin-top:4px}
 
+/* Person Search */
+.owner-link{color:var(--purple);cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
+.owner-link:hover{color:var(--amber);text-decoration-style:solid}
+.person-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.person-modal.show{opacity:1;pointer-events:auto}
+.person-modal-box{background:var(--navy-2);border:1px solid var(--bdr-md);border-radius:var(--r);padding:1.5rem;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
+.person-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--bdr)}
+.person-modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--white)}
+.person-modal-close{background:none;border:none;color:var(--slate);font-size:24px;cursor:pointer;padding:0;line-height:1}
+.person-modal-close:hover{color:var(--white)}
+.person-modal-name{font-size:14px;color:var(--purple);margin-bottom:1rem;font-family:'DM Mono',monospace}
+.person-modal-section{margin-bottom:1rem}
+.person-modal-section-title{font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.search-link{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--navy-3);border:1px solid var(--bdr);border-radius:var(--rs);margin-bottom:6px;text-decoration:none;color:var(--white);font-size:13px;transition:all 0.15s}
+.search-link:hover{background:var(--navy-4);border-color:var(--purple-bd)}
+.search-link-icon{font-size:16px}
+.search-link-name{flex:1}
+.search-link-arrow{color:var(--slate);font-size:12px}
+.search-link.premium{border-color:var(--amber-bd)}
+.search-link.premium .search-link-name{color:var(--amber)}
+.stab.purple{color:var(--purple)}
+.stab.purple.active{color:var(--purple);border-bottom-color:var(--purple)}
+
 @media(max-width:600px){.detail-grid,.mort-grid,.comps-grid{grid-template-columns:1fr}.frow.c2,.frow.c3{grid-template-columns:1fr}.search-card-header{flex-direction:column;align-items:flex-start}.ai-chat-msg.user{margin-left:10%}.balance-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -253,6 +276,7 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
       <button class="stab active" onclick="switchTab('address',this)">Search by Address</button>
       <button class="stab" onclick="switchTab('apn',this)">Search by APN</button>
       <button class="stab arm" onclick="switchTab('arm',this)">🔥 ARM Search</button>
+      <button class="stab purple" onclick="switchTab('person',this)">👤 Person Search</button>
     </div>
     <div class="spanel active" id="panel-address">
       <div class="fsingle">
@@ -288,6 +312,18 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
         </div>
       </div>
       <button class="btn-search orange" onclick="searchARM()">🔥 Find ARM Properties</button>
+    </div>
+    <div class="spanel" id="panel-person">
+      <div class="frow c2">
+        <div><label>First Name</label><input type="text" id="person-first" placeholder="e.g. John"></div>
+        <div><label>Last Name</label><input type="text" id="person-last" placeholder="e.g. Smith"></div>
+      </div>
+      <div class="frow c2">
+        <div><label>City (optional)</label><input type="text" id="person-city" placeholder="e.g. Phoenix"></div>
+        <div><label>State (optional)</label><input type="text" id="person-state" placeholder="e.g. AZ"></div>
+      </div>
+      <button class="btn-search" style="background:var(--purple)" onclick="searchPerson()">👤 Search Person</button>
+      <p style="font-size:11px;color:var(--slate);margin-top:10px;text-align:center">Opens free people search sites in new tabs. For skip tracing, we recommend <a href="https://batchskiptracing.com" target="_blank" style="color:var(--amber)">BatchSkipTracing</a> or <a href="https://www.whitepages.com/pro" target="_blank" style="color:var(--amber)">Whitepages Pro</a>.</p>
     </div>
   </div>
   <div class="loader" id="loader"><div class="spinner"></div><p>Pulling full ATTOM records…</p><div class="loader-step" id="loader-step">Step 1 of 6: Finding property…</div></div>
@@ -1009,7 +1045,17 @@ function buildCard(p,idx){
 
   html+='<div class="section-title" style="margin-top:1.5rem">Property Details</div>';
   html+='<div class="detail-grid"><div class="detail-col"><h4>Building</h4>'+drow('APN',apn)+drow('Type',propType)+drow('Year',yearBlt)+drow('Sqft',sqft)+drow('Beds/Baths',beds+'/'+baths)+'</div>';
-  html+='<div class="detail-col"><h4>Location</h4>'+drow('County',county)+drow('Lot (acres)',lotSize1)+drow('Owner',ownerName)+drow('Occupied',ownerOccupied)+'</div></div>';
+  
+  // Make owner name clickable for person search
+  var ownerRow = '<div class="detail-row"><span class="detail-label">Owner</span><span class="detail-val">';
+  if (ownerName && ownerName !== '—') {
+    ownerRow += '<span class="owner-link" onclick="searchOwner(\'' + ownerName.replace(/'/g, "\\'") + '\', \'' + (city||'').replace(/'/g, "\\'") + '\', \'' + (state||'').replace(/'/g, "\\'") + '\')" title="Click to search for owner contact info">' + ownerName + ' 🔍</span>';
+  } else {
+    ownerRow += '—';
+  }
+  ownerRow += '</span></div>';
+  
+  html+='<div class="detail-col"><h4>Location</h4>'+drow('County',county)+drow('Lot (acres)',lotSize1)+ownerRow+drow('Occupied',ownerOccupied)+'</div></div>';
 
   html+='<div class="section-title">Sale & Taxes</div>'+drow('Last Sale',lastSaleAmt,'hi')+drow('Sale Date',lastSaleDate,'teal')+drow('Assessed',asmtTotal)+drow('Annual Tax',taxAmt,'hi');
 
@@ -1089,10 +1135,138 @@ document.addEventListener('keydown',function(e){
     var a=document.querySelector('.spanel.active');
     if(a){
       if(a.id==='panel-arm'){searchARM();}
+      else if(a.id==='panel-person'){searchPerson();}
       else{var b=a.querySelector('.btn-search');if(b)b.click();}
     }
   }
+  // Close modal on Escape
+  if(e.key==='Escape'){closePersonModal();}
 });
+
+// Person Search Functions
+function getPersonSearchLinks(firstName, lastName, city, state) {
+  var name = encodeURIComponent((firstName + ' ' + lastName).trim());
+  var fullName = encodeURIComponent((firstName + ' ' + lastName + (city ? ' ' + city : '') + (state ? ' ' + state : '')).trim());
+  var cityState = (city && state) ? encodeURIComponent(city + ', ' + state) : '';
+  
+  return {
+    free: [
+      {name: 'TruePeopleSearch', icon: '🔍', url: 'https://www.truepeoplesearch.com/results?name=' + name + (cityState ? '&citystatezip=' + cityState : '')},
+      {name: 'FastPeopleSearch', icon: '⚡', url: 'https://www.fastpeoplesearch.com/name/' + name.replace(/%20/g, '-').toLowerCase()},
+      {name: 'That\'s Them', icon: '👤', url: 'https://thatsthem.com/name/' + name.replace(/%20/g, '-')},
+      {name: 'Whitepages', icon: '📖', url: 'https://www.whitepages.com/name/' + name.replace(/%20/g, '-') + (city && state ? '/' + encodeURIComponent(city) + '-' + encodeURIComponent(state) : '')},
+      {name: 'Radaris', icon: '🎯', url: 'https://radaris.com/p/' + firstName + '/' + lastName + '/'},
+      {name: 'Nuwber', icon: '📊', url: 'https://nuwber.com/search?name=' + name},
+    ],
+    paid: [
+      {name: 'BeenVerified', icon: '✅', url: 'https://www.beenverified.com/people/' + name.replace(/%20/g, '-').toLowerCase() + '/'},
+      {name: 'Spokeo', icon: '🔎', url: 'https://www.spokeo.com/' + firstName + '-' + lastName},
+      {name: 'Intelius', icon: '🔬', url: 'https://www.intelius.com/people-search/' + name.replace(/%20/g, '-') + '/'},
+    ],
+    criminal: [
+      {name: 'Arrests.org', icon: '⚠️', url: 'https://arrests.org/?s=' + name},
+      {name: 'CourtListener (RECAP)', icon: '⚖️', url: 'https://www.courtlistener.com/?q=' + name + '&type=r'},
+      {name: 'VineLink (Inmates)', icon: '🔒', url: 'https://www.vinelink.com/#/search'},
+      {name: 'Federal PACER', icon: '🏛️', url: 'https://pacer.uscourts.gov/'},
+      {name: state ? state + ' Courts' : 'State Courts', icon: '📋', url: 'https://www.google.com/search?q=' + encodeURIComponent((state || '') + ' state court records search ' + firstName + ' ' + lastName)},
+    ],
+    social: [
+      {name: 'Google', icon: '🌐', url: 'https://www.google.com/search?q=' + fullName},
+      {name: 'LinkedIn', icon: '💼', url: 'https://www.linkedin.com/search/results/people/?keywords=' + name},
+      {name: 'Facebook', icon: '👥', url: 'https://www.facebook.com/search/people/?q=' + name},
+    ]
+  };
+}
+
+function searchPerson() {
+  var firstName = document.getElementById('person-first').value.trim();
+  var lastName = document.getElementById('person-last').value.trim();
+  var city = document.getElementById('person-city').value.trim();
+  var state = document.getElementById('person-state').value.trim();
+  
+  if (!firstName && !lastName) {
+    alert('Please enter at least a first or last name');
+    return;
+  }
+  
+  openPersonModal(firstName, lastName, city, state);
+}
+
+function openPersonModal(firstName, lastName, city, state) {
+  var links = getPersonSearchLinks(firstName, lastName, city, state);
+  var modal = document.getElementById('person-modal');
+  var content = document.getElementById('person-modal-content');
+  
+  var html = '<div class="person-modal-name">👤 ' + firstName + ' ' + lastName + (city ? ', ' + city : '') + (state ? ', ' + state : '') + '</div>';
+  
+  // Free People Search
+  html += '<div class="person-modal-section"><div class="person-modal-section-title">🆓 Free People Search</div>';
+  links.free.forEach(function(l) {
+    html += '<a href="' + l.url + '" target="_blank" class="search-link"><span class="search-link-icon">' + l.icon + '</span><span class="search-link-name">' + l.name + '</span><span class="search-link-arrow">→</span></a>';
+  });
+  html += '</div>';
+  
+  // Paid Services
+  html += '<div class="person-modal-section"><div class="person-modal-section-title">💳 Paid Services (More Data)</div>';
+  links.paid.forEach(function(l) {
+    html += '<a href="' + l.url + '" target="_blank" class="search-link premium"><span class="search-link-icon">' + l.icon + '</span><span class="search-link-name">' + l.name + '</span><span class="search-link-arrow">→</span></a>';
+  });
+  html += '</div>';
+  
+  // Criminal Records
+  html += '<div class="person-modal-section"><div class="person-modal-section-title">⚖️ Criminal & Court Records</div>';
+  links.criminal.forEach(function(l) {
+    html += '<a href="' + l.url + '" target="_blank" class="search-link"><span class="search-link-icon">' + l.icon + '</span><span class="search-link-name">' + l.name + '</span><span class="search-link-arrow">→</span></a>';
+  });
+  html += '</div>';
+  
+  // Social
+  html += '<div class="person-modal-section"><div class="person-modal-section-title">🌐 Social & Web</div>';
+  links.social.forEach(function(l) {
+    html += '<a href="' + l.url + '" target="_blank" class="search-link"><span class="search-link-icon">' + l.icon + '</span><span class="search-link-name">' + l.name + '</span><span class="search-link-arrow">→</span></a>';
+  });
+  html += '</div>';
+  
+  content.innerHTML = html;
+  modal.classList.add('show');
+}
+
+function closePersonModal() {
+  var modal = document.getElementById('person-modal');
+  if (modal) modal.classList.remove('show');
+}
+
+function searchOwner(ownerName, city, state) {
+  // Parse owner name - often in "LASTNAME FIRSTNAME" or "LASTNAME, FIRSTNAME" format
+  var parts = ownerName.replace(/,/g, ' ').trim().split(/\s+/);
+  var firstName = '', lastName = '';
+  
+  if (parts.length >= 2) {
+    // Assume LAST FIRST format (common in property records)
+    lastName = parts[0];
+    firstName = parts.slice(1).join(' ');
+  } else {
+    lastName = parts[0] || '';
+  }
+  
+  // Clean up
+  firstName = firstName.replace(/[^a-zA-Z\s\-]/g, '').trim();
+  lastName = lastName.replace(/[^a-zA-Z\s\-]/g, '').trim();
+  
+  openPersonModal(firstName, lastName, city, state);
+}
 </script>
+
+<!-- Person Search Modal -->
+<div class="person-modal" id="person-modal" onclick="if(event.target===this)closePersonModal()">
+  <div class="person-modal-box">
+    <div class="person-modal-header">
+      <div class="person-modal-title">Person Search</div>
+      <button class="person-modal-close" onclick="closePersonModal()">&times;</button>
+    </div>
+    <div id="person-modal-content"></div>
+  </div>
+</div>
+
 </body>
 </html>
