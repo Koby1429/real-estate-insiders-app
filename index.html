@@ -347,9 +347,9 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
         <div><label>Status Filter</label>
           <select id="distressed-status">
             <option value="all">All Distressed</option>
-            <option value="preforeclosure">Pre-Foreclosure</option>
-            <option value="auction">Auction Scheduled</option>
-            <option value="reo">Bank Owned (REO)</option>
+            <option value="preforeclosure">Underwater/Pre-FC</option>
+            <option value="auction">Foreclosure Sales</option>
+            <option value="reo">Peak-Era Risk</option>
           </select>
         </div>
         <div><label>Max Results</label>
@@ -361,7 +361,7 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
         </div>
       </div>
       <button class="btn-search" style="background:var(--red)" onclick="searchDistressed()">⚠️ Find Distressed Properties</button>
-      <p style="font-size:11px;color:var(--slate);margin-top:10px;text-align:center">Searches for NOD, Lis Pendens, Auction, and REO properties. Data from ATTOM preforeclosure records.</p>
+      <p style="font-size:11px;color:var(--slate);margin-top:10px;text-align:center">Finds foreclosure sales, underwater properties (mortgage > value), and high-risk loans. Active NOD/Lis Pendens requires premium API.</p>
     </div>
     <div class="spanel" id="panel-person">
       <div class="frow c2">
@@ -749,61 +749,147 @@ async function searchDistressed() {
   showLoader(true, 'Searching for distressed properties in ' + zip + '...');
   
   try {
-    // Try the preforeclosure snapshot endpoint
-    var data = await attom('/propertyapi/v1.0.0/preforeclosure/snapshot', {postalcode: zip, pagesize: limit}).catch(function() { return null; });
+    var allProps = [];
     
-    // If that fails, try property/preforeclosure
-    if (!data || (!data.property && !data.Property)) {
-      data = await attom('/propertyapi/v1.0.0/property/preforeclosure', {postalcode: zip, pagesize: limit}).catch(function() { return null; });
+    // Strategy 1: Try sale/snapshot for foreclosure sales
+    showLoader(true, 'Step 1/3: Searching foreclosure sales...');
+    var saleData = await attom('/propertyapi/v1.0.0/sale/snapshot', {
+      postalcode: zip, 
+      pagesize: limit,
+      orderby: 'saletransdate desc'
+    }).catch(function() { return null; });
+    
+    if (saleData) {
+      var saleProps = [saleData.property || saleData.Property].flat().filter(Boolean);
+      console.log('Sale snapshot results:', saleProps.length);
+      
+      // Filter for foreclosure-related sales
+      saleProps.forEach(function(p) {
+        var sale = (p.sale && p.sale.amount) || p.sale || {};
+        var saleType = ((sale.saletype || sale.saletranstype || '') + '').toUpperCase();
+        var saleDesc = ((sale.saletranstypedescription || sale.description || '') + '').toUpperCase();
+        
+        // Check for foreclosure indicators
+        if (saleType.indexOf('FORECLOSURE') !== -1 || 
+            saleType.indexOf('REO') !== -1 || 
+            saleType.indexOf('BANK') !== -1 ||
+            saleType.indexOf('SHERIFF') !== -1 ||
+            saleType.indexOf('TRUSTEE') !== -1 ||
+            saleDesc.indexOf('FORECLOSURE') !== -1 ||
+            saleDesc.indexOf('REO') !== -1 ||
+            saleDesc.indexOf('DISTRESS') !== -1) {
+          p._distressSource = 'foreclosure_sale';
+          p._distressType = saleType || saleDesc || 'Foreclosure Sale';
+          allProps.push(p);
+        }
+      });
     }
     
-    // If still no data, try the sale/snapshot with foreclosure filter
-    if (!data || (!data.property && !data.Property)) {
-      showLoader(true, 'Trying alternate foreclosure search...');
-      data = await attom('/propertyapi/v1.0.0/sale/snapshot', {postalcode: zip, pagesize: limit, saletype: 'Foreclosure'}).catch(function() { return null; });
+    // Strategy 2: Look for properties with significant equity indicators
+    showLoader(true, 'Step 2/3: Analyzing mortgage data for distress signals...');
+    var mortData = await attom('/propertyapi/v1.0.0/property/detailmortgage', {
+      postalcode: zip, 
+      pagesize: limit
+    }).catch(function() { return null; });
+    
+    if (mortData) {
+      var mortProps = [mortData.property || mortData.Property].flat().filter(Boolean);
+      console.log('Mortgage data results:', mortProps.length);
+      
+      mortProps.forEach(function(p) {
+        var mort = p.mortgage || {};
+        var m = mort.first || mort.First || mort || {};
+        var sale = (p.sale && p.sale.amount) || p.sale || {};
+        var avm = (p.avm && p.avm.amount) || {};
+        
+        // Check for distress indicators:
+        // 1. Very old delinquent mortgages
+        // 2. Multiple mortgages with high LTV
+        // 3. Properties where mortgage > AVM (underwater)
+        
+        var mortAmount = parseInt(m.amount || m.loanamount || 0);
+        var avmAmount = parseInt(avm.value || 0);
+        var saleAmount = parseInt(sale.saleamt || 0);
+        var lastSaleDate = sale.saletransdate || '';
+        
+        // Check if underwater (owes more than value)
+        if (mortAmount > 0 && avmAmount > 0 && mortAmount > avmAmount * 0.95) {
+          p._distressSource = 'underwater';
+          p._distressType = 'Potentially Underwater';
+          p._underwaterAmount = mortAmount - avmAmount;
+          p._ltv = Math.round((mortAmount / avmAmount) * 100);
+          if (!allProps.find(function(x) { return x.identifier && p.identifier && x.identifier.attomId === p.identifier.attomId; })) {
+            allProps.push(p);
+          }
+        }
+        
+        // Check for properties bought at peak (2005-2008) that might be underwater
+        if (lastSaleDate) {
+          var saleYear = new Date(lastSaleDate).getFullYear();
+          if (saleYear >= 2005 && saleYear <= 2008 && mortAmount > 0 && saleAmount > 0) {
+            if (mortAmount > saleAmount * 0.8) { // High LTV from peak years
+              if (!p._distressSource) {
+                p._distressSource = 'peak_purchase';
+                p._distressType = 'Peak-Era Purchase';
+              }
+              if (!allProps.find(function(x) { return x.identifier && p.identifier && x.identifier.attomId === p.identifier.attomId; })) {
+                allProps.push(p);
+              }
+            }
+          }
+        }
+      });
     }
     
-    if (!data) {
-      showLoader(false);
-      showError('No Data', 'Could not retrieve foreclosure data for this ZIP. The preforeclosure API may require a premium subscription.');
-      return;
+    // Strategy 3: Try preforeclosure endpoint (premium, might fail)
+    showLoader(true, 'Step 3/3: Checking preforeclosure records...');
+    var preData = await attom('/propertyapi/v1.0.0/preforeclosure/snapshot', {postalcode: zip, pagesize: limit}).catch(function() { return null; });
+    
+    if (preData && (preData.property || preData.Property)) {
+      var preProps = [preData.property || preData.Property].flat().filter(Boolean);
+      console.log('Preforeclosure results:', preProps.length);
+      preProps.forEach(function(p) {
+        p._distressSource = 'preforeclosure';
+        p._distressType = 'Active Pre-Foreclosure';
+        if (!allProps.find(function(x) { return x.identifier && p.identifier && x.identifier.attomId === p.identifier.attomId; })) {
+          allProps.push(p);
+        }
+      });
     }
     
-    var props = [data.property || data.Property].flat().filter(Boolean);
-    console.log('Distressed search results:', props.length, 'properties');
-    console.log('Raw distressed data:', JSON.stringify(data, null, 2));
+    console.log('Total distressed properties found:', allProps.length);
+    console.log('Distressed data:', JSON.stringify(allProps.slice(0,3), null, 2));
     
-    showLoader(true, 'Analyzing ' + props.length + ' properties...');
-    
-    props.forEach(function(p) {
-      var fc = p.foreclosure || p.preforeclosure || p.sale || {};
+    // Process results
+    allProps.forEach(function(p) {
       var addr = p.address || {};
-      var fcStatus = (fc.fcstatus || fc.status || fc.recordtype || fc.saletype || '').toUpperCase();
-      var fcType = (fc.fctype || fc.type || fc.documenttype || '').toUpperCase();
+      var fc = p.foreclosure || p.preforeclosure || {};
+      var sale = (p.sale && p.sale.amount) || p.sale || {};
+      var mort = p.mortgage || {};
+      var m = mort.first || mort.First || mort || {};
       
-      // Determine status
       var status = 'default';
-      var statusLabel = 'Pre-Foreclosure';
+      var statusLabel = p._distressType || 'Distressed';
       
-      if (fcStatus.indexOf('REO') !== -1 || fcStatus.indexOf('BANK') !== -1) {
-        status = 'reo';
-        statusLabel = 'Bank Owned (REO)';
-      } else if (fcStatus.indexOf('AUCTION') !== -1 || fcStatus.indexOf('NTS') !== -1 || fcStatus.indexOf('TRUSTEE') !== -1 || fcStatus.indexOf('NFS') !== -1) {
+      if (p._distressSource === 'foreclosure_sale') {
         status = 'auction';
-        statusLabel = 'Auction';
-      } else if (fcStatus.indexOf('DEFAULT') !== -1 || fcStatus.indexOf('NOD') !== -1 || fcStatus.indexOf('LIS') !== -1) {
+        statusLabel = 'Foreclosure Sale';
+      } else if (p._distressSource === 'preforeclosure') {
         status = 'default';
         statusLabel = 'Pre-Foreclosure';
-      } else if (fcStatus.indexOf('FORECLOSURE') !== -1) {
-        status = 'auction';
-        statusLabel = 'Foreclosure';
+      } else if (p._distressSource === 'underwater') {
+        status = 'default';
+        statusLabel = 'Underwater (' + p._ltv + '% LTV)';
+      } else if (p._distressSource === 'peak_purchase') {
+        status = 'reo';
+        statusLabel = 'Peak-Era (Risk)';
       }
       
       // Apply status filter
       if (statusFilter !== 'all') {
-        if (statusFilter === 'preforeclosure' && status !== 'default') return;
-        if (statusFilter === 'auction' && status !== 'auction') return;
-        if (statusFilter === 'reo' && status !== 'reo') return;
+        if (statusFilter === 'preforeclosure' && p._distressSource !== 'preforeclosure' && p._distressSource !== 'underwater') return;
+        if (statusFilter === 'auction' && p._distressSource !== 'foreclosure_sale') return;
+        if (statusFilter === 'reo' && p._distressSource !== 'peak_purchase') return;
       }
       
       distressedResults.push({
@@ -813,18 +899,25 @@ async function searchDistressed() {
         zip: addr.postal1 || zip,
         status: status,
         statusLabel: statusLabel,
-        recordingDate: fc.recordingdate || fc.filingdate || fc.saletransdate || '',
+        distressSource: p._distressSource,
+        recordingDate: fc.recordingdate || fc.filingdate || sale.saletransdate || '',
         auctionDate: fc.auctiondate || fc.saledate || '',
-        defaultAmount: fc.defaultamount || fc.amount || fc.saleamt || 0,
-        lender: fc.lendername || fc.lender || fc.beneficiary || '',
+        defaultAmount: fc.defaultamount || m.amount || sale.saleamt || 0,
+        lender: m.lendername || (m.lender && m.lender.fullname) || fc.lendername || '',
         openingBid: fc.openingbid || fc.startingbid || 0,
         caseNumber: fc.casenumber || fc.documentnumber || '',
-        trustee: fc.trusteename || fc.trustee || ''
+        trustee: fc.trusteename || fc.trustee || '',
+        underwaterAmount: p._underwaterAmount || 0,
+        ltv: p._ltv || 0
       });
     });
     
-    // Sort by recording date (most recent first)
+    // Sort by status priority then date
     distressedResults.sort(function(a, b) {
+      var priority = {preforeclosure: 0, foreclosure_sale: 1, underwater: 2, peak_purchase: 3};
+      var pa = priority[a.distressSource] || 99;
+      var pb = priority[b.distressSource] || 99;
+      if (pa !== pb) return pa - pb;
       return new Date(b.recordingDate) - new Date(a.recordingDate);
     });
     
@@ -838,12 +931,12 @@ async function searchDistressed() {
 }
 
 function buildDistressedResults(results, zip, filter) {
-  var filterLabel = filter === 'all' ? 'All distressed' : filter.charAt(0).toUpperCase() + filter.slice(1);
+  var filterLabel = filter === 'all' ? 'Distressed' : filter.charAt(0).toUpperCase() + filter.slice(1);
   document.getElementById('result-count').textContent = results.length;
   document.getElementById('result-sub').textContent = filterLabel + ' properties in ' + zip;
   
   if (results.length === 0) {
-    document.getElementById('result-list').innerHTML = '<div class="no-results"><p>No distressed properties found in ZIP ' + zip + '</p><p style="font-size:12px;color:var(--slate);margin-top:8px">Note: Preforeclosure data may require a premium ATTOM subscription. Try searching by address to see if a specific property has foreclosure records.</p></div>';
+    document.getElementById('result-list').innerHTML = '<div class="no-results"><p>No distressed properties found in ZIP ' + zip + '</p><p style="font-size:12px;color:var(--slate);margin-top:8px">The search analyzed foreclosure sales and underwater properties. Active pre-foreclosure filings (NOD, Lis Pendens) require a premium ATTOM subscription.</p></div>';
     document.getElementById('btn-export').style.display = 'none';
     showResults(true);
     return;
@@ -853,17 +946,23 @@ function buildDistressedResults(results, zip, filter) {
   
   var html = '';
   results.forEach(function(r) {
-    var cardClass = r.status === 'reo' ? 'reo' : (r.status === 'auction' ? 'soon' : 'urgent');
+    var cardClass = r.distressSource === 'foreclosure_sale' ? 'soon' : (r.distressSource === 'underwater' ? 'urgent' : 'later');
     html += '<div class="arm-card ' + cardClass + '" style="border-color:var(--red-bd)">';
     html += '<div class="arm-header">';
     html += '<div><div class="arm-addr" style="color:#f09090">' + r.address + '</div><div class="arm-city">' + r.city + ', ' + r.state + ' ' + r.zip + '</div></div>';
     html += '<div class="distressed-status ' + r.status + '">' + r.statusLabel + '</div>';
     html += '</div>';
     html += '<div class="arm-details">';
-    if (r.recordingDate) html += '<div class="arm-detail"><span class="arm-detail-label">Filed</span><span class="arm-detail-val">' + fmtDate(r.recordingDate) + '</span></div>';
-    if (r.defaultAmount) html += '<div class="arm-detail"><span class="arm-detail-label">Amount</span><span class="arm-detail-val orange">$' + parseInt(r.defaultAmount).toLocaleString() + '</span></div>';
+    
+    // Show different info based on distress type
+    if (r.distressSource === 'underwater' && r.underwaterAmount > 0) {
+      html += '<div class="arm-detail"><span class="arm-detail-label">Underwater By</span><span class="arm-detail-val" style="color:#f09090">$' + parseInt(r.underwaterAmount).toLocaleString() + '</span></div>';
+      html += '<div class="arm-detail"><span class="arm-detail-label">LTV</span><span class="arm-detail-val orange">' + r.ltv + '%</span></div>';
+    }
+    if (r.recordingDate) html += '<div class="arm-detail"><span class="arm-detail-label">' + (r.distressSource === 'foreclosure_sale' ? 'Sale Date' : 'Filed') + '</span><span class="arm-detail-val">' + fmtDate(r.recordingDate) + '</span></div>';
+    if (r.defaultAmount && r.defaultAmount > 0) html += '<div class="arm-detail"><span class="arm-detail-label">' + (r.distressSource === 'foreclosure_sale' ? 'Sale Price' : 'Loan Amount') + '</span><span class="arm-detail-val orange">$' + parseInt(r.defaultAmount).toLocaleString() + '</span></div>';
     if (r.auctionDate) html += '<div class="arm-detail"><span class="arm-detail-label">Auction</span><span class="arm-detail-val green">' + fmtDate(r.auctionDate) + '</span></div>';
-    if (r.openingBid) html += '<div class="arm-detail"><span class="arm-detail-label">Opening Bid</span><span class="arm-detail-val green">$' + parseInt(r.openingBid).toLocaleString() + '</span></div>';
+    if (r.openingBid && r.openingBid > 0) html += '<div class="arm-detail"><span class="arm-detail-label">Opening Bid</span><span class="arm-detail-val green">$' + parseInt(r.openingBid).toLocaleString() + '</span></div>';
     if (r.lender) html += '<div class="arm-detail"><span class="arm-detail-label">Lender</span><span class="arm-detail-val">' + r.lender + '</span></div>';
     if (r.trustee) html += '<div class="arm-detail"><span class="arm-detail-label">Trustee</span><span class="arm-detail-val">' + r.trustee + '</span></div>';
     html += '</div></div>';
@@ -1077,6 +1176,176 @@ function buildCard(p,idx){
     openingBid = fmtMoney(foreclosureData.openingbid || foreclosureData.startingbid || foreclosureData.minimumbid);
   }
 
+  // ============================================
+  // LIEN EXTRACTION - Check ALL available sources
+  // ============================================
+  var liens = [];
+  var hasLiens = false;
+  var totalLienAmount = 0;
+  
+  // Source 1: Direct lien object from property data
+  var lienData = p.lien || p.liens || p.involuntarylien || p.involuntaryLien || {};
+  if (lienData) {
+    // Could be array or object
+    var lienArray = Array.isArray(lienData) ? lienData : (lienData.lien ? [lienData.lien].flat() : [lienData]);
+    lienArray.forEach(function(l) {
+      if (l && (l.amount || l.lienamount || l.lienAmount || l.originalamount)) {
+        var lienAmt = parseInt(l.amount || l.lienamount || l.lienAmount || l.originalamount) || 0;
+        liens.push({
+          type: l.lientype || l.lienType || l.type || l.documenttype || 'Lien',
+          amount: lienAmt,
+          recordingDate: l.recordingdate || l.recordingDate || l.filingdate || l.documentdate || '',
+          releaseDate: l.releasedate || l.releaseDate || '',
+          creditor: l.creditor || l.lienholder || l.lienHolder || l.plaintiff || l.beneficiary || '',
+          caseNumber: l.casenumber || l.caseNumber || l.documentnumber || l.instrumentnumber || '',
+          status: l.status || l.lienstatus || 'Active'
+        });
+        totalLienAmount += lienAmt;
+        hasLiens = true;
+      }
+    });
+  }
+  
+  // Source 2: Tax delinquency (unpaid taxes = tax lien)
+  var tax = asmt.tax || {};
+  var taxDelinquent = tax.taxdelinquentyear || tax.delinquentyear || tax.taxDelqYear || tax.taxyeardelinquent;
+  var taxDelinquentAmt = parseInt(tax.taxdelinquentamt || tax.delinquentamount || tax.taxDelqAmt || tax.delinquenttaxamount) || 0;
+  if (taxDelinquent || taxDelinquentAmt > 0) {
+    liens.push({
+      type: '🏛️ Tax Lien',
+      amount: taxDelinquentAmt,
+      recordingDate: taxDelinquent ? taxDelinquent + '-01-01' : '',
+      releaseDate: '',
+      creditor: county !== '—' ? county + ' County Tax Collector' : 'County Tax Collector',
+      caseNumber: '',
+      isEstimate: taxDelinquentAmt === 0,
+      status: 'Active - Delinquent'
+    });
+    totalLienAmount += taxDelinquentAmt;
+    hasLiens = true;
+  }
+  
+  // Source 3: Check assessment for special assessments (municipal liens)
+  var specialAsmt = parseInt(asmt.specialassessment || asmt.specialAssessment || asmt.improvementvalue || 0);
+  if (specialAsmt > 1000) { // Only significant amounts
+    liens.push({
+      type: '🏗️ Special Assessment',
+      amount: specialAsmt,
+      recordingDate: '',
+      releaseDate: '',
+      creditor: 'Municipality/City',
+      caseNumber: '',
+      status: 'Active'
+    });
+    totalLienAmount += specialAsmt;
+    hasLiens = true;
+  }
+  
+  // Source 4: Check for HOA/COA liens in summary or building data
+  var hoaInfo = summary.hoafee || summary.hoaFee || bldg.hoa || {};
+  var hoaDelinquent = summary.hoadelinquent || summary.hoaDelinquent || hoaInfo.delinquent;
+  var hoaLienAmt = parseInt(summary.hoalienamount || summary.hoaLienAmount || hoaInfo.lienamount) || 0;
+  if (hoaDelinquent || hoaLienAmt > 0) {
+    liens.push({
+      type: '🏘️ HOA Lien',
+      amount: hoaLienAmt,
+      recordingDate: '',
+      releaseDate: '',
+      creditor: summary.hoaname || 'Homeowners Association',
+      caseNumber: '',
+      status: 'Active',
+      isEstimate: hoaLienAmt === 0
+    });
+    if (hoaLienAmt > 0) totalLienAmount += hoaLienAmt;
+    hasLiens = true;
+  }
+  
+  // Source 5: Check sale history for judgment liens, sheriff sales, etc
+  var saleHistory = histData.salehistory || histData.salesHistory || histData.sale || [];
+  if (!Array.isArray(saleHistory)) saleHistory = [saleHistory];
+  saleHistory.forEach(function(s) {
+    if (!s) return;
+    var saleType = ((s.saletype || s.saleType || s.saletranstype || '') + '').toUpperCase();
+    var saleDesc = ((s.saletranstypedescription || s.description || '') + '').toUpperCase();
+    var combined = saleType + ' ' + saleDesc;
+    
+    if (combined.indexOf('LIEN') !== -1 || combined.indexOf('JUDGMENT') !== -1 || 
+        combined.indexOf('SHERIFF') !== -1 || combined.indexOf('MECHANIC') !== -1 ||
+        combined.indexOf('FEDERAL TAX') !== -1 || combined.indexOf('IRS') !== -1 ||
+        combined.indexOf('STATE TAX') !== -1) {
+      var lienAmt = parseInt(s.saleamt || s.saleAmount || s.amount || 0);
+      var lienType = '⚖️ ';
+      if (combined.indexOf('JUDGMENT') !== -1) lienType += 'Judgment Lien';
+      else if (combined.indexOf('MECHANIC') !== -1) lienType += 'Mechanic\'s Lien';
+      else if (combined.indexOf('IRS') !== -1 || combined.indexOf('FEDERAL TAX') !== -1) lienType += 'IRS Tax Lien';
+      else if (combined.indexOf('STATE TAX') !== -1) lienType += 'State Tax Lien';
+      else if (combined.indexOf('SHERIFF') !== -1) lienType += 'Sheriff Sale/Lien';
+      else lienType += 'Recorded Lien';
+      
+      liens.push({
+        type: lienType,
+        amount: lienAmt,
+        recordingDate: s.saletransdate || s.saleDate || s.recordingdate || '',
+        releaseDate: '',
+        creditor: s.buyer || s.grantee || s.plaintiff || 'Unknown',
+        caseNumber: s.documentnumber || s.instrumentnumber || '',
+        status: 'Recorded'
+      });
+      if (lienAmt > 0) totalLienAmount += lienAmt;
+      hasLiens = true;
+    }
+  });
+  
+  // Source 6: Check mortgage data for potential issues (multiple mortgages, high LTV)
+  var mort2 = mort.second || mort.Second || mort.mortgage2 || {};
+  var mort3 = mort.third || mort.Third || mort.mortgage3 || {};
+  var secondMortAmt = parseInt(mort2.amount || mort2.loanamount || 0);
+  var thirdMortAmt = parseInt(mort3.amount || mort3.loanamount || 0);
+  
+  // Source 7: Check for IRS/Federal liens in any field
+  var rawJson = JSON.stringify(p).toUpperCase();
+  if (rawJson.indexOf('IRS LIEN') !== -1 || rawJson.indexOf('FEDERAL TAX LIEN') !== -1) {
+    // There's mention of IRS lien somewhere in the data
+    var irsFound = liens.find(function(l) { return l.type.indexOf('IRS') !== -1; });
+    if (!irsFound) {
+      liens.push({
+        type: '🏛️ IRS Tax Lien (Detected)',
+        amount: 0,
+        recordingDate: '',
+        releaseDate: '',
+        creditor: 'Internal Revenue Service',
+        caseNumber: '',
+        status: 'Detected in Records',
+        isEstimate: true
+      });
+      hasLiens = true;
+    }
+  }
+  
+  // Source 8: Check for utility liens
+  if (rawJson.indexOf('UTILITY LIEN') !== -1 || rawJson.indexOf('WATER LIEN') !== -1 || rawJson.indexOf('SEWER LIEN') !== -1) {
+    liens.push({
+      type: '💧 Utility Lien (Detected)',
+      amount: 0,
+      recordingDate: '',
+      releaseDate: '',
+      creditor: 'Utility Company',
+      caseNumber: '',
+      status: 'Detected in Records',
+      isEstimate: true
+    });
+    hasLiens = true;
+  }
+  
+  // Check if property might be underwater (mortgage > value = potential distress indicator)
+  var avmValue = parseInt((avm.avm && avm.avm.amount && avm.avm.amount.value) || 0);
+  var isUnderwater = false;
+  var underwaterAmount = 0;
+  var ltvRatio = 0;
+  
+  console.log('Lien data found:', liens.length, 'liens totaling', totalLienAmount);
+  console.log('Liens:', JSON.stringify(liens, null, 2));
+
   // Extract mortgage data - more flexible detection
   var mortgageAmount='—',mortgageRate='—',lenderName='—',mortgageDate='—',loanType='—';
   var mortgageTerm='—',mortgageMaturity='—',calculatedFromMaturity=false;
@@ -1196,6 +1465,62 @@ function buildCard(p,idx){
     armHtml += '</div></div>';
   }
 
+  // Calculate underwater status
+  var mortgageNumeric = parseInt((mortgageAmount || '').replace(/[$,]/g, '')) || 0;
+  if (mortgageNumeric > 0 && avmValue > 0) {
+    ltvRatio = Math.round((mortgageNumeric / avmValue) * 100);
+    if (mortgageNumeric > avmValue * 0.95) {
+      isUnderwater = true;
+      underwaterAmount = mortgageNumeric - avmValue;
+      // Add underwater as a form of distress if not already flagged
+      if (!isDistressed) {
+        isDistressed = true;
+        distressedStatus = 'default';
+        distressedType = 'Potentially Underwater';
+      }
+    }
+  }
+  
+  // Build Lien Alert HTML
+  var lienHtml = '';
+  if (hasLiens && liens.length > 0) {
+    lienHtml = '<div class="distressed-box" style="background:var(--orange-bg);border-color:var(--orange-bd)">';
+    lienHtml += '<div class="distressed-header"><span class="distressed-icon">⚖️</span><span class="distressed-title" style="color:var(--orange)">Liens Detected (' + liens.length + ')</span>';
+    lienHtml += '<span class="distressed-status auction">$' + totalLienAmount.toLocaleString() + ' Total</span></div>';
+    
+    liens.forEach(function(lien) {
+      lienHtml += '<div class="lien-card">';
+      lienHtml += '<div class="lien-card-header"><span class="lien-type">' + lien.type + '</span>';
+      if (lien.amount > 0 && !lien.isEstimate) {
+        lienHtml += '<span class="lien-amount">$' + lien.amount.toLocaleString() + '</span>';
+      } else if (lien.isEstimate) {
+        lienHtml += '<span class="lien-amount" style="color:var(--slate)">Amount Unknown</span>';
+      }
+      lienHtml += '</div>';
+      lienHtml += '<div class="lien-details">';
+      if (lien.recordingDate) lienHtml += 'Filed: ' + fmtDate(lien.recordingDate) + ' ';
+      if (lien.creditor) lienHtml += '• Creditor: ' + lien.creditor + ' ';
+      if (lien.caseNumber) lienHtml += '• Case: ' + lien.caseNumber;
+      lienHtml += '</div></div>';
+    });
+    
+    lienHtml += '</div>';
+  }
+  
+  // Build Underwater Alert HTML
+  var underwaterHtml = '';
+  if (isUnderwater && underwaterAmount > 0) {
+    underwaterHtml = '<div class="distressed-box">';
+    underwaterHtml += '<div class="distressed-header"><span class="distressed-icon">📉</span><span class="distressed-title">Property May Be Underwater</span>';
+    underwaterHtml += '<span class="distressed-status default">' + ltvRatio + '% LTV</span></div>';
+    underwaterHtml += '<div class="distressed-grid">';
+    underwaterHtml += '<div class="distressed-item"><div class="distressed-item-label">Mortgage Balance</div><div class="distressed-item-val red">$' + mortgageNumeric.toLocaleString() + '</div></div>';
+    underwaterHtml += '<div class="distressed-item"><div class="distressed-item-label">Est. Value (AVM)</div><div class="distressed-item-val green">$' + avmValue.toLocaleString() + '</div></div>';
+    underwaterHtml += '<div class="distressed-item"><div class="distressed-item-label">Underwater By</div><div class="distressed-item-val red">$' + underwaterAmount.toLocaleString() + '</div></div>';
+    underwaterHtml += '<div class="distressed-item"><div class="distressed-item-label">LTV Ratio</div><div class="distressed-item-val orange">' + ltvRatio + '%</div></div>';
+    underwaterHtml += '</div></div>';
+  }
+
   currentPropertyData = {
     address:street,cityState:cityState,county:county,propType:propType,yearBuilt:yearBlt,sqft:sqft,beds:beds,baths:baths,lotSize:lotSize1,
     avmValue:avmVal,avmLow:avmLow,avmHigh:avmHigh,lastSalePrice:lastSaleAmt,lastSaleDate:lastSaleDate,
@@ -1204,7 +1529,11 @@ function buildCard(p,idx){
     isARM: armInfo ? true : false, armType: armInfo ? armInfo.type : null,
     isDistressed: isDistressed, distressedStatus: distressedStatus, distressedType: distressedType,
     auctionDate: auctionDate, defaultAmount: defaultAmount, foreclosingLender: foreclosingLender,
-    recordingDate: recordingDate, caseNumber: caseNumber, trustee: trustee, openingBid: openingBid
+    recordingDate: recordingDate, caseNumber: caseNumber, trustee: trustee, openingBid: openingBid,
+    // Lien data
+    hasLiens: hasLiens, liens: liens, totalLienAmount: totalLienAmount,
+    // Underwater data
+    isUnderwater: isUnderwater, underwaterAmount: underwaterAmount, ltvRatio: ltvRatio
   };
 
   currentCompsData = compsData.map(function(c){
@@ -1223,18 +1552,26 @@ function buildCard(p,idx){
   }).filter(function(c){return c.price>0;});
 
   var badges='<span class="badge badge-purple">🤖 AI</span><span class="badge badge-orange">📊 Comps</span>';
-  if(isDistressed)badges+='<span class="badge badge-red">⚠️ '+distressedType+'</span>';
+  if(isDistressed && !isUnderwater)badges+='<span class="badge badge-red">⚠️ '+distressedType+'</span>';
+  if(isUnderwater)badges+='<span class="badge badge-red">📉 Underwater '+ltvRatio+'%</span>';
+  if(hasLiens)badges+='<span class="badge badge-red">⚖️ Liens</span>';
   if(armInfo)badges+='<span class="badge badge-orange">🔥 ARM</span>';
   if(hasMortgage)badges+='<span class="badge badge-teal">💰 Mortgage</span>';
   if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
   if(avmVal&&avmVal!=='—')badges+='<span class="badge badge-green">'+avmVal+'</span>';
 
-  var html='<div class="prop-card'+(isDistressed?' distressed-card':'')+'" id="card-'+idx+'">';
+  var html='<div class="prop-card'+((isDistressed||hasLiens||isUnderwater)?' distressed-card':'')+'" id="card-'+idx+'">';
   html+='<div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+(county!=='—'?' <span class="county-badge">'+county+'</span>':'')+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
   html+='<div class="prop-card-body" id="body-'+idx+'">';
 
-  // Distressed Alert if detected
-  if (isDistressed) {
+  // Underwater Alert (show first as most important)
+  html += underwaterHtml;
+  
+  // Lien Alert
+  html += lienHtml;
+
+  // Distressed/Foreclosure Alert if detected (and not already showing underwater)
+  if (isDistressed && !isUnderwater) {
     html += '<div class="distressed-box">';
     html += '<div class="distressed-header"><span class="distressed-icon">⚠️</span><span class="distressed-title">Distressed Property Alert</span>';
     html += '<span class="distressed-status ' + distressedStatus + '">' + distressedType + '</span></div>';
@@ -1254,8 +1591,9 @@ function buildCard(p,idx){
 
   html+='<div class="ai-tabs" id="ai-tabs-'+idx+'">';
   html+='<div class="ai-tab active" data-tab="insights" onclick="switchAiTab('+idx+',\'insights\')">🤖 AI Insights</div>';
-  html+='<div class="ai-tab orange" data-tab="comps" onclick="switchAiTab('+idx+',\'comps\')">📊 Comps Analysis</div>';
-  html+='<div class="ai-tab teal" data-tab="balance" onclick="switchAiTab('+idx+',\'balance\')">💰 Balance Calculator</div>';
+  html+='<div class="ai-tab orange" data-tab="comps" onclick="switchAiTab('+idx+',\'comps\')">📊 Comps</div>';
+  html+='<div class="ai-tab teal" data-tab="balance" onclick="switchAiTab('+idx+',\'balance\')">💰 Balance</div>';
+  html+='<div class="ai-tab" style="color:var(--red)" data-tab="liens" onclick="switchAiTab('+idx+',\'liens\')">⚖️ Liens & FC</div>';
   html+='<div class="ai-tab" data-tab="chat" onclick="switchAiTab('+idx+',\'chat\')">💬 Ask AI</div>';
   html+='</div>';
 
@@ -1319,10 +1657,108 @@ function buildCard(p,idx){
   }
   html+='</div></div></div>';
 
+  // ============================================
+  // LIENS & FORECLOSURE PANEL
+  // ============================================
+  html+='<div class="ai-panel" id="ai-panel-liens-'+idx+'">';
+  html+='<div class="ai-box" style="border-color:var(--red-bd)"><div class="ai-box-header"><div class="ai-icon" style="color:var(--red)">⚖️</div><div class="ai-box-title" style="color:#f09090">Liens & Foreclosure Status</div></div>';
+  
+  // Foreclosure Status Section
+  html+='<div style="margin-bottom:1rem">';
+  html+='<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📋 Foreclosure Status</div>';
+  if (isDistressed) {
+    html+='<div class="distressed-grid" style="margin-bottom:0">';
+    html+='<div class="distressed-item"><div class="distressed-item-label">Status</div><div class="distressed-item-val red">' + distressedType + '</div></div>';
+    if (recordingDate !== '—') html+='<div class="distressed-item"><div class="distressed-item-label">Filing Date</div><div class="distressed-item-val">' + recordingDate + '</div></div>';
+    if (defaultAmount !== '—') html+='<div class="distressed-item"><div class="distressed-item-label">Default Amount</div><div class="distressed-item-val red">' + defaultAmount + '</div></div>';
+    if (auctionDate !== '—') html+='<div class="distressed-item"><div class="distressed-item-label">Auction Date</div><div class="distressed-item-val orange">' + auctionDate + '</div></div>';
+    if (openingBid !== '—') html+='<div class="distressed-item"><div class="distressed-item-label">Opening Bid</div><div class="distressed-item-val green">' + openingBid + '</div></div>';
+    if (foreclosingLender !== '—') html+='<div class="distressed-item"><div class="distressed-item-label">Lender</div><div class="distressed-item-val">' + foreclosingLender + '</div></div>';
+    if (trustee !== '—') html+='<div class="distressed-item"><div class="distressed-item-label">Trustee</div><div class="distressed-item-val">' + trustee + '</div></div>';
+    if (caseNumber !== '—') html+='<div class="distressed-item"><div class="distressed-item-label">Case #</div><div class="distressed-item-val">' + caseNumber + '</div></div>';
+    html+='</div>';
+  } else {
+    html+='<div style="color:var(--green);font-size:13px">✅ No foreclosure filings detected</div>';
+    html+='<div style="color:var(--slate);font-size:11px;margin-top:4px">Note: Active NOD/Lis Pendens data requires premium ATTOM subscription</div>';
+  }
+  html+='</div>';
+  
+  // Underwater Status Section
+  html+='<div style="margin-bottom:1rem">';
+  html+='<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📉 Equity Position</div>';
+  if (isUnderwater && underwaterAmount > 0) {
+    html+='<div class="distressed-grid" style="margin-bottom:0">';
+    html+='<div class="distressed-item"><div class="distressed-item-label">Status</div><div class="distressed-item-val red">⚠️ Potentially Underwater</div></div>';
+    html+='<div class="distressed-item"><div class="distressed-item-label">Mortgage</div><div class="distressed-item-val red">$' + mortgageNumeric.toLocaleString() + '</div></div>';
+    html+='<div class="distressed-item"><div class="distressed-item-label">Est. Value</div><div class="distressed-item-val green">$' + avmValue.toLocaleString() + '</div></div>';
+    html+='<div class="distressed-item"><div class="distressed-item-label">Underwater By</div><div class="distressed-item-val red">$' + underwaterAmount.toLocaleString() + '</div></div>';
+    html+='<div class="distressed-item"><div class="distressed-item-label">LTV Ratio</div><div class="distressed-item-val orange">' + ltvRatio + '%</div></div>';
+    html+='</div>';
+  } else if (ltvRatio > 0) {
+    html+='<div style="color:var(--green);font-size:13px">✅ Property has equity (LTV: ' + ltvRatio + '%)</div>';
+  } else {
+    html+='<div style="color:var(--slate);font-size:13px">Unable to calculate - missing AVM or mortgage data</div>';
+  }
+  html+='</div>';
+  
+  // Liens Section
+  html+='<div>';
+  html+='<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">⚖️ Recorded Liens (' + liens.length + ')</div>';
+  if (hasLiens && liens.length > 0) {
+    html+='<div style="margin-bottom:8px;padding:8px;background:var(--red-bg);border-radius:6px;border:1px solid var(--red-bd)">';
+    html+='<span style="color:#f09090;font-weight:500">Total Lien Amount: $' + totalLienAmount.toLocaleString() + '</span></div>';
+    liens.forEach(function(lien) {
+      html+='<div class="lien-card">';
+      html+='<div class="lien-card-header"><span class="lien-type">' + lien.type + '</span>';
+      if (lien.amount > 0 && !lien.isEstimate) {
+        html+='<span class="lien-amount">$' + lien.amount.toLocaleString() + '</span>';
+      } else if (lien.isEstimate) {
+        html+='<span class="lien-amount" style="color:var(--slate)">Amount Unknown</span>';
+      }
+      html+='</div>';
+      html+='<div class="lien-details">';
+      if (lien.status) html+='<span style="color:var(--orange)">Status: ' + lien.status + '</span> ';
+      if (lien.recordingDate) html+='• Filed: ' + fmtDate(lien.recordingDate) + ' ';
+      if (lien.creditor) html+='• Creditor: ' + lien.creditor + ' ';
+      if (lien.caseNumber) html+='• Case: ' + lien.caseNumber;
+      html+='</div></div>';
+    });
+  } else {
+    html+='<div style="color:var(--green);font-size:13px">✅ No liens detected in available records</div>';
+  }
+  html+='</div>';
+  
+  // Second/Third Mortgages (Junior Liens)
+  if (secondMortAmt > 0 || thirdMortAmt > 0) {
+    html+='<div style="margin-top:1rem">';
+    html+='<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">🏦 Junior Mortgages</div>';
+    if (secondMortAmt > 0) {
+      html+='<div class="lien-card"><div class="lien-card-header"><span class="lien-type">2nd Mortgage</span><span class="lien-amount">$' + secondMortAmt.toLocaleString() + '</span></div></div>';
+    }
+    if (thirdMortAmt > 0) {
+      html+='<div class="lien-card"><div class="lien-card-header"><span class="lien-type">3rd Mortgage</span><span class="lien-amount">$' + thirdMortAmt.toLocaleString() + '</span></div></div>';
+    }
+    html+='</div>';
+  }
+  
+  // Quick External Search Links
+  html+='<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--bdr)">';
+  html+='<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">🔍 Search Public Records</div>';
+  var countySearch = encodeURIComponent((county !== '—' ? county + ' County ' : '') + (state || '') + ' property records');
+  var addressSearch = encodeURIComponent(street + ' ' + cityState);
+  html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  html+='<a href="https://www.google.com/search?q=' + addressSearch + '+lien+records" target="_blank" class="search-link" style="flex:1;min-width:140px"><span class="search-link-icon">🔍</span><span class="search-link-name">Google Liens</span></a>';
+  html+='<a href="https://www.google.com/search?q=' + addressSearch + '+foreclosure" target="_blank" class="search-link" style="flex:1;min-width:140px"><span class="search-link-icon">🏠</span><span class="search-link-name">Google Foreclosure</span></a>';
+  html+='<a href="https://www.google.com/search?q=' + countySearch + '" target="_blank" class="search-link" style="flex:1;min-width:140px"><span class="search-link-icon">🏛️</span><span class="search-link-name">County Records</span></a>';
+  html+='<a href="https://www.courtlistener.com/?q=' + encodeURIComponent(ownerName !== '—' ? ownerName : street) + '" target="_blank" class="search-link" style="flex:1;min-width:140px"><span class="search-link-icon">⚖️</span><span class="search-link-name">Court Records</span></a>';
+  html+='</div></div>';
+  
+  html+='</div></div>';
+
   html+='<div class="ai-panel" id="ai-panel-chat-'+idx+'">';
   html+='<div class="ai-chat"><div class="ai-chat-header"><span>💬 Ask AI About This Property</span></div>';
   html+='<div class="ai-chat-messages" id="chat-messages-'+idx+'"><div class="ai-chat-msg assistant">I\'ve analyzed this property and comps. Ask me anything!</div></div>';
-  html+='<div class="quick-questions"><span onclick="askQuickQuestion('+idx+',\'Is this a good investment?\')" class="quick-q">Good investment?</span><span onclick="askQuickQuestion('+idx+',\'What are the red flags?\')" class="quick-q">Red flags?</span><span onclick="askQuickQuestion('+idx+',\'Estimate rental income\')" class="quick-q">Rental income?</span><span onclick="askQuickQuestion('+idx+',\'How does it compare to comps?\')" class="quick-q">Compare to comps?</span><span onclick="askQuickQuestion('+idx+',\'Calculate remaining mortgage balance\')" class="quick-q">Mortgage balance?</span><span onclick="askQuickQuestion('+idx+',\'Is this property in foreclosure or have any liens?\')" class="quick-q">Foreclosure status?</span></div>';
+  html+='<div class="quick-questions"><span onclick="askQuickQuestion('+idx+',\'Is this a good investment?\')" class="quick-q">Good investment?</span><span onclick="askQuickQuestion('+idx+',\'What are the red flags?\')" class="quick-q">Red flags?</span><span onclick="askQuickQuestion('+idx+',\'Estimate rental income\')" class="quick-q">Rental income?</span><span onclick="askQuickQuestion('+idx+',\'How does it compare to comps?\')" class="quick-q">Compare to comps?</span><span onclick="askQuickQuestion('+idx+',\'Calculate remaining mortgage balance\')" class="quick-q">Mortgage balance?</span><span onclick="askQuickQuestion('+idx+',\'Does this property have any liens or judgments?\')" class="quick-q">Liens?</span><span onclick="askQuickQuestion('+idx+',\'Is this property in foreclosure or distressed?\')" class="quick-q">Foreclosure?</span></div>';
   html+='<div class="ai-chat-input"><input type="text" id="chat-input-'+idx+'" placeholder="Ask about this property..." onkeydown="if(event.key===\'Enter\')sendChatMessage('+idx+')"><button id="chat-send-'+idx+'" onclick="sendChatMessage('+idx+')">Send</button></div></div>';
   html+='</div>';
 
