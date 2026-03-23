@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1413,6 +1413,116 @@ function buildCard(p,idx){
   
   console.log('Extracted mortgage data:', {hasMortgage, mortgageAmount, mortgageRate, lenderName, mortgageDate, mortgageTerm, mortgageMaturity, loanType});
 
+  // ============================================
+  // SECOND MORTGAGE / HELOC EXTRACTION
+  // ============================================
+  var hasSecondMortgage = false;
+  var secondMortgage = {
+    amount: '—',
+    rate: '—',
+    lender: '—',
+    date: '—',
+    term: '—',
+    maturity: '—',
+    type: '—',
+    isHELOC: false
+  };
+  
+  // Try multiple paths for 2nd mortgage
+  var m2 = mort.second || mort.Second || mort.mortgage2 || mort.Mortgage2 || {};
+  
+  // Also check for numbered fields
+  if (!m2.amount && mort.loanAmount2) {
+    m2 = {
+      amount: mort.loanAmount2,
+      lender: mort.lenderName2 || mort.lender2,
+      term: mort.loanTerm2 || mort.term2,
+      maturitydate: mort.maturityDate2,
+      recordingdate: mort.recordingDate2,
+      interestrate: mort.interestRate2 || mort.rate2,
+      loantype: mort.loanType2 || mort.type2
+    };
+  }
+  
+  // Check for HELOC indicators
+  var m2Type = ((m2.loantype || m2.loanType || m2.type || '') + '').toUpperCase();
+  var m2Desc = ((m2.loandescription || m2.description || '') + '').toUpperCase();
+  var isHELOC = m2Type.indexOf('HELOC') !== -1 || m2Type.indexOf('LINE') !== -1 || 
+                m2Type.indexOf('EQUITY LINE') !== -1 || m2Type.indexOf('CREDIT LINE') !== -1 ||
+                m2Desc.indexOf('HELOC') !== -1 || m2Desc.indexOf('HOME EQUITY LINE') !== -1 ||
+                m2Type.indexOf('REVOLVING') !== -1;
+  
+  var m2Amt = m2.amount || m2.loanamount || m2.Amount || m2.LoanAmount || 0;
+  if (parseInt(m2Amt) > 0) {
+    hasSecondMortgage = true;
+    secondMortgage.amount = fmtMoney(m2Amt);
+    secondMortgage.isHELOC = isHELOC;
+    
+    var m2Rate = m2.interestrate || m2.interestRate || m2.rate || m2.Rate;
+    if (m2Rate) secondMortgage.rate = parseFloat(m2Rate).toFixed(3) + '%';
+    
+    var m2Lender = m2.lender || {};
+    if (typeof m2Lender === 'string') {
+      secondMortgage.lender = fmt(m2Lender);
+    } else {
+      secondMortgage.lender = fmt(m2.lendername || m2.lenderName || m2Lender.fullname || m2Lender.name);
+    }
+    
+    var m2Term = m2.term || m2.loanterm || m2.loanTerm;
+    if (m2Term) {
+      var m2Yrs = Math.round(parseInt(m2Term) / 12);
+      secondMortgage.term = m2Term + ' months (' + m2Yrs + ' yrs)';
+    }
+    
+    var m2Maturity = m2.maturitydate || m2.maturityDate || m2.duedate;
+    if (m2Maturity) secondMortgage.maturity = fmtDate(m2Maturity);
+    
+    var m2Recorded = m2.recordingdate || m2.recordingDate || m2.originationdate;
+    if (m2Recorded) secondMortgage.date = fmtDate(m2Recorded);
+    
+    secondMortgage.type = isHELOC ? 'HELOC' : fmt(m2.loantype || m2.loanType || '2nd Mortgage');
+  }
+  
+  // ============================================
+  // THIRD MORTGAGE EXTRACTION (rare but possible)
+  // ============================================
+  var hasThirdMortgage = false;
+  var thirdMortgage = {
+    amount: '—',
+    rate: '—',
+    lender: '—',
+    date: '—',
+    type: '—'
+  };
+  
+  var m3 = mort.third || mort.Third || mort.mortgage3 || mort.Mortgage3 || {};
+  if (!m3.amount && mort.loanAmount3) {
+    m3 = {
+      amount: mort.loanAmount3,
+      lender: mort.lenderName3,
+      loantype: mort.loanType3
+    };
+  }
+  
+  var m3Amt = m3.amount || m3.loanamount || 0;
+  if (parseInt(m3Amt) > 0) {
+    hasThirdMortgage = true;
+    thirdMortgage.amount = fmtMoney(m3Amt);
+    
+    var m3Lender = m3.lender || {};
+    thirdMortgage.lender = fmt(typeof m3Lender === 'string' ? m3Lender : (m3.lendername || m3Lender.fullname));
+    thirdMortgage.type = fmt(m3.loantype || m3.loanType || '3rd Mortgage');
+  }
+  
+  // Calculate total debt load
+  var totalMortgageDebt = parseInt((mortgageAmount || '').replace(/[$,]/g, '')) || 0;
+  if (hasSecondMortgage) totalMortgageDebt += parseInt((secondMortgage.amount || '').replace(/[$,]/g, '')) || 0;
+  if (hasThirdMortgage) totalMortgageDebt += parseInt((thirdMortgage.amount || '').replace(/[$,]/g, '')) || 0;
+  
+  console.log('Second mortgage:', hasSecondMortgage ? secondMortgage : 'None');
+  console.log('Third mortgage:', hasThirdMortgage ? thirdMortgage : 'None');
+  console.log('Total mortgage debt:', totalMortgageDebt);
+
   // If no explicit mortgage data, estimate from sale price (assume 80% LTV)
   var saleAmt = parseInt(sa.saleamt || sale.saleamt) || 0;
   var saleDate = sa.saletransdate || sale.saletransdate || sale.salesearchdate;
@@ -1533,7 +1643,11 @@ function buildCard(p,idx){
     // Lien data
     hasLiens: hasLiens, liens: liens, totalLienAmount: totalLienAmount,
     // Underwater data
-    isUnderwater: isUnderwater, underwaterAmount: underwaterAmount, ltvRatio: ltvRatio
+    isUnderwater: isUnderwater, underwaterAmount: underwaterAmount, ltvRatio: ltvRatio,
+    // 2nd/3rd Mortgage & HELOC
+    hasSecondMortgage: hasSecondMortgage, secondMortgage: secondMortgage,
+    hasThirdMortgage: hasThirdMortgage, thirdMortgage: thirdMortgage,
+    totalMortgageDebt: totalMortgageDebt
   };
 
   currentCompsData = compsData.map(function(c){
@@ -1556,6 +1670,8 @@ function buildCard(p,idx){
   if(isUnderwater)badges+='<span class="badge badge-red">📉 Underwater '+ltvRatio+'%</span>';
   if(hasLiens)badges+='<span class="badge badge-red">⚖️ Liens</span>';
   if(armInfo)badges+='<span class="badge badge-orange">🔥 ARM</span>';
+  if(hasSecondMortgage && secondMortgage.isHELOC)badges+='<span class="badge badge-purple">💳 HELOC</span>';
+  if(hasSecondMortgage && !secondMortgage.isHELOC)badges+='<span class="badge badge-teal">2nd Mtg</span>';
   if(hasMortgage)badges+='<span class="badge badge-teal">💰 Mortgage</span>';
   if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
   if(avmVal&&avmVal!=='—')badges+='<span class="badge badge-green">'+avmVal+'</span>';
@@ -1758,7 +1874,7 @@ function buildCard(p,idx){
   html+='<div class="ai-panel" id="ai-panel-chat-'+idx+'">';
   html+='<div class="ai-chat"><div class="ai-chat-header"><span>💬 Ask AI About This Property</span></div>';
   html+='<div class="ai-chat-messages" id="chat-messages-'+idx+'"><div class="ai-chat-msg assistant">I\'ve analyzed this property and comps. Ask me anything!</div></div>';
-  html+='<div class="quick-questions"><span onclick="askQuickQuestion('+idx+',\'Is this a good investment?\')" class="quick-q">Good investment?</span><span onclick="askQuickQuestion('+idx+',\'What are the red flags?\')" class="quick-q">Red flags?</span><span onclick="askQuickQuestion('+idx+',\'Estimate rental income\')" class="quick-q">Rental income?</span><span onclick="askQuickQuestion('+idx+',\'How does it compare to comps?\')" class="quick-q">Compare to comps?</span><span onclick="askQuickQuestion('+idx+',\'Calculate remaining mortgage balance\')" class="quick-q">Mortgage balance?</span><span onclick="askQuickQuestion('+idx+',\'Does this property have any liens or judgments?\')" class="quick-q">Liens?</span><span onclick="askQuickQuestion('+idx+',\'Is this property in foreclosure or distressed?\')" class="quick-q">Foreclosure?</span></div>';
+  html+='<div class="quick-questions"><span onclick="askQuickQuestion('+idx+',\'Is this a good investment?\')" class="quick-q">Good investment?</span><span onclick="askQuickQuestion('+idx+',\'What are the red flags?\')" class="quick-q">Red flags?</span><span onclick="askQuickQuestion('+idx+',\'Estimate rental income\')" class="quick-q">Rental income?</span><span onclick="askQuickQuestion('+idx+',\'How does it compare to comps?\')" class="quick-q">Compare to comps?</span><span onclick="askQuickQuestion('+idx+',\'Calculate remaining mortgage balance\')" class="quick-q">Mortgage balance?</span><span onclick="askQuickQuestion('+idx+',\'Does this property have a HELOC or 2nd mortgage?\')" class="quick-q">HELOC/2nd?</span><span onclick="askQuickQuestion('+idx+',\'Does this property have any liens or judgments?\')" class="quick-q">Liens?</span><span onclick="askQuickQuestion('+idx+',\'Is this property in foreclosure or distressed?\')" class="quick-q">Foreclosure?</span></div>';
   html+='<div class="ai-chat-input"><input type="text" id="chat-input-'+idx+'" placeholder="Ask about this property..." onkeydown="if(event.key===\'Enter\')sendChatMessage('+idx+')"><button id="chat-send-'+idx+'" onclick="sendChatMessage('+idx+')">Send</button></div></div>';
   html+='</div>';
 
@@ -1795,7 +1911,7 @@ function buildCard(p,idx){
   }
 
   // ALWAYS show mortgage section if any data exists
-  html+='<div class="section-title teal">Mortgage</div>';
+  html+='<div class="section-title teal">Mortgage & Debt</div>';
   if (hasMortgage || mortgageAmount !== '—' || lenderName !== '—') {
     html+='<div class="mort-grid">';
     html+='<div class="mort-card"><div class="mc-label">1st Mortgage</div>';
@@ -1812,21 +1928,53 @@ function buildCard(p,idx){
     html+=drow('Maturity',mortgageMaturity,'green');
     html+='</div>';
     
-    // Check for 2nd mortgage
-    var m2 = mort.second || mort.Second || {};
-    var amt2 = m2.amount || m2.loanamount;
-    if (amt2) {
-      var lr2 = m2.lender || {};
-      var ln2 = typeof lr2 === 'string' ? fmt(lr2) : fmt(m2.lendername || lr2.fullname || lr2.name);
-      var ir2 = m2.interestrate || m2.interestRate;
-      html+='<div class="mort-card"><div class="mc-label">2nd Mortgage</div>';
-      html+=drow('Lender',ln2,'teal');
-      html+=drow('Amount',fmtMoney(amt2),'hi');
-      html+=drow('Rate',ir2?(parseFloat(ir2).toFixed(3)+'%'):'—','green');
-      html+=drow('Recorded',fmtDate(m2.recordingdate||m2.recordingDate));
+    // Display 2nd Mortgage / HELOC using new extraction
+    if (hasSecondMortgage) {
+      var m2Label = secondMortgage.isHELOC ? '💳 HELOC' : '2nd Mortgage';
+      var m2Color = secondMortgage.isHELOC ? 'purple' : 'teal';
+      html+='<div class="mort-card" style="border-color:var(--' + (secondMortgage.isHELOC ? 'purple' : 'teal') + '-bd)">';
+      html+='<div class="mc-label" style="color:var(--' + (secondMortgage.isHELOC ? 'purple' : 'teal') + ')">' + m2Label + '</div>';
+      html+=drow('Lender',secondMortgage.lender, m2Color);
+      html+=drow('Amount',secondMortgage.amount,'hi');
+      html+=drow('Rate',secondMortgage.rate,'green');
+      html+=drow('Type',secondMortgage.type);
+      html+=drow('Term',secondMortgage.term);
+      html+=drow('Recorded',secondMortgage.date);
+      html+=drow('Maturity',secondMortgage.maturity);
       html+='</div>';
     }
+    
+    // Display 3rd Mortgage if exists
+    if (hasThirdMortgage) {
+      html+='<div class="mort-card" style="border-color:var(--orange-bd)">';
+      html+='<div class="mc-label" style="color:var(--orange)">3rd Mortgage</div>';
+      html+=drow('Lender',thirdMortgage.lender,'orange');
+      html+=drow('Amount',thirdMortgage.amount,'hi');
+      html+=drow('Type',thirdMortgage.type);
+      html+='</div>';
+    }
+    
     html+='</div>';
+    
+    // Total Debt Summary
+    if (hasSecondMortgage || hasThirdMortgage || hasLiens) {
+      html+='<div style="margin-top:1rem;padding:12px;background:var(--navy-3);border-radius:var(--rs);border:1px solid var(--bdr)">';
+      html+='<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📊 Total Debt Summary</div>';
+      html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">';
+      html+='<div><span style="font-size:11px;color:var(--slate)">1st Mortgage</span><div style="font-size:14px;color:var(--white);font-family:\'DM Mono\',monospace">' + mortgageAmount + '</div></div>';
+      if (hasSecondMortgage) {
+        html+='<div><span style="font-size:11px;color:var(--slate)">' + (secondMortgage.isHELOC ? 'HELOC' : '2nd Mortgage') + '</span><div style="font-size:14px;color:var(--' + (secondMortgage.isHELOC ? 'purple' : 'white') + ');font-family:\'DM Mono\',monospace">' + secondMortgage.amount + '</div></div>';
+      }
+      if (hasThirdMortgage) {
+        html+='<div><span style="font-size:11px;color:var(--slate)">3rd Mortgage</span><div style="font-size:14px;color:var(--orange);font-family:\'DM Mono\',monospace">' + thirdMortgage.amount + '</div></div>';
+      }
+      if (hasLiens && totalLienAmount > 0) {
+        html+='<div><span style="font-size:11px;color:var(--slate)">Liens</span><div style="font-size:14px;color:#f09090;font-family:\'DM Mono\',monospace">$' + totalLienAmount.toLocaleString() + '</div></div>';
+      }
+      var grandTotal = totalMortgageDebt + totalLienAmount;
+      html+='<div style="border-left:1px solid var(--bdr-md);padding-left:10px"><span style="font-size:11px;color:var(--amber)">TOTAL DEBT</span><div style="font-size:16px;color:var(--amber);font-family:\'DM Mono\',monospace;font-weight:500">$' + grandTotal.toLocaleString() + '</div></div>';
+      html+='</div></div>';
+    }
   } else {
     html+='<p style="color:var(--slate);font-size:13px">No mortgage data on file for this property.</p>';
   }
