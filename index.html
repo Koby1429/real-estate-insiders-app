@@ -438,7 +438,8 @@ function attom(path,params){
 }
 
 async function askClaude(messages, systemPrompt) {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  // Use Railway proxy for AI requests
+  const response = await fetch(RAILWAY + "/api/claude", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
@@ -448,15 +449,38 @@ async function askClaude(messages, systemPrompt) {
       messages: messages
     })
   });
-  if (!response.ok) throw new Error('AI request failed');
+  if (!response.ok) {
+    // Try direct API as fallback (won't work in browser but useful for debugging)
+    console.log('Railway AI proxy failed, trying direct API...');
+    const directResponse = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "x-api-key": "your-key", "anthropic-version": "2023-06-01"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1500,
+        system: systemPrompt,
+        messages: messages
+      })
+    });
+    if (!directResponse.ok) throw new Error('AI request failed');
+    const data = await directResponse.json();
+    return data.content[0].text;
+  }
   const data = await response.json();
-  return data.content[0].text;
+  // Handle both proxy response formats
+  if (data.content && data.content[0]) return data.content[0].text;
+  if (data.text) return data.text;
+  if (data.response) return data.response;
+  return JSON.stringify(data);
 }
 
 async function generatePropertyAnalysis(idx) {
   const div = document.getElementById('ai-analysis-'+idx);
   if (!div || !currentPropertyData) return;
   div.innerHTML = '<div class="ai-loading"><div class="spinner ai"></div><span>AI analyzing property...</span></div>';
+  
+  // First, try to show a basic analysis without AI
+  const basicAnalysis = generateBasicAnalysis();
   
   const systemPrompt = "You are a real estate investment analyst. Analyze property data and provide concise insights. Focus on: 1) Investment potential (rental, appreciation) 2) Red flags or concerns 3) Key opportunities 4) Quick recommendations. Be direct. Use bullet points. Keep under 200 words. Format with HTML (p, strong, ul, li).";
 
@@ -466,8 +490,72 @@ async function generatePropertyAnalysis(idx) {
     const analysis = await askClaude([{role:"user",content:ctx}], systemPrompt);
     div.innerHTML = '<div class="ai-content">'+analysis+'</div>';
   } catch(e) {
-    div.innerHTML = '<div class="ai-error">⚠️ AI analysis unavailable. The AI service may not be accessible from this environment.</div>';
+    console.log('AI error:', e);
+    // Show basic analysis as fallback
+    div.innerHTML = basicAnalysis;
   }
+}
+
+// Generate basic property analysis without AI
+function generateBasicAnalysis() {
+  if (!currentPropertyData) return '<div class="ai-error">No property data available</div>';
+  
+  var p = currentPropertyData;
+  var html = '<div class="ai-content">';
+  
+  // Value Analysis
+  var avmNum = parseInt((p.avmValue||'').replace(/[$,]/g,'')) || 0;
+  var saleNum = parseInt((p.lastSalePrice||'').replace(/[$,]/g,'')) || 0;
+  var sqftNum = parseInt(p.sqft) || 0;
+  var pricePerSqft = (avmNum > 0 && sqftNum > 0) ? Math.round(avmNum / sqftNum) : 0;
+  
+  html += '<p><strong>📊 Property Summary</strong></p>';
+  html += '<ul>';
+  html += '<li><strong>Value:</strong> ' + (p.avmValue || 'Unknown') + ' (AVM estimate)</li>';
+  if (pricePerSqft > 0) html += '<li><strong>Price/Sqft:</strong> $' + pricePerSqft.toLocaleString() + '</li>';
+  if (saleNum > 0 && avmNum > 0) {
+    var appreciation = Math.round(((avmNum - saleNum) / saleNum) * 100);
+    html += '<li><strong>Change since purchase:</strong> ' + (appreciation >= 0 ? '+' : '') + appreciation + '%</li>';
+  }
+  html += '</ul>';
+  
+  // Key Facts
+  html += '<p><strong>🏠 Key Details</strong></p>';
+  html += '<ul>';
+  html += '<li>' + (p.beds||'?') + ' bed / ' + (p.baths||'?') + ' bath, ' + (p.sqft||'?') + ' sqft</li>';
+  html += '<li>Built: ' + (p.yearBuilt||'Unknown') + '</li>';
+  html += '<li>Owner Occupied: ' + (p.ownerOccupied||'Unknown') + '</li>';
+  html += '</ul>';
+  
+  // Mortgage Info
+  if (p.mortgageAmount && p.mortgageAmount !== '—') {
+    html += '<p><strong>💰 Mortgage</strong></p>';
+    html += '<ul>';
+    html += '<li>Amount: ' + p.mortgageAmount + '</li>';
+    if (p.mortgageRate && p.mortgageRate !== '—') html += '<li>Rate: ' + p.mortgageRate + '</li>';
+    if (p.lender && p.lender !== '—') html += '<li>Lender: ' + p.lender + '</li>';
+    html += '</ul>';
+  }
+  
+  // Alerts
+  var alerts = [];
+  if (p.isDistressed) alerts.push('⚠️ DISTRESSED/FORECLOSURE');
+  if (p.isUnderwater) alerts.push('📉 UNDERWATER (LTV: ' + p.ltvRatio + '%)');
+  if (p.hasLiens) alerts.push('⚖️ LIENS: $' + (p.totalLienAmount||0).toLocaleString());
+  if (p.isARM) alerts.push('🔄 ARM LOAN - rate may adjust');
+  if (p.hasSecondMortgage) alerts.push('📋 2nd Mortgage/HELOC detected');
+  
+  if (alerts.length > 0) {
+    html += '<p><strong style="color:#f09090">🚨 Alerts</strong></p>';
+    html += '<ul style="color:#f09090">';
+    alerts.forEach(function(a) { html += '<li>' + a + '</li>'; });
+    html += '</ul>';
+  }
+  
+  html += '<p style="font-size:11px;color:var(--slate);margin-top:12px"><em>Basic analysis generated locally. AI-powered deep analysis requires API connection.</em></p>';
+  html += '</div>';
+  
+  return html;
 }
 
 async function generateCompsAnalysis(idx) {
@@ -2026,6 +2114,23 @@ function buildCard(p,idx){
   } else {
     html+='<p style="color:var(--slate)">No mortgage data found for this property. Cannot calculate balance.</p>';
   }
+  
+  // RAW MORTGAGE DATA DISPLAY - for debugging 2nd mortgage/HELOC issues
+  html+='<details style="margin-top:16px;padding:10px;background:var(--navy-3);border-radius:var(--rs);border:1px solid var(--bdr)">';
+  html+='<summary style="cursor:pointer;font-size:11px;color:var(--amber)">🔧 Raw Mortgage Data from ATTOM (click to expand)</summary>';
+  html+='<div style="margin-top:10px;font-size:11px;font-family:\'DM Mono\',monospace;color:var(--slate);white-space:pre-wrap;max-height:300px;overflow:auto">';
+  html+=JSON.stringify(mort, null, 2).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  html+='</div>';
+  if (hasSecondMortgage) {
+    html+='<div style="margin-top:8px;padding:8px;background:var(--purple-bg);border-radius:var(--rs)">';
+    html+='<div style="font-size:10px;color:var(--purple)">✅ 2nd Mortgage/HELOC Detected:</div>';
+    html+='<div style="font-size:11px;color:var(--white);font-family:\'DM Mono\',monospace">'+JSON.stringify(secondMortgage, null, 2)+'</div>';
+    html+='</div>';
+  } else {
+    html+='<div style="margin-top:8px;font-size:10px;color:var(--red)">❌ No 2nd mortgage/HELOC detected in this data</div>';
+  }
+  html+='</details>';
+  
   html+='</div></div></div>';
 
   // ============================================
@@ -2220,6 +2325,13 @@ function buildCard(p,idx){
       html+=drow('Term',secondMortgage.term);
       html+=drow('Recorded',secondMortgage.date);
       html+=drow('Maturity',secondMortgage.maturity);
+      html+='</div>';
+    } else {
+      // Note: No 2nd mortgage found
+      html+='<div class="mort-card" style="border-color:var(--bdr);opacity:0.7">';
+      html+='<div class="mc-label" style="color:var(--slate)">2nd Mortgage / HELOC</div>';
+      html+='<p style="font-size:11px;color:var(--slate);margin:8px 0">None found in ATTOM records.</p>';
+      html+='<p style="font-size:10px;color:var(--slate-dk);margin:0;font-style:italic">Note: ATTOM data comes from public records. Not all counties record HELOCs/2nd mortgages consistently. Check county recorder or title company for complete lien info.</p>';
       html+='</div>';
     }
     
