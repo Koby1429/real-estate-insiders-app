@@ -247,8 +247,35 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
 .search-link.premium .search-link-name{color:var(--amber)}
 .stab.purple{color:var(--purple)}
 .stab.purple.active{color:var(--purple);border-bottom-color:var(--purple)}
+.stab.red{color:var(--red)}
+.stab.red.active{color:var(--red);border-bottom-color:var(--red)}
 
-@media(max-width:600px){.detail-grid,.mort-grid,.comps-grid{grid-template-columns:1fr}.frow.c2,.frow.c3{grid-template-columns:1fr}.search-card-header{flex-direction:column;align-items:flex-start}.ai-chat-msg.user{margin-left:10%}.balance-grid{grid-template-columns:1fr 1fr}}
+/* Distressed Properties Styles */
+.distressed-box{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r);padding:1rem;margin-bottom:1rem}
+.distressed-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.distressed-icon{font-size:20px}
+.distressed-title{font-size:14px;font-weight:500;color:#f09090}
+.distressed-status{display:inline-block;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:500}
+.distressed-status.default{background:var(--red);color:white}
+.distressed-status.auction{background:var(--orange);color:white}
+.distressed-status.reo{background:var(--purple);color:white}
+.distressed-status.clear{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.distressed-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:10px}
+.distressed-item{background:var(--navy-3);border-radius:var(--rs);padding:10px}
+.distressed-item-label{font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.distressed-item-val{font-size:13px;color:var(--white);font-family:'DM Mono',monospace}
+.distressed-item-val.red{color:#f09090}
+.distressed-item-val.orange{color:var(--orange)}
+.distressed-item-val.green{color:var(--green)}
+.lien-card{background:var(--navy-3);border:1px solid var(--red-bd);border-radius:var(--rs);padding:10px;margin-bottom:8px}
+.lien-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.lien-type{font-size:12px;font-weight:500;color:#f09090}
+.lien-amount{font-size:14px;font-weight:500;color:var(--amber);font-family:'DM Mono',monospace}
+.lien-details{font-size:11px;color:var(--slate)}
+.distressed-card{background:var(--navy-2);border:1px solid var(--red-bd);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:10px}
+.distressed-card .prop-addr{color:#f09090}
+
+@media(max-width:600px){.detail-grid,.mort-grid,.comps-grid{grid-template-columns:1fr}.frow.c2,.frow.c3{grid-template-columns:1fr}.search-card-header{flex-direction:column;align-items:flex-start}.ai-chat-msg.user{margin-left:10%}.balance-grid{grid-template-columns:1fr 1fr}.distressed-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -269,14 +296,15 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
 <div class="page">
   <div class="search-card">
     <div class="search-card-header">
-      <div><h1>Property Records Search</h1><p>150M+ properties · AI insights, comps analysis, deed, mortgage &amp; AVM data</p></div>
+      <div><h1>Property Records Search</h1><p>150M+ properties · AI insights, comps, deed, mortgage, foreclosure &amp; AVM data</p></div>
       <div class="powered-badge">Powered by ATTOM + Claude AI</div>
     </div>
     <div class="stabs">
       <button class="stab active" onclick="switchTab('address',this)">Search by Address</button>
       <button class="stab" onclick="switchTab('apn',this)">Search by APN</button>
       <button class="stab arm" onclick="switchTab('arm',this)">🔥 ARM Search</button>
-      <button class="stab purple" onclick="switchTab('person',this)">👤 Person Search</button>
+      <button class="stab red" onclick="switchTab('distressed',this)">⚠️ Distressed</button>
+      <button class="stab purple" onclick="switchTab('person',this)">👤 Person</button>
     </div>
     <div class="spanel active" id="panel-address">
       <div class="fsingle">
@@ -312,6 +340,28 @@ input[type=text]::placeholder,textarea::placeholder{color:var(--slate-dk)}
         </div>
       </div>
       <button class="btn-search orange" onclick="searchARM()">🔥 Find ARM Properties</button>
+    </div>
+    <div class="spanel" id="panel-distressed">
+      <div class="frow c3">
+        <div><label>ZIP Code</label><input type="text" id="distressed-zip" placeholder="e.g. 85001"></div>
+        <div><label>Status Filter</label>
+          <select id="distressed-status">
+            <option value="all">All Distressed</option>
+            <option value="preforeclosure">Pre-Foreclosure</option>
+            <option value="auction">Auction Scheduled</option>
+            <option value="reo">Bank Owned (REO)</option>
+          </select>
+        </div>
+        <div><label>Max Results</label>
+          <select id="distressed-limit">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-search" style="background:var(--red)" onclick="searchDistressed()">⚠️ Find Distressed Properties</button>
+      <p style="font-size:11px;color:var(--slate);margin-top:10px;text-align:center">Searches for NOD, Lis Pendens, Auction, and REO properties. Data from ATTOM preforeclosure records.</p>
     </div>
     <div class="spanel" id="panel-person">
       <div class="frow c2">
@@ -679,8 +729,165 @@ function exportCSV() {
   a.click();
 }
 
+// Distressed Properties Search
+var distressedResults = [];
+
+async function searchDistressed() {
+  hideError();
+  showResults(false);
+  distressedResults = [];
+  
+  var zip = document.getElementById('distressed-zip').value.trim();
+  var statusFilter = document.getElementById('distressed-status').value;
+  var limit = parseInt(document.getElementById('distressed-limit').value);
+  
+  if (!zip || !/^\d{5}$/.test(zip)) {
+    showError('Invalid ZIP', 'Enter a 5-digit ZIP code.');
+    return;
+  }
+  
+  showLoader(true, 'Searching for distressed properties in ' + zip + '...');
+  
+  try {
+    // Try the preforeclosure snapshot endpoint
+    var data = await attom('/propertyapi/v1.0.0/preforeclosure/snapshot', {postalcode: zip, pagesize: limit}).catch(function() { return null; });
+    
+    // If that fails, try property/preforeclosure
+    if (!data || (!data.property && !data.Property)) {
+      data = await attom('/propertyapi/v1.0.0/property/preforeclosure', {postalcode: zip, pagesize: limit}).catch(function() { return null; });
+    }
+    
+    // If still no data, try the sale/snapshot with foreclosure filter
+    if (!data || (!data.property && !data.Property)) {
+      showLoader(true, 'Trying alternate foreclosure search...');
+      data = await attom('/propertyapi/v1.0.0/sale/snapshot', {postalcode: zip, pagesize: limit, saletype: 'Foreclosure'}).catch(function() { return null; });
+    }
+    
+    if (!data) {
+      showLoader(false);
+      showError('No Data', 'Could not retrieve foreclosure data for this ZIP. The preforeclosure API may require a premium subscription.');
+      return;
+    }
+    
+    var props = [data.property || data.Property].flat().filter(Boolean);
+    console.log('Distressed search results:', props.length, 'properties');
+    console.log('Raw distressed data:', JSON.stringify(data, null, 2));
+    
+    showLoader(true, 'Analyzing ' + props.length + ' properties...');
+    
+    props.forEach(function(p) {
+      var fc = p.foreclosure || p.preforeclosure || p.sale || {};
+      var addr = p.address || {};
+      var fcStatus = (fc.fcstatus || fc.status || fc.recordtype || fc.saletype || '').toUpperCase();
+      var fcType = (fc.fctype || fc.type || fc.documenttype || '').toUpperCase();
+      
+      // Determine status
+      var status = 'default';
+      var statusLabel = 'Pre-Foreclosure';
+      
+      if (fcStatus.indexOf('REO') !== -1 || fcStatus.indexOf('BANK') !== -1) {
+        status = 'reo';
+        statusLabel = 'Bank Owned (REO)';
+      } else if (fcStatus.indexOf('AUCTION') !== -1 || fcStatus.indexOf('NTS') !== -1 || fcStatus.indexOf('TRUSTEE') !== -1 || fcStatus.indexOf('NFS') !== -1) {
+        status = 'auction';
+        statusLabel = 'Auction';
+      } else if (fcStatus.indexOf('DEFAULT') !== -1 || fcStatus.indexOf('NOD') !== -1 || fcStatus.indexOf('LIS') !== -1) {
+        status = 'default';
+        statusLabel = 'Pre-Foreclosure';
+      } else if (fcStatus.indexOf('FORECLOSURE') !== -1) {
+        status = 'auction';
+        statusLabel = 'Foreclosure';
+      }
+      
+      // Apply status filter
+      if (statusFilter !== 'all') {
+        if (statusFilter === 'preforeclosure' && status !== 'default') return;
+        if (statusFilter === 'auction' && status !== 'auction') return;
+        if (statusFilter === 'reo' && status !== 'reo') return;
+      }
+      
+      distressedResults.push({
+        address: addr.line1 || addr.oneLine || 'Unknown',
+        city: addr.locality || '',
+        state: addr.countrySubd || '',
+        zip: addr.postal1 || zip,
+        status: status,
+        statusLabel: statusLabel,
+        recordingDate: fc.recordingdate || fc.filingdate || fc.saletransdate || '',
+        auctionDate: fc.auctiondate || fc.saledate || '',
+        defaultAmount: fc.defaultamount || fc.amount || fc.saleamt || 0,
+        lender: fc.lendername || fc.lender || fc.beneficiary || '',
+        openingBid: fc.openingbid || fc.startingbid || 0,
+        caseNumber: fc.casenumber || fc.documentnumber || '',
+        trustee: fc.trusteename || fc.trustee || ''
+      });
+    });
+    
+    // Sort by recording date (most recent first)
+    distressedResults.sort(function(a, b) {
+      return new Date(b.recordingDate) - new Date(a.recordingDate);
+    });
+    
+    showLoader(false);
+    buildDistressedResults(distressedResults, zip, statusFilter);
+    
+  } catch(e) {
+    showLoader(false);
+    showError('API Error', e.message);
+  }
+}
+
+function buildDistressedResults(results, zip, filter) {
+  var filterLabel = filter === 'all' ? 'All distressed' : filter.charAt(0).toUpperCase() + filter.slice(1);
+  document.getElementById('result-count').textContent = results.length;
+  document.getElementById('result-sub').textContent = filterLabel + ' properties in ' + zip;
+  
+  if (results.length === 0) {
+    document.getElementById('result-list').innerHTML = '<div class="no-results"><p>No distressed properties found in ZIP ' + zip + '</p><p style="font-size:12px;color:var(--slate);margin-top:8px">Note: Preforeclosure data may require a premium ATTOM subscription. Try searching by address to see if a specific property has foreclosure records.</p></div>';
+    document.getElementById('btn-export').style.display = 'none';
+    showResults(true);
+    return;
+  }
+  
+  document.getElementById('btn-export').style.display = 'inline-block';
+  
+  var html = '';
+  results.forEach(function(r) {
+    var cardClass = r.status === 'reo' ? 'reo' : (r.status === 'auction' ? 'soon' : 'urgent');
+    html += '<div class="arm-card ' + cardClass + '" style="border-color:var(--red-bd)">';
+    html += '<div class="arm-header">';
+    html += '<div><div class="arm-addr" style="color:#f09090">' + r.address + '</div><div class="arm-city">' + r.city + ', ' + r.state + ' ' + r.zip + '</div></div>';
+    html += '<div class="distressed-status ' + r.status + '">' + r.statusLabel + '</div>';
+    html += '</div>';
+    html += '<div class="arm-details">';
+    if (r.recordingDate) html += '<div class="arm-detail"><span class="arm-detail-label">Filed</span><span class="arm-detail-val">' + fmtDate(r.recordingDate) + '</span></div>';
+    if (r.defaultAmount) html += '<div class="arm-detail"><span class="arm-detail-label">Amount</span><span class="arm-detail-val orange">$' + parseInt(r.defaultAmount).toLocaleString() + '</span></div>';
+    if (r.auctionDate) html += '<div class="arm-detail"><span class="arm-detail-label">Auction</span><span class="arm-detail-val green">' + fmtDate(r.auctionDate) + '</span></div>';
+    if (r.openingBid) html += '<div class="arm-detail"><span class="arm-detail-label">Opening Bid</span><span class="arm-detail-val green">$' + parseInt(r.openingBid).toLocaleString() + '</span></div>';
+    if (r.lender) html += '<div class="arm-detail"><span class="arm-detail-label">Lender</span><span class="arm-detail-val">' + r.lender + '</span></div>';
+    if (r.trustee) html += '<div class="arm-detail"><span class="arm-detail-label">Trustee</span><span class="arm-detail-val">' + r.trustee + '</span></div>';
+    html += '</div></div>';
+  });
+  
+  document.getElementById('result-list').innerHTML = html;
+  showResults(true);
+}
+
+function exportDistressedCSV() {
+  if (!distressedResults.length) return;
+  var csv = 'Address,City,State,ZIP,Status,Filing Date,Auction Date,Default Amount,Opening Bid,Lender,Trustee\n';
+  distressedResults.forEach(function(r) {
+    csv += '"' + r.address + '","' + r.city + '","' + r.state + '","' + r.zip + '","' + r.statusLabel + '","' + r.recordingDate + '","' + r.auctionDate + '",' + r.defaultAmount + ',' + r.openingBid + ',"' + r.lender + '","' + r.trustee + '"\n';
+  });
+  var blob = new Blob([csv], {type: 'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'distressed_properties_' + document.getElementById('distressed-zip').value + '.csv';
+  a.click();
+}
+
 function search(mode){
-  hideError();showResults(false);showLoader(true,'Step 1 of 6: Finding property…');
+  hideError();showResults(false);showLoader(true,'Step 1 of 7: Finding property…');
   var baseParams={};
   if(mode==='address'){
     var addr=document.getElementById('a-address').value.trim();
@@ -703,7 +910,7 @@ function search(mode){
     geoId=props[0].location&&props[0].location.geoid;
     mergedData.basic=props[0];
     if(!attomId)throw new Error('Could not get ATTOM ID.');
-    showLoader(true,'Step 2 of 6: Pulling deed & mortgage…');
+    showLoader(true,'Step 2 of 7: Pulling deed & mortgage…');
     return attom('/propertyapi/v1.0.0/property/detailmortgage',{attomId:attomId});
   })
   .then(function(d){
@@ -713,7 +920,7 @@ function search(mode){
       console.log('Extracted property from detailmortgage:', JSON.stringify(props[0], null, 2));
       mergedData.detail=props[0];
     }
-    showLoader(true,'Step 3 of 6: Getting owner & AVM…');
+    showLoader(true,'Step 3 of 7: Getting owner & AVM…');
     return Promise.all([
       attom('/propertyapi/v1.0.0/property/detailowner',{attomId:attomId}).catch(function(){return null;}),
       attom('/propertyapi/v1.0.0/attomavm/detail',{attomId:attomId}).catch(function(){return null;})
@@ -722,12 +929,12 @@ function search(mode){
   .then(function(results){
     if(results[0]){var op=[results[0].property||results[0].Property].flat().filter(Boolean);if(op.length)mergedData.owner=op[0];}
     if(results[1]){var ap=[results[1].property||results[1].Property].flat().filter(Boolean);if(ap.length)mergedData.avm=ap[0];}
-    showLoader(true,'Step 4 of 6: Fetching transaction history…');
+    showLoader(true,'Step 4 of 7: Fetching transaction history…');
     return attom('/propertyapi/v1.0.0/saleshistory/detail',{attomId:attomId}).catch(function(){return null;});
   })
   .then(function(histResult){
     if(histResult){var hp=[histResult.property||histResult.Property].flat().filter(Boolean);if(hp.length)mergedData.history=hp[0];}
-    showLoader(true,'Step 5 of 6: Finding comparable sales…');
+    showLoader(true,'Step 5 of 7: Finding comparable sales…');
     var addr = mergedData.basic&&mergedData.basic.address;
     if(addr&&addr.postal1){
       return attom('/propertyapi/v1.0.0/sale/snapshot',{postalcode:addr.postal1,orderby:'saletransdate desc',pagesize:10}).catch(function(){return null;});
@@ -739,13 +946,24 @@ function search(mode){
       var cp=[compsResult.property||compsResult.Property].flat().filter(Boolean);
       mergedData.comps=cp.slice(0,6);
     }
-    showLoader(true,'Step 6 of 6: Running AI analysis…');
+    showLoader(true,'Step 6 of 7: Checking foreclosure status…');
+    // Try to get preforeclosure data
+    return attom('/propertyapi/v1.0.0/property/preforeclosure',{attomId:attomId}).catch(function(){return null;});
+  })
+  .then(function(preforeclosureResult){
+    if(preforeclosureResult){
+      console.log('Preforeclosure data:', JSON.stringify(preforeclosureResult, null, 2));
+      var pp=[preforeclosureResult.property||preforeclosureResult.Property].flat().filter(Boolean);
+      if(pp.length) mergedData.preforeclosure=pp[0];
+    }
+    showLoader(true,'Step 7 of 7: Running AI analysis…');
     var final=Object.assign({},mergedData.basic||{},mergedData.detail||{});
     console.log('Final merged data - mortgage:', JSON.stringify(final.mortgage, null, 2));
     if(mergedData.owner&&mergedData.owner.owner)final.owner=mergedData.owner.owner;
     if(mergedData.avm)final._avm=mergedData.avm;
     if(mergedData.history)final._history=mergedData.history;
     if(mergedData.comps)final._comps=mergedData.comps;
+    if(mergedData.preforeclosure)final._preforeclosure=mergedData.preforeclosure;
     showLoader(false);
     buildResults([final]);
   })
@@ -807,6 +1025,57 @@ function buildCard(p,idx){
   var avmVal=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.value);
   var avmLow=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.low);
   var avmHigh=fmtMoney(avm.avm&&avm.avm.amount&&avm.avm.amount.high);
+
+  // Extract preforeclosure/distressed data
+  var preforeclosure = p._preforeclosure || p.preforeclosure || {};
+  var foreclosureData = preforeclosure.foreclosure || preforeclosure.preforeclosure || preforeclosure || {};
+  var isDistressed = false;
+  var distressedStatus = 'clear';
+  var distressedType = '';
+  var auctionDate = '';
+  var defaultAmount = '';
+  var foreclosingLender = '';
+  var recordingDate = '';
+  var caseNumber = '';
+  var trustee = '';
+  var openingBid = '';
+  
+  // Check for various foreclosure status indicators
+  var fcStatus = foreclosureData.fcstatus || foreclosureData.status || foreclosureData.foreclosurestatus || '';
+  var fcType = foreclosureData.fctype || foreclosureData.type || foreclosureData.recordtype || foreclosureData.documenttype || '';
+  var fcRecordType = foreclosureData.recordtype || foreclosureData.filingtype || '';
+  
+  console.log('Preforeclosure data:', JSON.stringify(preforeclosure, null, 2));
+  
+  // Detect if property is distressed
+  if (fcStatus || fcType || foreclosureData.auctiondate || foreclosureData.defaultamount || foreclosureData.recordingdate) {
+    isDistressed = true;
+    
+    // Determine status type
+    var statusUpper = (fcStatus + ' ' + fcType + ' ' + fcRecordType).toUpperCase();
+    if (statusUpper.indexOf('REO') !== -1 || statusUpper.indexOf('BANK OWNED') !== -1) {
+      distressedStatus = 'reo';
+      distressedType = 'Bank Owned (REO)';
+    } else if (statusUpper.indexOf('AUCTION') !== -1 || statusUpper.indexOf('NTS') !== -1 || statusUpper.indexOf('TRUSTEE SALE') !== -1 || statusUpper.indexOf('NFS') !== -1) {
+      distressedStatus = 'auction';
+      distressedType = 'Auction Scheduled';
+    } else if (statusUpper.indexOf('DEFAULT') !== -1 || statusUpper.indexOf('NOD') !== -1 || statusUpper.indexOf('LIS PENDENS') !== -1 || statusUpper.indexOf('PREFORECLOSURE') !== -1) {
+      distressedStatus = 'default';
+      distressedType = 'Pre-Foreclosure';
+    } else {
+      distressedStatus = 'default';
+      distressedType = fcType || fcStatus || 'In Default';
+    }
+    
+    // Extract foreclosure details
+    auctionDate = fmtDate(foreclosureData.auctiondate || foreclosureData.saledate || foreclosureData.auction_date);
+    defaultAmount = fmtMoney(foreclosureData.defaultamount || foreclosureData.amount || foreclosureData.originalbalance);
+    foreclosingLender = fmt(foreclosureData.lendername || foreclosureData.lender || (foreclosureData.beneficiary && foreclosureData.beneficiary.name) || foreclosureData.servicer);
+    recordingDate = fmtDate(foreclosureData.recordingdate || foreclosureData.filingdate || foreclosureData.recording_date);
+    caseNumber = fmt(foreclosureData.casenumber || foreclosureData.documentnumber || foreclosureData.instrumentnumber);
+    trustee = fmt(foreclosureData.trusteename || foreclosureData.trustee || (foreclosureData.trustee && foreclosureData.trustee.name));
+    openingBid = fmtMoney(foreclosureData.openingbid || foreclosureData.startingbid || foreclosureData.minimumbid);
+  }
 
   // Extract mortgage data - more flexible detection
   var mortgageAmount='—',mortgageRate='—',lenderName='—',mortgageDate='—',loanType='—';
@@ -932,7 +1201,10 @@ function buildCard(p,idx){
     avmValue:avmVal,avmLow:avmLow,avmHigh:avmHigh,lastSalePrice:lastSaleAmt,lastSaleDate:lastSaleDate,
     assessedValue:asmtTotal,annualTax:taxAmt,ownerName:ownerName,ownerOccupied:ownerOccupied,
     mortgageAmount:mortgageAmount,mortgageRate:mortgageRate,lender:lenderName,apn:apn,
-    isARM: armInfo ? true : false, armType: armInfo ? armInfo.type : null
+    isARM: armInfo ? true : false, armType: armInfo ? armInfo.type : null,
+    isDistressed: isDistressed, distressedStatus: distressedStatus, distressedType: distressedType,
+    auctionDate: auctionDate, defaultAmount: defaultAmount, foreclosingLender: foreclosingLender,
+    recordingDate: recordingDate, caseNumber: caseNumber, trustee: trustee, openingBid: openingBid
   };
 
   currentCompsData = compsData.map(function(c){
@@ -951,14 +1223,31 @@ function buildCard(p,idx){
   }).filter(function(c){return c.price>0;});
 
   var badges='<span class="badge badge-purple">🤖 AI</span><span class="badge badge-orange">📊 Comps</span>';
+  if(isDistressed)badges+='<span class="badge badge-red">⚠️ '+distressedType+'</span>';
   if(armInfo)badges+='<span class="badge badge-orange">🔥 ARM</span>';
   if(hasMortgage)badges+='<span class="badge badge-teal">💰 Mortgage</span>';
   if(propType&&propType!=='—')badges+='<span class="badge badge-slate">'+propType+'</span>';
   if(avmVal&&avmVal!=='—')badges+='<span class="badge badge-green">'+avmVal+'</span>';
 
-  var html='<div class="prop-card" id="card-'+idx+'">';
+  var html='<div class="prop-card'+(isDistressed?' distressed-card':'')+'" id="card-'+idx+'">';
   html+='<div class="prop-card-head" onclick="toggleCard('+idx+')"><div><div class="prop-addr">'+street+'</div><div class="prop-loc">'+cityState+(county!=='—'?' <span class="county-badge">'+county+'</span>':'')+'</div></div><div style="display:flex;align-items:center;gap:8px"><div class="prop-badges">'+badges+'</div><div class="expand-icon" id="exp-'+idx+'">&#9662;</div></div></div>';
   html+='<div class="prop-card-body" id="body-'+idx+'">';
+
+  // Distressed Alert if detected
+  if (isDistressed) {
+    html += '<div class="distressed-box">';
+    html += '<div class="distressed-header"><span class="distressed-icon">⚠️</span><span class="distressed-title">Distressed Property Alert</span>';
+    html += '<span class="distressed-status ' + distressedStatus + '">' + distressedType + '</span></div>';
+    html += '<div class="distressed-grid">';
+    if (recordingDate !== '—') html += '<div class="distressed-item"><div class="distressed-item-label">Filing Date</div><div class="distressed-item-val">' + recordingDate + '</div></div>';
+    if (defaultAmount !== '—') html += '<div class="distressed-item"><div class="distressed-item-label">Default Amount</div><div class="distressed-item-val red">' + defaultAmount + '</div></div>';
+    if (auctionDate !== '—') html += '<div class="distressed-item"><div class="distressed-item-label">Auction Date</div><div class="distressed-item-val orange">' + auctionDate + '</div></div>';
+    if (openingBid !== '—') html += '<div class="distressed-item"><div class="distressed-item-label">Opening Bid</div><div class="distressed-item-val green">' + openingBid + '</div></div>';
+    if (foreclosingLender !== '—') html += '<div class="distressed-item"><div class="distressed-item-label">Lender/Servicer</div><div class="distressed-item-val">' + foreclosingLender + '</div></div>';
+    if (trustee !== '—') html += '<div class="distressed-item"><div class="distressed-item-label">Trustee</div><div class="distressed-item-val">' + trustee + '</div></div>';
+    if (caseNumber !== '—') html += '<div class="distressed-item"><div class="distressed-item-label">Case/Doc #</div><div class="distressed-item-val">' + caseNumber + '</div></div>';
+    html += '</div></div>';
+  }
 
   // ARM Alert if detected
   html += armHtml;
@@ -1033,7 +1322,7 @@ function buildCard(p,idx){
   html+='<div class="ai-panel" id="ai-panel-chat-'+idx+'">';
   html+='<div class="ai-chat"><div class="ai-chat-header"><span>💬 Ask AI About This Property</span></div>';
   html+='<div class="ai-chat-messages" id="chat-messages-'+idx+'"><div class="ai-chat-msg assistant">I\'ve analyzed this property and comps. Ask me anything!</div></div>';
-  html+='<div class="quick-questions"><span onclick="askQuickQuestion('+idx+',\'Is this a good investment?\')" class="quick-q">Good investment?</span><span onclick="askQuickQuestion('+idx+',\'What are the red flags?\')" class="quick-q">Red flags?</span><span onclick="askQuickQuestion('+idx+',\'Estimate rental income\')" class="quick-q">Rental income?</span><span onclick="askQuickQuestion('+idx+',\'How does it compare to comps?\')" class="quick-q">Compare to comps?</span><span onclick="askQuickQuestion('+idx+',\'Calculate remaining mortgage balance\')" class="quick-q">Mortgage balance?</span></div>';
+  html+='<div class="quick-questions"><span onclick="askQuickQuestion('+idx+',\'Is this a good investment?\')" class="quick-q">Good investment?</span><span onclick="askQuickQuestion('+idx+',\'What are the red flags?\')" class="quick-q">Red flags?</span><span onclick="askQuickQuestion('+idx+',\'Estimate rental income\')" class="quick-q">Rental income?</span><span onclick="askQuickQuestion('+idx+',\'How does it compare to comps?\')" class="quick-q">Compare to comps?</span><span onclick="askQuickQuestion('+idx+',\'Calculate remaining mortgage balance\')" class="quick-q">Mortgage balance?</span><span onclick="askQuickQuestion('+idx+',\'Is this property in foreclosure or have any liens?\')" class="quick-q">Foreclosure status?</span></div>';
   html+='<div class="ai-chat-input"><input type="text" id="chat-input-'+idx+'" placeholder="Ask about this property..." onkeydown="if(event.key===\'Enter\')sendChatMessage('+idx+')"><button id="chat-send-'+idx+'" onclick="sendChatMessage('+idx+')">Send</button></div></div>';
   html+='</div>';
 
@@ -1135,6 +1424,7 @@ document.addEventListener('keydown',function(e){
     var a=document.querySelector('.spanel.active');
     if(a){
       if(a.id==='panel-arm'){searchARM();}
+      else if(a.id==='panel-distressed'){searchDistressed();}
       else if(a.id==='panel-person'){searchPerson();}
       else{var b=a.querySelector('.btn-search');if(b)b.click();}
     }
