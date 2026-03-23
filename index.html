@@ -1019,15 +1019,37 @@ function search(mode){
       console.log('Extracted property from detailmortgage:', JSON.stringify(props[0], null, 2));
       mergedData.detail=props[0];
     }
-    showLoader(true,'Step 3 of 7: Getting owner & AVM…');
+    showLoader(true,'Step 3 of 7: Getting owner, AVM & expanded profile…');
     return Promise.all([
       attom('/propertyapi/v1.0.0/property/detailowner',{attomId:attomId}).catch(function(){return null;}),
-      attom('/propertyapi/v1.0.0/attomavm/detail',{attomId:attomId}).catch(function(){return null;})
+      attom('/propertyapi/v1.0.0/attomavm/detail',{attomId:attomId}).catch(function(){return null;}),
+      attom('/propertyapi/v1.0.0/property/expandedprofile',{attomId:attomId}).catch(function(){return null;})
     ]);
   })
   .then(function(results){
     if(results[0]){var op=[results[0].property||results[0].Property].flat().filter(Boolean);if(op.length)mergedData.owner=op[0];}
     if(results[1]){var ap=[results[1].property||results[1].Property].flat().filter(Boolean);if(ap.length)mergedData.avm=ap[0];}
+    // Expanded profile may have more complete mortgage data
+    if(results[2]){
+      var ep=[results[2].property||results[2].Property].flat().filter(Boolean);
+      if(ep.length){
+        console.log('Expanded profile data:', JSON.stringify(ep[0], null, 2));
+        mergedData.expanded=ep[0];
+        // Merge expanded mortgage data if it exists
+        if(ep[0].mortgage){
+          console.log('Expanded mortgage data:', JSON.stringify(ep[0].mortgage, null, 2));
+          // If expanded has more mortgage fields, use them
+          if(!mergedData.detail) mergedData.detail = {};
+          if(!mergedData.detail.mortgage) mergedData.detail.mortgage = ep[0].mortgage;
+          else {
+            // Merge any additional fields from expanded
+            for(var key in ep[0].mortgage){
+              if(!mergedData.detail.mortgage[key]) mergedData.detail.mortgage[key] = ep[0].mortgage[key];
+            }
+          }
+        }
+      }
+    }
     showLoader(true,'Step 4 of 7: Fetching transaction history…');
     return attom('/propertyapi/v1.0.0/saleshistory/detail',{attomId:attomId}).catch(function(){return null;});
   })
@@ -1092,6 +1114,23 @@ function drow(label,val,cls){return'<div class="detail-row"><span class="detail-
 function recorderSearchLink(county,state){return 'https://www.google.com/search?q='+encodeURIComponent(county+' '+state+' county recorder deed search');}
 
 function buildCard(p,idx){
+  // FULL PROPERTY DEBUG - see all available fields
+  console.log('========== FULL PROPERTY DATA ==========');
+  console.log('All property keys:', Object.keys(p));
+  console.log('Full property JSON:', JSON.stringify(p, null, 2));
+  
+  // Look for any field containing "2", "second", "heloc", "equity"
+  var interestingKeys = [];
+  for (var key in p) {
+    if (key.match(/2|second|heloc|equity|junior|sub/i)) {
+      interestingKeys.push(key + ': ' + JSON.stringify(p[key]));
+    }
+  }
+  if (interestingKeys.length > 0) {
+    console.log('INTERESTING 2nd MORTGAGE KEYS FOUND:', interestingKeys);
+  }
+  console.log('=========================================');
+  
   var addr=p.address||{},bldg=p.building||{},lot=p.lot||{},sale=p.sale||{},asmt=p.assessment||{},mort=p.mortgage||{},summary=p.summary||{},identifier=p.identifier||{},area=p.area||{},location=p.location||{},avm=p._avm||{},histData=p._history||{},compsData=p._comps||[];
   
   var street=fmt(addr.line1||addr.oneLine);
@@ -1111,8 +1150,20 @@ function buildCard(p,idx){
 
   var ownerData=p.owner||{};
   var ownerName=fmt((ownerData.owner1&&ownerData.owner1.fullname)||ownerData.owner1fullname||ownerData.fullname||'—');
+  var owner2Name=fmt((ownerData.owner2&&ownerData.owner2.fullname)||ownerData.owner2fullname||'');
+  var owner3Name=fmt((ownerData.owner3&&ownerData.owner3.fullname)||ownerData.owner3fullname||'');
+  var owner4Name=fmt((ownerData.owner4&&ownerData.owner4.fullname)||ownerData.owner4fullname||'');
   var absentee=ownerData.absenteeind||ownerData.absenteeInd||'';
   var ownerOccupied=absentee==='O'?'Yes':absentee==='A'?'No (Absentee)':'—';
+  var mailingAddr = '';
+  if (ownerData.mailingaddressoneline) {
+    mailingAddr = ownerData.mailingaddressoneline;
+  } else if (ownerData.mailaddress) {
+    var ma = ownerData.mailaddress;
+    mailingAddr = [ma.line1, ma.line2, ma.locality, ma.countrySubd, ma.postal1].filter(Boolean).join(', ');
+  }
+  
+  console.log('Owner data:', {ownerName, owner2Name, owner3Name, absentee, mailingAddr});
 
   var sa=sale.amount||{};
   var lastSaleAmt=fmtMoney(sa.saleamt||sale.saleamt);
@@ -1352,11 +1403,45 @@ function buildCard(p,idx){
   var hasMortgage = false;
   var isEstimated = false;
   
-  // Debug: log raw mortgage object
+  // EXTENSIVE DEBUG: Log ALL mortgage keys
+  console.log('========== MORTGAGE DEBUG ==========');
   console.log('Raw mortgage object:', JSON.stringify(mort, null, 2));
+  console.log('Mortgage object keys:', Object.keys(mort));
+  
+  // Check for ALL possible mortgage structures
+  console.log('mort.first:', mort.first);
+  console.log('mort.First:', mort.First);
+  console.log('mort.second:', mort.second);
+  console.log('mort.Second:', mort.Second);
+  console.log('mort.mortgage1:', mort.mortgage1);
+  console.log('mort.mortgage2:', mort.mortgage2);
+  console.log('mort.loanAmount1:', mort.loanAmount1);
+  console.log('mort.loanAmount2:', mort.loanAmount2);
+  
+  // Check if mortgages is an array
+  if (Array.isArray(mort)) {
+    console.log('MORTGAGE IS ARRAY with', mort.length, 'items');
+    mort.forEach(function(m, i) {
+      console.log('Mortgage[' + i + ']:', JSON.stringify(m, null, 2));
+    });
+  }
+  
+  // Check for numbered fields pattern (amount1, amount2, etc)
+  for (var key in mort) {
+    if (key.match(/2|second|Second|heloc|HELOC|equity|Equity/i)) {
+      console.log('FOUND 2nd/HELOC key:', key, '=', mort[key]);
+    }
+  }
+  console.log('=====================================');
   
   // Try multiple paths to find mortgage data
   var m = mort.first || mort.First || mort.mortgage1 || mort.currentMortgage || mort || {};
+  
+  // If mortgage is an array, get first element
+  if (Array.isArray(mort) && mort.length > 0) {
+    m = mort[0];
+    console.log('Using first mortgage from array:', m);
+  }
   
   // If mort itself has amount fields directly, use them
   if (!m.amount && mort.amount) m = mort;
@@ -1411,11 +1496,13 @@ function buildCard(p,idx){
   
   loanType = fmt(m.loantype || m.loanType || m.loantypecode || m.loanTypeCode || m.LoanType);
   
-  console.log('Extracted mortgage data:', {hasMortgage, mortgageAmount, mortgageRate, lenderName, mortgageDate, mortgageTerm, mortgageMaturity, loanType});
+  console.log('Extracted 1st mortgage data:', {hasMortgage, mortgageAmount, mortgageRate, lenderName, mortgageDate, mortgageTerm, mortgageMaturity, loanType});
 
   // ============================================
   // SECOND MORTGAGE / HELOC EXTRACTION
   // ============================================
+  console.log('========== 2ND MORTGAGE DEBUG ==========');
+  
   var hasSecondMortgage = false;
   var secondMortgage = {
     amount: '—',
@@ -1429,49 +1516,96 @@ function buildCard(p,idx){
   };
   
   // Try multiple paths for 2nd mortgage
-  var m2 = mort.second || mort.Second || mort.mortgage2 || mort.Mortgage2 || {};
+  var m2 = mort.second || mort.Second || mort.mortgage2 || mort.Mortgage2 || null;
   
-  // Also check for numbered fields
-  if (!m2.amount && mort.loanAmount2) {
-    m2 = {
-      amount: mort.loanAmount2,
-      lender: mort.lenderName2 || mort.lender2,
-      term: mort.loanTerm2 || mort.term2,
-      maturitydate: mort.maturityDate2,
-      recordingdate: mort.recordingDate2,
-      interestrate: mort.interestRate2 || mort.rate2,
-      loantype: mort.loanType2 || mort.type2
-    };
+  console.log('mort.second:', mort.second);
+  console.log('mort.Second:', mort.Second);
+  console.log('mort.mortgage2:', mort.mortgage2);
+  
+  // Check if mortgage is an array with 2+ items
+  if (Array.isArray(mort) && mort.length > 1) {
+    m2 = mort[1];
+    console.log('Found 2nd mortgage in array[1]:', m2);
   }
   
+  // Check for numbered/flat fields (ATTOM often uses this pattern)
+  var secondAmount = mort.loanAmount2 || mort.amount2 || mort.secondamount || mort.secondAmount ||
+                     mort.loanamount2 || mort.LoanAmount2 || mort.mortgageAmount2 || 0;
+  var secondLender = mort.lenderName2 || mort.lender2 || mort.secondlender || mort.secondLender ||
+                     mort.lendername2 || mort.LenderName2 || '';
+  var secondRate = mort.interestRate2 || mort.rate2 || mort.secondrate || mort.secondRate ||
+                   mort.interestrate2 || mort.InterestRate2 || 0;
+  var secondType = mort.loanType2 || mort.type2 || mort.secondtype || mort.secondType ||
+                   mort.loantype2 || mort.LoanType2 || '';
+  var secondTerm = mort.loanTerm2 || mort.term2 || mort.secondterm || mort.secondTerm ||
+                   mort.loanterm2 || mort.LoanTerm2 || 0;
+  var secondRecDate = mort.recordingDate2 || mort.date2 || mort.seconddate || mort.recordingdate2 || '';
+  var secondMaturity = mort.maturityDate2 || mort.maturity2 || mort.secondmaturity || mort.maturitydate2 || '';
+  
+  console.log('Flat field check - secondAmount:', secondAmount, 'secondLender:', secondLender, 'secondType:', secondType);
+  
+  // Build m2 from flat fields if found
+  if (parseInt(secondAmount) > 0 && !m2) {
+    m2 = {
+      amount: secondAmount,
+      lender: secondLender,
+      term: secondTerm,
+      maturitydate: secondMaturity,
+      recordingdate: secondRecDate,
+      interestrate: secondRate,
+      loantype: secondType
+    };
+    console.log('Built m2 from flat fields:', m2);
+  }
+  
+  // If still no m2, check if mort itself has second mortgage fields embedded
+  if (!m2 && mort.title2) {
+    m2 = {
+      amount: mort.amount2 || mort.loanamount2,
+      lender: mort.lenderfullname2 || mort.lender2,
+      loantype: mort.title2 || mort.loantype2
+    };
+    console.log('Built m2 from title2 pattern:', m2);
+  }
+  
+  // Initialize m2 if still null
+  if (!m2) m2 = {};
+  
+  console.log('Final m2 object:', JSON.stringify(m2, null, 2));
+  
   // Check for HELOC indicators
-  var m2Type = ((m2.loantype || m2.loanType || m2.type || '') + '').toUpperCase();
-  var m2Desc = ((m2.loandescription || m2.description || '') + '').toUpperCase();
+  var m2Type = ((m2.loantype || m2.loanType || m2.type || m2.title || secondType || '') + '').toUpperCase();
+  var m2Desc = ((m2.loandescription || m2.description || m2.title || '') + '').toUpperCase();
   var isHELOC = m2Type.indexOf('HELOC') !== -1 || m2Type.indexOf('LINE') !== -1 || 
                 m2Type.indexOf('EQUITY LINE') !== -1 || m2Type.indexOf('CREDIT LINE') !== -1 ||
                 m2Desc.indexOf('HELOC') !== -1 || m2Desc.indexOf('HOME EQUITY LINE') !== -1 ||
-                m2Type.indexOf('REVOLVING') !== -1;
+                m2Type.indexOf('REVOLVING') !== -1 || m2Type.indexOf('OPEN END') !== -1 ||
+                m2Type.indexOf('EQUITY') !== -1;
   
-  var m2Amt = m2.amount || m2.loanamount || m2.Amount || m2.LoanAmount || 0;
+  console.log('HELOC check - m2Type:', m2Type, 'isHELOC:', isHELOC);
+  
+  var m2Amt = m2.amount || m2.loanamount || m2.Amount || m2.LoanAmount || secondAmount || 0;
+  console.log('2nd mortgage amount:', m2Amt);
+  
   if (parseInt(m2Amt) > 0) {
     hasSecondMortgage = true;
     secondMortgage.amount = fmtMoney(m2Amt);
     secondMortgage.isHELOC = isHELOC;
     
-    var m2Rate = m2.interestrate || m2.interestRate || m2.rate || m2.Rate;
+    var m2Rate = m2.interestrate || m2.interestRate || m2.rate || m2.Rate || secondRate;
     if (m2Rate) secondMortgage.rate = parseFloat(m2Rate).toFixed(3) + '%';
     
     var m2Lender = m2.lender || {};
     if (typeof m2Lender === 'string') {
       secondMortgage.lender = fmt(m2Lender);
     } else {
-      secondMortgage.lender = fmt(m2.lendername || m2.lenderName || m2Lender.fullname || m2Lender.name);
+      secondMortgage.lender = fmt(m2.lendername || m2.lenderName || m2Lender.fullname || m2Lender.name || secondLender);
     }
     
-    var m2Term = m2.term || m2.loanterm || m2.loanTerm;
-    if (m2Term) {
-      var m2Yrs = Math.round(parseInt(m2Term) / 12);
-      secondMortgage.term = m2Term + ' months (' + m2Yrs + ' yrs)';
+    var m2TermVal = m2.term || m2.loanterm || m2.loanTerm || secondTerm;
+    if (m2TermVal) {
+      var m2Yrs = Math.round(parseInt(m2TermVal) / 12);
+      secondMortgage.term = m2TermVal + ' months (' + m2Yrs + ' yrs)';
     }
     
     var m2Maturity = m2.maturitydate || m2.maturityDate || m2.duedate;
@@ -1634,8 +1768,8 @@ function buildCard(p,idx){
   currentPropertyData = {
     address:street,cityState:cityState,county:county,propType:propType,yearBuilt:yearBlt,sqft:sqft,beds:beds,baths:baths,lotSize:lotSize1,
     avmValue:avmVal,avmLow:avmLow,avmHigh:avmHigh,lastSalePrice:lastSaleAmt,lastSaleDate:lastSaleDate,
-    assessedValue:asmtTotal,annualTax:taxAmt,ownerName:ownerName,ownerOccupied:ownerOccupied,
-    mortgageAmount:mortgageAmount,mortgageRate:mortgageRate,lender:lenderName,apn:apn,
+    assessedValue:asmtTotal,annualTax:taxAmt,ownerName:ownerName,owner2Name:owner2Name,owner3Name:owner3Name,mailingAddress:mailingAddr,ownerOccupied:ownerOccupied,
+    mortgageAmount:mortgageAmount,mortgageRate:mortgageRate,lender:lenderName,mortgageDate:mortgageDate,mortgageTerm:mortgageTerm,mortgageMaturity:mortgageMaturity,apn:apn,
     isARM: armInfo ? true : false, armType: armInfo ? armInfo.type : null,
     isDistressed: isDistressed, distressedStatus: distressedStatus, distressedType: distressedType,
     auctionDate: auctionDate, defaultAmount: defaultAmount, foreclosingLender: foreclosingLender,
@@ -1750,26 +1884,147 @@ function buildCard(p,idx){
   }
   html+='</div>';
 
-  // Balance Calculator Panel
+  // Balance Calculator Panel - WITH ACTUAL CALCULATIONS
   html+='<div class="ai-panel" id="ai-panel-balance-'+idx+'">';
-  html+='<div class="ai-box teal"><div class="ai-box-header"><div class="ai-icon teal">💰</div><div class="ai-box-title teal">AI Mortgage Balance Calculator</div></div>';
+  html+='<div class="ai-box teal"><div class="ai-box-header"><div class="ai-icon teal">💰</div><div class="ai-box-title teal">Mortgage Balance Calculator</div></div>';
   html+='<div id="ai-balance-'+idx+'">';
-  if (hasMortgage) {
-    html+='<p style="color:var(--slate);font-size:13px;margin-bottom:12px">Click this tab to calculate estimated remaining balance based on loan amount, date, and average rates.</p>';
-    html+='<div class="arm-details">';
-    html+='<div class="arm-detail"><span class="arm-detail-label">Original Loan</span><span class="arm-detail-val">'+mortgageAmount+'</span></div>';
-    if (calculatedFromMaturity) {
-      html+='<div class="arm-detail"><span class="arm-detail-label">Loan Date</span><span class="arm-detail-val">'+mortgageDate+' <span style="color:var(--green);font-size:10px">(from maturity)</span></span></div>';
-    } else {
-      html+='<div class="arm-detail"><span class="arm-detail-label">Loan Date</span><span class="arm-detail-val">'+mortgageDate+'</span></div>';
+  
+  if (hasMortgage && mortgageAmount !== '—') {
+    // Parse values for calculation
+    var loanPrincipal = parseInt((mortgageAmount || '').replace(/[$,]/g, '')) || 0;
+    var loanRateStr = mortgageRate !== '—' ? mortgageRate : '';
+    var loanRate = parseFloat(loanRateStr) || 0;
+    var loanDateStr = mortgageDate !== '—' ? mortgageDate : '';
+    var termMonthsNum = parseInt(mortgageTerm) || 360; // default 30 years
+    
+    // Historical average rates by year for estimation
+    var historicalRates = {
+      2000: 8.05, 2001: 6.97, 2002: 6.54, 2003: 5.83, 2004: 5.84, 2005: 5.87,
+      2006: 6.41, 2007: 6.34, 2008: 6.03, 2009: 5.04, 2010: 4.69, 2011: 4.45,
+      2012: 3.66, 2013: 3.98, 2014: 4.17, 2015: 3.85, 2016: 3.65, 2017: 3.99,
+      2018: 4.54, 2019: 3.94, 2020: 3.10, 2021: 2.96, 2022: 5.34, 2023: 6.81,
+      2024: 6.72, 2025: 6.50, 2026: 6.40
+    };
+    
+    // Get loan origination date
+    var loanDate = loanDateStr ? new Date(loanDateStr) : null;
+    var loanYear = loanDate ? loanDate.getFullYear() : 2020;
+    
+    // If no rate provided, use historical average for that year
+    if (loanRate === 0 && loanYear) {
+      loanRate = historicalRates[loanYear] || 5.0;
     }
-    html+='<div class="arm-detail"><span class="arm-detail-label">Rate</span><span class="arm-detail-val green">'+mortgageRate+'</span></div>';
-    html+='<div class="arm-detail"><span class="arm-detail-label">Term</span><span class="arm-detail-val">'+mortgageTerm+'</span></div>';
-    html+='<div class="arm-detail"><span class="arm-detail-label">Maturity</span><span class="arm-detail-val green">'+mortgageMaturity+'</span></div>';
-    html+='<div class="arm-detail"><span class="arm-detail-label">Lender</span><span class="arm-detail-val">'+lenderName+'</span></div>';
+    
+    // Calculate months elapsed
+    var monthsElapsed = 0;
+    if (loanDate && !isNaN(loanDate.getTime())) {
+      var now = new Date();
+      monthsElapsed = (now.getFullYear() - loanDate.getFullYear()) * 12 + (now.getMonth() - loanDate.getMonth());
+      if (monthsElapsed < 0) monthsElapsed = 0;
+      if (monthsElapsed > termMonthsNum) monthsElapsed = termMonthsNum;
+    }
+    
+    // Calculate monthly payment using standard amortization formula
+    var monthlyRate = (loanRate / 100) / 12;
+    var monthlyPayment = 0;
+    var remainingBalance = loanPrincipal;
+    var totalInterestPaid = 0;
+    var totalPrincipalPaid = 0;
+    
+    if (loanPrincipal > 0 && monthlyRate > 0 && termMonthsNum > 0) {
+      // M = P * [r(1+r)^n] / [(1+r)^n - 1]
+      var x = Math.pow(1 + monthlyRate, termMonthsNum);
+      monthlyPayment = loanPrincipal * (monthlyRate * x) / (x - 1);
+      
+      // Calculate remaining balance after monthsElapsed payments
+      // B = P * [(1+r)^n - (1+r)^p] / [(1+r)^n - 1]
+      // where p = payments made
+      if (monthsElapsed > 0) {
+        var y = Math.pow(1 + monthlyRate, monthsElapsed);
+        remainingBalance = loanPrincipal * (x - y) / (x - 1);
+        totalPrincipalPaid = loanPrincipal - remainingBalance;
+        totalInterestPaid = (monthlyPayment * monthsElapsed) - totalPrincipalPaid;
+      }
+    }
+    
+    var yearsElapsed = Math.floor(monthsElapsed / 12);
+    var monthsRemaining = termMonthsNum - monthsElapsed;
+    var yearsRemaining = Math.floor(monthsRemaining / 12);
+    var percentPaidOff = loanPrincipal > 0 ? Math.round((totalPrincipalPaid / loanPrincipal) * 100) : 0;
+    var equityBuilt = totalPrincipalPaid;
+    
+    // Display loan details
+    html+='<div style="margin-bottom:16px;padding:12px;background:var(--navy-3);border-radius:var(--rs)">';
+    html+='<div style="font-size:11px;color:var(--amber);text-transform:uppercase;margin-bottom:10px">📋 Loan Details</div>';
+    html+='<div class="balance-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    html+='<div><span style="font-size:11px;color:var(--slate)">Original Loan</span><div style="font-size:16px;color:var(--white);font-family:\'DM Mono\',monospace">'+mortgageAmount+'</div></div>';
+    html+='<div><span style="font-size:11px;color:var(--slate)">Interest Rate</span><div style="font-size:16px;color:var(--green);font-family:\'DM Mono\',monospace">'+(loanRate > 0 ? loanRate.toFixed(2)+'%' : 'Est. '+historicalRates[loanYear]+'%')+'</div></div>';
+    html+='<div><span style="font-size:11px;color:var(--slate)">Loan Date</span><div style="font-size:14px;color:var(--white)">'+mortgageDate+'</div></div>';
+    html+='<div><span style="font-size:11px;color:var(--slate)">Term</span><div style="font-size:14px;color:var(--white)">'+mortgageTerm+'</div></div>';
+    html+='</div></div>';
+    
+    // Display calculations
+    html+='<div style="margin-bottom:16px;padding:16px;background:var(--teal-bg);border:1px solid var(--teal-bd);border-radius:var(--r)">';
+    html+='<div style="font-size:11px;color:var(--teal);text-transform:uppercase;margin-bottom:12px">💵 Estimated Calculations</div>';
+    html+='<div class="balance-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+    
+    // Monthly Payment
+    html+='<div style="text-align:center;padding:10px;background:var(--navy-3);border-radius:var(--rs)">';
+    html+='<div style="font-size:10px;color:var(--slate);text-transform:uppercase;margin-bottom:4px">Monthly Payment</div>';
+    html+='<div style="font-size:22px;color:var(--amber);font-family:\'DM Mono\',monospace;font-weight:500">$'+Math.round(monthlyPayment).toLocaleString()+'</div>';
     html+='</div>';
+    
+    // Remaining Balance
+    html+='<div style="text-align:center;padding:10px;background:var(--navy-3);border-radius:var(--rs)">';
+    html+='<div style="font-size:10px;color:var(--slate);text-transform:uppercase;margin-bottom:4px">Est. Remaining Balance</div>';
+    html+='<div style="font-size:22px;color:var(--teal);font-family:\'DM Mono\',monospace;font-weight:500">$'+Math.round(remainingBalance).toLocaleString()+'</div>';
+    html+='</div>';
+    
+    // Principal Paid
+    html+='<div style="text-align:center;padding:10px;background:var(--navy-3);border-radius:var(--rs)">';
+    html+='<div style="font-size:10px;color:var(--slate);text-transform:uppercase;margin-bottom:4px">Principal Paid</div>';
+    html+='<div style="font-size:18px;color:var(--green);font-family:\'DM Mono\',monospace">$'+Math.round(totalPrincipalPaid).toLocaleString()+'</div>';
+    html+='<div style="font-size:11px;color:var(--green)">'+percentPaidOff+'% paid off</div>';
+    html+='</div>';
+    
+    // Interest Paid
+    html+='<div style="text-align:center;padding:10px;background:var(--navy-3);border-radius:var(--rs)">';
+    html+='<div style="font-size:10px;color:var(--slate);text-transform:uppercase;margin-bottom:4px">Interest Paid</div>';
+    html+='<div style="font-size:18px;color:var(--orange);font-family:\'DM Mono\',monospace">$'+Math.round(totalInterestPaid).toLocaleString()+'</div>';
+    html+='<div style="font-size:11px;color:var(--slate)">to lender</div>';
+    html+='</div>';
+    
+    html+='</div>';
+    
+    // Progress bar
+    html+='<div style="margin-top:12px">';
+    html+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--slate);margin-bottom:4px">';
+    html+='<span>'+yearsElapsed+' years elapsed</span>';
+    html+='<span>'+yearsRemaining+' years remaining</span>';
+    html+='</div>';
+    html+='<div style="height:8px;background:var(--navy-3);border-radius:4px;overflow:hidden">';
+    html+='<div style="height:100%;width:'+percentPaidOff+'%;background:linear-gradient(90deg,var(--green),var(--teal))"></div>';
+    html+='</div>';
+    html+='</div>';
+    
+    html+='</div>';
+    
+    // Equity estimate if we have AVM
+    if (avmValue > 0 && remainingBalance > 0) {
+      var equityEstimate = avmValue - remainingBalance - totalLienAmount;
+      var equityPercent = Math.round((equityEstimate / avmValue) * 100);
+      html+='<div style="padding:12px;background:'+(equityEstimate > 0 ? 'var(--green-bg)' : 'var(--red-bg)')+';border:1px solid '+(equityEstimate > 0 ? 'var(--green-bd)' : 'var(--red-bd)')+';border-radius:var(--rs)">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      html+='<div><div style="font-size:11px;color:var(--slate);text-transform:uppercase">Estimated Equity</div>';
+      html+='<div style="font-size:20px;color:'+(equityEstimate > 0 ? 'var(--green)' : '#f09090')+';font-family:\'DM Mono\',monospace;font-weight:500">'+(equityEstimate >= 0 ? '$'+Math.round(equityEstimate).toLocaleString() : '-$'+Math.abs(Math.round(equityEstimate)).toLocaleString())+'</div></div>';
+      html+='<div style="text-align:right"><div style="font-size:24px;color:'+(equityEstimate > 0 ? 'var(--green)' : '#f09090')+'">'+equityPercent+'%</div><div style="font-size:10px;color:var(--slate)">of value</div></div>';
+      html+='</div></div>';
+    }
+    
+    html+='<p style="font-size:10px;color:var(--slate);margin-top:12px;font-style:italic">* Estimates based on standard amortization. Actual balance may vary due to extra payments, refinancing, or rate changes.</p>';
+    
   } else {
-    html+='<p style="color:var(--slate)">No mortgage data found for this property.</p>';
+    html+='<p style="color:var(--slate)">No mortgage data found for this property. Cannot calculate balance.</p>';
   }
   html+='</div></div></div>';
 
@@ -1888,7 +2143,7 @@ function buildCard(p,idx){
   html+='<div class="detail-grid"><div class="detail-col"><h4>Building</h4>'+drow('APN',apn)+drow('Type',propType)+drow('Year',yearBlt)+drow('Sqft',sqft)+drow('Beds/Baths',beds+'/'+baths)+'</div>';
   
   // Make owner name clickable for person search
-  var ownerRow = '<div class="detail-row"><span class="detail-label">Owner</span><span class="detail-val">';
+  var ownerRow = '<div class="detail-row"><span class="detail-label">Owner 1</span><span class="detail-val">';
   if (ownerName && ownerName !== '—') {
     ownerRow += '<span class="owner-link" onclick="searchOwner(\'' + ownerName.replace(/'/g, "\\'") + '\', \'' + (city||'').replace(/'/g, "\\'") + '\', \'' + (state||'').replace(/'/g, "\\'") + '\')" title="Click to search for owner contact info">' + ownerName + ' 🔍</span>';
   } else {
@@ -1896,7 +2151,31 @@ function buildCard(p,idx){
   }
   ownerRow += '</span></div>';
   
-  html+='<div class="detail-col"><h4>Location</h4>'+drow('County',county)+drow('Lot (acres)',lotSize1)+ownerRow+drow('Occupied',ownerOccupied)+'</div></div>';
+  // Owner 2 row
+  var owner2Row = '';
+  if (owner2Name && owner2Name !== '—') {
+    owner2Row = '<div class="detail-row"><span class="detail-label">Owner 2</span><span class="detail-val">';
+    owner2Row += '<span class="owner-link" onclick="searchOwner(\'' + owner2Name.replace(/'/g, "\\'") + '\', \'' + (city||'').replace(/'/g, "\\'") + '\', \'' + (state||'').replace(/'/g, "\\'") + '\')" title="Click to search for owner contact info">' + owner2Name + ' 🔍</span>';
+    owner2Row += '</span></div>';
+  }
+  
+  // Owner 3 row (rare but possible)
+  var owner3Row = '';
+  if (owner3Name && owner3Name !== '—') {
+    owner3Row = '<div class="detail-row"><span class="detail-label">Owner 3</span><span class="detail-val">';
+    owner3Row += '<span class="owner-link" onclick="searchOwner(\'' + owner3Name.replace(/'/g, "\\'") + '\', \'' + (city||'').replace(/'/g, "\\'") + '\', \'' + (state||'').replace(/'/g, "\\'") + '\')" title="Click to search">' + owner3Name + ' 🔍</span>';
+    owner3Row += '</span></div>';
+  }
+  
+  html+='<div class="detail-col"><h4>Ownership</h4>'+ownerRow+owner2Row+owner3Row+drow('Occupied',ownerOccupied)+'</div></div>';
+  
+  // Mailing address section if different from property
+  if (mailingAddr && mailingAddr !== '—' && mailingAddr.length > 5) {
+    html+='<div class="detail-row" style="margin-top:8px"><span class="detail-label">📬 Mailing Address</span><span class="detail-val" style="font-size:12px">'+mailingAddr+'</span></div>';
+  }
+  
+  html+='<div class="detail-row"><span class="detail-label">County</span><span class="detail-val">'+county+'</span></div>';
+  html+='<div class="detail-row"><span class="detail-label">Lot Size</span><span class="detail-val">'+lotSize1+' acres</span></div>';
 
   html+='<div class="section-title">Sale & Taxes</div>'+drow('Last Sale',lastSaleAmt,'hi')+drow('Sale Date',lastSaleDate,'teal')+drow('Assessed',asmtTotal)+drow('Annual Tax',taxAmt,'hi');
 
